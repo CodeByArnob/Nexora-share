@@ -87,6 +87,44 @@ class ReceiverApprovalDialog extends StatelessWidget {
                     ),
                   ],
                 ),
+                if (offer.files.length > 1) ...[
+                  const SizedBox(height: 8),
+                  const Divider(height: 1),
+                  const SizedBox(height: 6),
+                  SizedBox(
+                    height: 80,
+                    child: ListView.builder(
+                      itemCount: offer.files.length,
+                      itemBuilder: (ctx, idx) {
+                        final f = offer.files[idx];
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2.0),
+                          child: Row(
+                            children: [
+                              Icon(
+                                f.relativePath != null ? Icons.folder_open : Icons.insert_drive_file,
+                                size: 14,
+                                color: Colors.grey,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  f.relativePath ?? f.name,
+                                  style: const TextStyle(fontSize: 12),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              Text(
+                                _formatBytes(f.sizeBytes),
+                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

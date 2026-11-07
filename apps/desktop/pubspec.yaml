@@ -41,6 +41,8 @@ dependencies:
   qr_flutter: ^4.1.0
   crypto: ^3.0.8
   uuid: ^4.6.0
+  sqflite_common_ffi: ^2.4.5
+  sqlite3_flutter_libs: ^0.6.0+eol
 
 dev_dependencies:
   flutter_test:

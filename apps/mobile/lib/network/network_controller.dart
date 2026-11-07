@@ -98,6 +98,48 @@ class NetworkController {
     _ref.read(transferHistoryProvider.notifier).state = history;
   }
 
+  /// Sends a specific file to a peer (e.g. from file picker, Share Intent, or tests).
+  Future<void> sendFile({
+    required NexoraDevice peer,
+    required File file,
+  }) async {
+    if (_client == null) return;
+    final localDevice = _ref.read(localDeviceProvider);
+    await _client!.sendFile(
+      peer: peer,
+      file: file,
+      localDevice: localDevice,
+    );
+  }
+
+  /// Sends multiple files in a batch to a peer.
+  Future<void> sendFiles({
+    required NexoraDevice peer,
+    required List<File> files,
+  }) async {
+    if (_client == null) return;
+    final localDevice = _ref.read(localDeviceProvider);
+    await _client!.sendFiles(
+      peer: peer,
+      files: files,
+      localDevice: localDevice,
+    );
+  }
+
+  /// Sends an entire directory structure to a peer.
+  Future<void> sendDirectory({
+    required NexoraDevice peer,
+    required Directory directory,
+  }) async {
+    if (_client == null) return;
+    final localDevice = _ref.read(localDeviceProvider);
+    await _client!.sendDirectory(
+      peer: peer,
+      directory: directory,
+      localDevice: localDevice,
+    );
+  }
+
   /// Launches the native Storage Access Framework (SAF) / file picker
   /// and initiates file transmission to target peer.
   Future<void> pickAndSendFile({
@@ -110,15 +152,7 @@ class NetworkController {
 
     if (files.isNotEmpty && files.first.path != null) {
       final file = File(files.first.path!);
-      final localDevice = _ref.read(localDeviceProvider);
-
-      if (_client != null) {
-        _client!.sendFile(
-          peer: targetPeer,
-          file: file,
-          localDevice: localDevice,
-        );
-      }
+      await sendFile(peer: targetPeer, file: file);
     }
   }
 

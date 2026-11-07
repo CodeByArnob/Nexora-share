@@ -88,9 +88,7 @@ class _SendViewState extends ConsumerState<SendView> {
 
     ref.read(activeNavSectionProvider.notifier).state = DesktopNavSection.transfers;
 
-    for (final file in filesToSend) {
-      await controller.sendFile(peer: target, file: file);
-    }
+    await controller.sendFiles(peer: target, files: filesToSend);
   }
 
   @override

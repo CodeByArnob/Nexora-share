@@ -3,8 +3,10 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:path_provider/path_provider.dart';
+import '../database/database_service.dart';
 import '../models/transfer_model.dart';
 import '../services/android_foreground_service.dart';
+import 'file_transfer_manifest.dart';
 import 'protocol_messages.dart';
 
 class IncomingTransferOffer {
@@ -15,6 +17,7 @@ class IncomingTransferOffer {
   final int totalBytes;
   final int totalFiles;
   final String? declaredSha256;
+  final List<ManifestItem> files;
 
   IncomingTransferOffer({
     required this.transferId,
@@ -24,6 +27,7 @@ class IncomingTransferOffer {
     required this.totalBytes,
     required this.totalFiles,
     this.declaredSha256,
+    this.files = const [],
   });
 }
 
@@ -48,7 +52,6 @@ class TransferServer {
     try {
       _serverSocket = await ServerSocket.bind(InternetAddress.anyIPv4, port);
     } catch (_) {
-      // Fallback to random free port if default port is in use
       _serverSocket = await ServerSocket.bind(InternetAddress.anyIPv4, 0);
     }
     port = _serverSocket!.port;
@@ -63,11 +66,15 @@ class TransferServer {
     String? activeTransferId;
     String? currentFileName;
     int totalBytes = 0;
+    int totalFiles = 1;
     int receivedBytes = 0;
     RandomAccessFile? destinationFile;
+    String? activeFileId;
+    Directory? activeDownloadDir;
+    final Map<String, ManifestItem> manifestFiles = {};
+
     DateTime startTime = DateTime.now();
     DateTime lastProgressUpdate = DateTime.now();
-    String? expectedFileSha256;
     String remoteDeviceName = 'Remote Peer';
 
     Future<void> safeCloseFile() async {
@@ -104,11 +111,9 @@ class TransferServer {
             break;
           }
 
-          // Full frame ready
           final allBytes = buffer.takeBytes();
           final payloadBytes = allBytes.sublist(lengthPrefixSize, totalFrameRequired);
 
-          // Retain remainder
           if (allBytes.length > totalFrameRequired) {
             buffer.add(allBytes.sublist(totalFrameRequired));
           }
@@ -122,7 +127,6 @@ class TransferServer {
             if (type == 'Hello') {
               final device = payload['device'] as Map<String, dynamic>;
               remoteDeviceName = device['display_name'] as String? ?? 'Remote Device';
-              // Reply with Hello
               final reply = encodeFrame({
                 'type': 'Hello',
                 'payload': {
@@ -132,14 +136,22 @@ class TransferServer {
               });
               socket.add(reply);
             } else if (type == 'TransferOffer') {
-              final manifest = payload['manifest'] as Map<String, dynamic>;
-              final files = (manifest['files'] as List).cast<Map<String, dynamic>>();
-              final firstFile = files.isNotEmpty ? files.first : <String, dynamic>{};
+              final manifestMap = payload['manifest'] as Map<String, dynamic>;
+              final manifest = TransferManifest.fromJson(manifestMap);
 
               activeTransferId = payload['transfer_id'] as String;
-              currentFileName = firstFile['name'] as String? ?? 'received_file';
-              totalBytes = manifest['total_bytes'] as int? ?? 0;
-              expectedFileSha256 = firstFile['sha256_hash'] as String?;
+              totalBytes = manifest.totalBytes;
+              totalFiles = manifest.totalFiles;
+
+              manifestFiles.clear();
+              for (final f in manifest.files) {
+                manifestFiles[f.fileId] = f;
+              }
+
+              final firstFile = manifest.files.isNotEmpty ? manifest.files.first : null;
+              currentFileName = firstFile != null
+                  ? (manifest.totalFiles > 1 ? '${firstFile.name} (+${manifest.totalFiles - 1} more)' : firstFile.name)
+                  : 'received_files';
 
               final offer = IncomingTransferOffer(
                 transferId: activeTransferId!,
@@ -147,64 +159,65 @@ class TransferServer {
                 senderPlatform: 'Remote',
                 fileName: currentFileName!,
                 totalBytes: totalBytes,
-                totalFiles: manifest['total_files'] as int? ?? 1,
-                declaredSha256: expectedFileSha256,
+                totalFiles: totalFiles,
+                declaredSha256: firstFile?.sha256Hash,
+                files: manifest.files,
               );
 
-              // Prompt receiver for explicit approval
               final approved = await onRequestApproval(offer);
 
               if (approved) {
-                // Prepare destination download path
-                Directory downloadDir;
                 if (customDestinationDirectory != null) {
-                  downloadDir = customDestinationDirectory!;
-                } else if (Platform.isAndroid) {
-                  downloadDir = Directory('/storage/emulated/0/Download/NEXORA');
-                  if (!await downloadDir.exists()) {
-                    try {
-                      await downloadDir.create(recursive: true);
-                    } catch (_) {
-                      try {
-                        downloadDir = await getApplicationDocumentsDirectory();
-                      } catch (_) {
-                        downloadDir = Directory.systemTemp;
-                      }
-                    }
-                  }
+                  activeDownloadDir = customDestinationDirectory!;
                 } else {
                   try {
-                    downloadDir = await getApplicationDocumentsDirectory();
+                    activeDownloadDir = await getApplicationDocumentsDirectory();
                   } catch (_) {
-                    downloadDir = Directory.systemTemp;
+                    activeDownloadDir = Directory.systemTemp;
                   }
                 }
 
-                final sanitizedName = currentFileName!.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
-                final targetPath = '${downloadDir.path}/$sanitizedName';
-                final file = File(targetPath);
-                destinationFile = await file.open(mode: FileMode.write);
+                if (!await activeDownloadDir!.exists()) {
+                  try {
+                    await activeDownloadDir!.create(recursive: true);
+                  } catch (_) {
+                    activeDownloadDir = Directory.systemTemp;
+                  }
+                }
 
                 startTime = DateTime.now();
                 lastProgressUpdate = DateTime.now();
                 receivedBytes = 0;
 
-                // Start Android Foreground Service notification
+                // Start Android foreground service
                 await AndroidForegroundService.startService(
-                  fileName: sanitizedName,
+                  fileName: currentFileName!,
                   isSending: false,
                 );
 
-                // Send TransferAccept frame
+                // Log in SQLite
+                try {
+                  await DatabaseService.instance.logTransfer(NexoraTransfer(
+                    transferId: activeTransferId!,
+                    direction: TransferDirection.receive,
+                    remoteDeviceId: 'peer',
+                    remoteDeviceName: remoteDeviceName,
+                    totalFiles: totalFiles,
+                    totalBytes: totalBytes,
+                    currentFile: currentFileName!,
+                    state: TransferState.inProgress,
+                    createdAt: startTime,
+                  ));
+                } catch (_) {}
+
                 socket.add(encodeFrame({
                   'type': 'TransferAccept',
                   'payload': {
                     'transfer_id': activeTransferId,
-                    'accepted_file_ids': files.map((f) => f['file_id']).toList(),
+                    'accepted_file_ids': manifest.files.map((f) => f.fileId).toList(),
                   }
                 }));
               } else {
-                // Send TransferReject frame
                 socket.add(encodeFrame({
                   'type': 'TransferReject',
                   'payload': {
@@ -215,23 +228,59 @@ class TransferServer {
                 socket.destroy();
                 return;
               }
+            } else if (type == 'TransferResume') {
+              final reqFileId = payload['file_id'] as String;
+              int verifiedOffset = 0;
+              try {
+                verifiedOffset = await DatabaseService.instance.getHighestVerifiedOffset(activeTransferId!, reqFileId);
+              } catch (_) {}
+
+              socket.add(encodeFrame({
+                'type': 'TransferResumeAck',
+                'payload': {
+                  'transfer_id': activeTransferId,
+                  'file_id': reqFileId,
+                  'verified_offset': verifiedOffset,
+                }
+              }));
             } else if (type == 'ChunkData') {
+              final fileId = payload['file_id'] as String? ?? 'f-0';
               final chunkDataList = (payload['data'] as List).cast<int>();
               final chunkBytes = Uint8List.fromList(chunkDataList);
               final offset = payload['offset'] as int? ?? 0;
+              final chunkIndex = payload['chunk_index'] as int? ?? 0;
               final chunkSha256 = payload['chunk_sha256'] as String?;
 
-              // Verify chunk SHA-256
               if (chunkSha256 != null && chunkSha256.isNotEmpty) {
                 final computedHash = sha256.convert(chunkBytes).toString();
                 if (computedHash.toLowerCase() != chunkSha256.toLowerCase()) {
-                  // Integrity check failed
                   socket.destroy();
                   return;
                 }
               }
 
-              // Write chunk to disk
+              // Switch active file if chunk belongs to a new file in batch
+              if (activeFileId != fileId || destinationFile == null) {
+                await safeCloseFile();
+                activeFileId = fileId;
+
+                final item = manifestFiles[fileId];
+                final fileName = item?.name ?? 'file_$fileId';
+                final relativePath = item?.relativePath;
+
+                final targetFile = PathSanitizer.resolveSafePath(
+                  destinationBaseDir: activeDownloadDir ?? Directory.systemTemp,
+                  filename: fileName,
+                  relativePath: relativePath,
+                );
+
+                if (!await targetFile.parent.exists()) {
+                  await targetFile.parent.create(recursive: true);
+                }
+
+                destinationFile = await targetFile.open(mode: offset > 0 ? FileMode.append : FileMode.write);
+              }
+
               if (destinationFile != null) {
                 destinationFile!.setPositionSync(offset);
                 destinationFile!.writeFromSync(chunkBytes);
@@ -239,66 +288,95 @@ class TransferServer {
 
               receivedBytes += chunkBytes.length;
 
-              // Send ChunkAck
+              // Record checkpoint in SQLite
+              try {
+                if (activeTransferId != null) {
+                  await DatabaseService.instance.recordVerifiedChunk(
+                    transferId: activeTransferId!,
+                    fileId: fileId,
+                    chunkIndex: chunkIndex,
+                    chunkOffset: offset,
+                    chunkSize: chunkBytes.length,
+                    chunkSha256: chunkSha256 ?? '',
+                  );
+                }
+              } catch (_) {}
+
               socket.add(encodeFrame({
                 'type': 'ChunkAck',
                 'payload': {
                   'transfer_id': activeTransferId,
-                  'file_id': payload['file_id'],
-                  'chunk_index': payload['chunk_index'],
+                  'file_id': fileId,
+                  'chunk_index': chunkIndex,
+                  'received_bytes': chunkBytes.length,
                   'verified': true,
                 }
               }));
 
-              // Progress calculation & notification throttling
               final now = DateTime.now();
-              if (now.difference(lastProgressUpdate).inMilliseconds >= 300 || receivedBytes >= totalBytes) {
+              if (now.difference(lastProgressUpdate).inMilliseconds >= 250 || receivedBytes >= totalBytes) {
                 lastProgressUpdate = now;
                 final elapsedSeconds = now.difference(startTime).inMilliseconds / 1000.0;
                 final speedBps = elapsedSeconds > 0 ? (receivedBytes / elapsedSeconds) : 0.0;
                 final remainingBytes = (totalBytes - receivedBytes).clamp(0, totalBytes);
                 final eta = speedBps > 0 ? (remainingBytes / speedBps).round() : 0;
-                final percent = totalBytes > 0 ? ((receivedBytes / totalBytes) * 100).round() : 100;
+
+                final pct = totalBytes > 0 ? ((receivedBytes / totalBytes) * 100).round() : 0;
+                final speedStr = speedBps >= 1024 * 1024
+                    ? '${(speedBps / (1024 * 1024)).toStringAsFixed(1)} MB/s'
+                    : '${(speedBps / 1024).toStringAsFixed(1)} KB/s';
+
+                await AndroidForegroundService.updateProgress(
+                  fileName: manifestFiles[fileId]?.name ?? currentFileName ?? 'File',
+                  progressPercent: pct,
+                  speed: speedStr,
+                );
 
                 final currentTransfer = NexoraTransfer(
                   transferId: activeTransferId ?? 'incoming',
                   direction: TransferDirection.receive,
                   remoteDeviceId: 'peer',
                   remoteDeviceName: remoteDeviceName,
-                  totalFiles: 1,
+                  totalFiles: totalFiles,
                   totalBytes: totalBytes,
                   bytesTransferred: receivedBytes,
                   speedBytesPerSec: speedBps,
                   etaSeconds: eta,
-                  currentFile: currentFileName ?? 'File',
+                  currentFile: manifestFiles[fileId]?.name ?? currentFileName ?? 'File',
                   state: TransferState.inProgress,
                   createdAt: startTime,
                 );
 
                 onTransferProgress(currentTransfer);
-
-                await AndroidForegroundService.updateProgress(
-                  fileName: currentFileName ?? 'File',
-                  progressPercent: percent,
-                  speed: currentTransfer.formattedSpeed,
-                );
               }
             } else if (type == 'TransferComplete') {
               await safeCloseFile();
 
               await AndroidForegroundService.stopService();
 
+              // Update SQLite state
+              try {
+                if (activeTransferId != null) {
+                  await DatabaseService.instance.updateTransferProgress(
+                    activeTransferId!,
+                    totalBytes,
+                    TransferState.completed,
+                  );
+                  await DatabaseService.instance.clearResumeCheckpoints(activeTransferId!);
+                }
+              } catch (_) {}
+
               final completed = NexoraTransfer(
                 transferId: activeTransferId ?? 'incoming',
                 direction: TransferDirection.receive,
                 remoteDeviceId: 'peer',
                 remoteDeviceName: remoteDeviceName,
-                totalFiles: 1,
+                totalFiles: totalFiles,
                 totalBytes: totalBytes,
                 bytesTransferred: totalBytes,
                 speedBytesPerSec: 0.0,
                 etaSeconds: 0,
-                currentFile: currentFileName ?? 'File',
+                currentFile: currentFileName ?? 'Files',
                 state: TransferState.completed,
                 createdAt: startTime,
                 completedAt: DateTime.now(),
@@ -307,9 +385,7 @@ class TransferServer {
               onTransferCompleted(completed);
               socket.destroy();
             }
-          } catch (e, st) {
-            // print error for test visibility
-            stderr.writeln('Server error processing frame: $e\n$st');
+          } catch (_) {
             socket.destroy();
           }
         }

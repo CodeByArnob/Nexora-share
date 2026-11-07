@@ -116,6 +116,34 @@ class DesktopNetworkController {
     );
   }
 
+  /// Sends multiple files in a batch to a peer.
+  Future<void> sendFiles({
+    required NexoraDevice peer,
+    required List<File> files,
+  }) async {
+    if (_client == null) return;
+    final localDevice = _ref.read(localDeviceProvider);
+    await _client!.sendFiles(
+      peer: peer,
+      files: files,
+      localDevice: localDevice,
+    );
+  }
+
+  /// Sends an entire directory structure preserving subfolder hierarchy to a peer.
+  Future<void> sendDirectory({
+    required NexoraDevice peer,
+    required Directory directory,
+  }) async {
+    if (_client == null) return;
+    final localDevice = _ref.read(localDeviceProvider);
+    await _client!.sendDirectory(
+      peer: peer,
+      directory: directory,
+      localDevice: localDevice,
+    );
+  }
+
   /// Launches the native Windows file picker and initiates transmission to the selected peer.
   Future<void> pickAndSendFile({
     required BuildContext context,
@@ -139,12 +167,7 @@ class DesktopNetworkController {
     final selectedDirectory = await FilePicker.getDirectoryPath();
     if (selectedDirectory != null) {
       final dir = Directory(selectedDirectory);
-      final entities = await dir.list(recursive: false).toList();
-      for (final entity in entities) {
-        if (entity is File) {
-          await sendFile(peer: targetPeer, file: entity);
-        }
-      }
+      await sendDirectory(peer: targetPeer, directory: dir);
     }
   }
 

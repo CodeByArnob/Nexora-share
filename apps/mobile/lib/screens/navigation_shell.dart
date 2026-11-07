@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../database/database_service.dart';
 import '../network/network_controller.dart';
+import '../providers/app_state.dart';
 import '../widgets/receiver_approval_dialog.dart';
 import 'home_screen.dart';
 import 'transfers_screen.dart';
@@ -36,7 +38,19 @@ class _NavigationShellState extends ConsumerState<NavigationShell> {
     });
   }
 
-  void _initNetwork() {
+  Future<void> _initNetwork() async {
+    try {
+      await DatabaseService.instance.initialize();
+      final history = await DatabaseService.instance.getTransferHistory();
+      if (history.isNotEmpty) {
+        ref.read(transferHistoryProvider.notifier).state = history;
+      }
+      final trusted = await DatabaseService.instance.getTrustedDevices();
+      if (trusted.isNotEmpty) {
+        ref.read(trustedDevicesProvider.notifier).state = trusted;
+      }
+    } catch (_) {}
+
     _controller.initialize(
       approvalCallback: (offer) async {
         if (!mounted) return false;
