@@ -11,6 +11,76 @@ import '../widgets/pairing_dialog.dart';
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  void _showManualConnectDialog(
+    BuildContext context,
+    NetworkController controller,
+  ) {
+    final ipController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.wifi_find, color: NexoraColors.electricBlue),
+            SizedBox(width: 8),
+            Text('Connect by IP'),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter the Wi-Fi or Hotspot IP address of the other NEXORA phone (shown on their home screen):',
+              style: TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: ipController,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              autofocus: true,
+              decoration: const InputDecoration(
+                hintText: 'e.g. 192.168.1.45 or 192.168.43.1',
+                labelText: 'Peer IP Address',
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.router),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final targetIp = ipController.text.trim();
+              if (targetIp.isNotEmpty) {
+                Navigator.pop(ctx);
+                final success = await controller.manualConnect(targetIp);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        success
+                            ? 'Connected to $targetIp successfully!'
+                            : 'Discovery ping sent to $targetIp. Waiting for response...',
+                      ),
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Connect'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final localDevice = ref.watch(localDeviceProvider);
@@ -58,6 +128,11 @@ class HomeScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.add_link),
+            tooltip: 'Connect by IP',
+            onPressed: () => _showManualConnectDialog(context, controller),
+          ),
+          IconButton(
             icon: const Icon(Icons.qr_code_2),
             tooltip: 'Pair Device (QR & Code)',
             onPressed: () {
@@ -65,8 +140,10 @@ class HomeScreen extends ConsumerWidget {
                 'version': 1,
                 'device_id': localDevice.deviceId,
                 'display_name': localDevice.displayName,
+                'platform': localDevice.platform,
                 'fingerprint': localDevice.fingerprint,
-                'port': 48842,
+                'address': localDevice.address,
+                'port': controller.tcpPort,
               });
               showDialog(
                 context: context,
@@ -74,6 +151,10 @@ class HomeScreen extends ConsumerWidget {
                   localDevice: localDevice,
                   sasCode: '482910',
                   qrData: qrPayload,
+                  onManualConnect: () {
+                    Navigator.of(context).pop();
+                    _showManualConnectDialog(context, controller);
+                  },
                 ),
               );
             },
@@ -128,11 +209,16 @@ class HomeScreen extends ConsumerWidget {
                                 ),
                               ),
                               const SizedBox(width: 6),
-                              const Text(
-                                'Local Network Discovery Active',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey,
+                              Expanded(
+                                child: Text(
+                                  localDevice.address != null
+                                      ? 'Online • IP: ${localDevice.address}:${controller.tcpPort}'
+                                      : 'Local Network Discovery Active',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
@@ -170,7 +256,7 @@ class HomeScreen extends ConsumerWidget {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
                             content: Text(
-                              'No nearby NEXORA peers detected yet. Wait for discovery.',
+                              'No nearby NEXORA peers detected yet. Wait for discovery or Connect by IP.',
                             ),
                           ),
                         );
@@ -258,14 +344,26 @@ class HomeScreen extends ConsumerWidget {
                   'Nearby Devices',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
-                TextButton.icon(
-                  icon: const SizedBox(
-                    width: 12,
-                    height: 12,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  ),
-                  label: const Text('Scanning'),
-                  onPressed: () {},
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextButton.icon(
+                      icon: const Icon(Icons.add_link, size: 16),
+                      label: const Text('Add IP'),
+                      onPressed: () =>
+                          _showManualConnectDialog(context, controller),
+                    ),
+                    const SizedBox(width: 4),
+                    TextButton.icon(
+                      icon: const SizedBox(
+                        width: 12,
+                        height: 12,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                      label: const Text('Scanning'),
+                      onPressed: () {},
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -292,12 +390,22 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Ensure the other device is on the same Wi-Fi network and has NEXORA open.',
+                        'Ensure both devices are on the same Wi-Fi network or mobile hotspot, and have NEXORA open.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey.shade600,
                         ),
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.wifi_find, size: 18),
+                        label: const Text('Connect Directly by IP Address'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: NexoraColors.electricBlue,
+                        ),
+                        onPressed: () =>
+                            _showManualConnectDialog(context, controller),
                       ),
                     ],
                   ),
@@ -325,7 +433,7 @@ class HomeScreen extends ConsumerWidget {
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     subtitle: Text(
-                      '${peer.platform} • ${peer.address ?? 'mDNS'}',
+                      '${peer.platform} • ${peer.address ?? 'Direct'}',
                     ),
                     trailing: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(

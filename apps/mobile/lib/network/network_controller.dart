@@ -20,6 +20,8 @@ class NetworkController {
   TransferClient? _client;
   int _tcpPort = 48842;
 
+  int get tcpPort => _tcpPort;
+
   // Active receiver approval prompt hook
   Future<bool> Function(IncomingTransferOffer offer)? onApprovalRequested;
 
@@ -72,6 +74,17 @@ class NetworkController {
         // Handle error state
       },
     );
+  }
+
+  /// Updates the local device announcement broadcast
+  void updateLocalDevice(NexoraDevice updatedDevice) {
+    _discovery?.updateLocalDevice(updatedDevice);
+  }
+
+  /// Manually pings and discovers a peer by IP address
+  Future<bool> manualConnect(String targetIp, {int targetPort = 48842}) async {
+    if (_discovery == null) return false;
+    return await _discovery!.manualConnect(targetIp, targetPort: targetPort);
   }
 
   void _updateActiveTransfer(NexoraTransfer transfer) {

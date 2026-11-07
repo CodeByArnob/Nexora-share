@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/database_service.dart';
 import '../network/network_controller.dart';
 import '../providers/app_state.dart';
+import '../services/device_identity_service.dart';
 import '../widgets/receiver_approval_dialog.dart';
 import 'home_screen.dart';
 import 'transfers_screen.dart';
@@ -41,6 +42,11 @@ class _NavigationShellState extends ConsumerState<NavigationShell> {
   Future<void> _initNetwork() async {
     try {
       await DatabaseService.instance.initialize();
+
+      // Resolve genuine persistent unique device identity
+      final genuineDevice = await DeviceIdentityService.resolveIdentity();
+      ref.read(localDeviceProvider.notifier).state = genuineDevice;
+
       final history = await DatabaseService.instance.getTransferHistory();
       if (history.isNotEmpty) {
         ref.read(transferHistoryProvider.notifier).state = history;

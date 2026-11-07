@@ -1,7 +1,9 @@
 package io.github.codebyarnob.nexora_app
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.net.wifi.WifiManager
 import android.os.Bundle
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -14,10 +16,48 @@ class MainActivity : FlutterActivity() {
 
     private var initialSharedUris: ArrayList<String>? = null
     private var shareMethodChannel: MethodChannel? = null
+    private var multicastLock: WifiManager.MulticastLock? = null
+    private var wifiLock: WifiManager.WifiLock? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        acquireLocks()
         handleIntent(intent)
+    }
+
+    private fun acquireLocks() {
+        try {
+            val wifi = applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
+            if (wifi != null) {
+                multicastLock = wifi.createMulticastLock("NexoraMulticastLock").apply {
+                    setReferenceCounted(true)
+                    acquire()
+                }
+                @Suppress("DEPRECATION")
+                wifiLock = wifi.createWifiLock(WifiManager.WIFI_MODE_FULL_HIGH_PERF, "NexoraWifiLock").apply {
+                    setReferenceCounted(false)
+                    acquire()
+                }
+            }
+        } catch (_: Exception) {
+            // Non-critical if lock acquisition is restricted
+        }
+    }
+
+    override fun onDestroy() {
+        try {
+            multicastLock?.let {
+                if (it.isHeld) {
+                    it.release()
+                }
+            }
+            wifiLock?.let {
+                if (it.isHeld) {
+                    it.release()
+                }
+            }
+        } catch (_: Exception) {}
+        super.onDestroy()
     }
 
     override fun onNewIntent(intent: Intent) {

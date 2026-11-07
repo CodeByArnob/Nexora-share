@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../network/network_controller.dart';
 import '../providers/app_state.dart';
+import '../services/device_identity_service.dart';
 import '../theme/nexora_theme.dart';
 
 class SettingsScreen extends ConsumerWidget {
@@ -60,12 +62,17 @@ class SettingsScreen extends ConsumerWidget {
                     ElevatedButton(
                       child: const Text('Save'),
                       onPressed: () {
-                        if (controller.text.trim().isNotEmpty) {
-                          ref
-                              .read(localDeviceProvider.notifier)
-                              .state = localDevice.copyWith(
-                            displayName: controller.text.trim(),
+                        final newName = controller.text.trim();
+                        if (newName.isNotEmpty) {
+                          final updatedDevice = localDevice.copyWith(
+                            displayName: newName,
                           );
+                          ref.read(localDeviceProvider.notifier).state =
+                              updatedDevice;
+                          DeviceIdentityService.updateDisplayName(newName);
+                          ref
+                              .read(networkControllerProvider)
+                              .updateLocalDevice(updatedDevice);
                         }
                         Navigator.pop(context);
                       },
@@ -79,7 +86,9 @@ class SettingsScreen extends ConsumerWidget {
             leading: const Icon(Icons.fingerprint),
             title: const Text('Device Fingerprint'),
             subtitle: Text(
-              '${localDevice.fingerprint.substring(0, 24)}...',
+              localDevice.fingerprint.length > 24
+                  ? '${localDevice.fingerprint.substring(0, 24)}...'
+                  : localDevice.fingerprint,
               style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
             ),
           ),

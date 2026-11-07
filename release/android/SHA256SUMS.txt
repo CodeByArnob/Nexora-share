@@ -1,2 +1,2 @@
-06e9432170563a715032a52309fc0b4e9c1d5f59effbdee87cb19cbd27754432  nexora-v1.0.0-release.apk
-59b729c82696af71636a9bcb89fa17a8eb1e1aa5d0ea8ae56d0db0d9f95f5526  nexora-v1.0.0-release.aab
+669823bdfe58adb7c036880cfcab05eac6b7bbe97287351dd5e1c5ae2b83eb5b  nexora-v1.0.0-release.apk
+8f087e1d9f05a1987e1c75a54ca2849409c8257bac0903755a3747396e3f346b  nexora-v1.0.0-release.aab
