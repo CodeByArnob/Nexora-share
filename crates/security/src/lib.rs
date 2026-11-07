@@ -35,11 +35,15 @@ const WINDOWS_RESERVED_NAMES: &[&str] = &[
 pub fn sanitize_filename(name: &str) -> Result<String, SecurityError> {
     let trimmed = name.trim();
     if trimmed.is_empty() {
-        return Err(SecurityError::InvalidFilename("Filename cannot be empty".into()));
+        return Err(SecurityError::InvalidFilename(
+            "Filename cannot be empty".into(),
+        ));
     }
 
     if trimmed.contains('\0') {
-        return Err(SecurityError::InvalidFilename("Null bytes are prohibited".into()));
+        return Err(SecurityError::InvalidFilename(
+            "Null bytes are prohibited".into(),
+        ));
     }
 
     // Check for path separators in standalone file names
@@ -189,7 +193,10 @@ mod tests {
     fn test_resolve_safe_path_traversal() {
         let base = Path::new("/downloads/nexora");
         let result = resolve_safe_path(base, "doc.pdf", Some("../../../etc"), true);
-        assert!(matches!(result, Err(SecurityError::PathTraversalAttempt(_))));
+        assert!(matches!(
+            result,
+            Err(SecurityError::PathTraversalAttempt(_))
+        ));
     }
 
     #[test]

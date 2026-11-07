@@ -51,12 +51,7 @@ impl PeerRegistry {
     }
 
     /// Registers or updates a discovered peer, returning the appropriate discovery event.
-    pub fn upsert_peer(
-        &self,
-        device: DeviceInfo,
-        address: String,
-        port: u16,
-    ) -> DiscoveryEvent {
+    pub fn upsert_peer(&self, device: DeviceInfo, address: String, port: u16) -> DiscoveryEvent {
         let mut map = self.peers.lock().unwrap();
         let device_id = device.device_id.clone();
         let peer = DiscoveredPeer {

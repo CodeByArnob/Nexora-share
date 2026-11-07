@@ -1,7 +1,7 @@
 //! Device identity, Ed25519 cryptographic key management, and fingerprinting for NEXORA.
 
 use ed25519_dalek::{Signature, Signer, SigningKey, Verifier, VerifyingKey};
-use nexora_protocol::{CURRENT_PROTOCOL_VERSION, DeviceInfo};
+use nexora_protocol::{DeviceInfo, CURRENT_PROTOCOL_VERSION};
 use rand::rngs::OsRng;
 use sha2::{Digest, Sha256};
 use thiserror::Error;
@@ -114,11 +114,13 @@ pub fn verify_peer_signature(
     let verifying_key = VerifyingKey::from_bytes(public_key_bytes)
         .map_err(|e| IdentityError::InvalidPublicKey(e.to_string()))?;
 
-    let sig_bytes = hex::decode(signature_hex)
-        .map_err(|e| IdentityError::InvalidSignature(e.to_string()))?;
+    let sig_bytes =
+        hex::decode(signature_hex).map_err(|e| IdentityError::InvalidSignature(e.to_string()))?;
 
     if sig_bytes.len() != 64 {
-        return Err(IdentityError::InvalidSignature("Signature must be 64 bytes".into()));
+        return Err(IdentityError::InvalidSignature(
+            "Signature must be 64 bytes".into(),
+        ));
     }
 
     let mut sig_arr = [0u8; 64];
@@ -152,10 +154,12 @@ mod tests {
         let signature = identity.sign(message);
         let pub_key = identity.public_key_bytes();
 
-        let valid = verify_peer_signature(&pub_key, message, &signature).expect("Verification check should run");
+        let valid = verify_peer_signature(&pub_key, message, &signature)
+            .expect("Verification check should run");
         assert!(valid, "Valid signature must verify successfully");
 
-        let invalid = verify_peer_signature(&pub_key, b"Tampered Message", &signature).expect("Verification check should run");
+        let invalid = verify_peer_signature(&pub_key, b"Tampered Message", &signature)
+            .expect("Verification check should run");
         assert!(!invalid, "Tampered message must fail verification");
     }
 

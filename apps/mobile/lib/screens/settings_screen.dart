@@ -180,24 +180,37 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.info_outline, color: NexoraColors.electricBlue),
+            leading: const Icon(
+              Icons.info_outline,
+              color: NexoraColors.electricBlue,
+            ),
             title: const Text('Version & Build'),
             subtitle: const Text('Version 1.0.0 (Build 100) — Release Stable'),
           ),
           ListTile(
-            leading: const Icon(Icons.person_outline, color: NexoraColors.signalTeal),
+            leading: const Icon(
+              Icons.person_outline,
+              color: NexoraColors.signalTeal,
+            ),
             title: const Text('Developer'),
-            subtitle: const Text('CodeByArnob (https://github.com/CodeByArnob)'),
+            subtitle: const Text(
+              'CodeByArnob (https://github.com/CodeByArnob)',
+            ),
           ),
           ListTile(
-            leading: const Icon(Icons.source_outlined, color: NexoraColors.electricBlue),
+            leading: const Icon(
+              Icons.source_outlined,
+              color: NexoraColors.electricBlue,
+            ),
             title: const Text('Open Source Repository'),
             subtitle: const Text('https://github.com/CodeByArnob/Nexora-share'),
           ),
           ListTile(
             leading: const Icon(Icons.description_outlined, color: Colors.grey),
             title: const Text('License & Technologies'),
-            subtitle: const Text('Apache 2.0 • Flutter, Rust, Riverpod, SQLite, SHA-256'),
+            subtitle: const Text(
+              'Apache 2.0 • Flutter, Rust, Riverpod, SQLite, SHA-256',
+            ),
           ),
         ],
       ),

@@ -204,8 +204,8 @@ pub enum WireMessage {
 
 /// Encodes a WireMessage into a 4-byte length-prefixed binary frame.
 pub fn encode_frame(msg: &WireMessage) -> Result<Vec<u8>, ProtocolError> {
-    let payload = serde_json::to_vec(msg)
-        .map_err(|e| ProtocolError::SerializationError(e.to_string()))?;
+    let payload =
+        serde_json::to_vec(msg).map_err(|e| ProtocolError::SerializationError(e.to_string()))?;
 
     let length = payload.len();
     if length > MAX_FRAME_SIZE {
@@ -241,8 +241,7 @@ pub fn decode_frame(bytes: &[u8]) -> Result<WireMessage, ProtocolError> {
     }
 
     let payload = &bytes[LENGTH_PREFIX_SIZE..total_required];
-    serde_json::from_slice(payload)
-        .map_err(|e| ProtocolError::DeserializationError(e.to_string()))
+    serde_json::from_slice(payload).map_err(|e| ProtocolError::DeserializationError(e.to_string()))
 }
 
 #[cfg(test)]

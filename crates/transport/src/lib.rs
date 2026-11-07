@@ -1,6 +1,8 @@
 //! Framed network transport, async reader/writer with length prefixing and timeouts for NEXORA.
 
-use nexora_protocol::{decode_frame, encode_frame, ProtocolError, WireMessage, LENGTH_PREFIX_SIZE, MAX_FRAME_SIZE};
+use nexora_protocol::{
+    decode_frame, encode_frame, ProtocolError, WireMessage, LENGTH_PREFIX_SIZE, MAX_FRAME_SIZE,
+};
 use std::time::Duration;
 use thiserror::Error;
 use tokio::io::{AsyncRead, AsyncReadExt, AsyncWrite, AsyncWriteExt};
@@ -41,7 +43,9 @@ where
 
         let length = u32::from_be_bytes(len_buf) as usize;
         if length > MAX_FRAME_SIZE {
-            return Err(TransportError::Protocol(ProtocolError::FrameTooLarge(length)));
+            return Err(TransportError::Protocol(ProtocolError::FrameTooLarge(
+                length,
+            )));
         }
 
         let mut payload_buf = vec![0u8; length];
@@ -87,7 +91,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use nexora_protocol::{CURRENT_PROTOCOL_VERSION, DeviceInfo};
+    use nexora_protocol::{DeviceInfo, CURRENT_PROTOCOL_VERSION};
 
     #[tokio::test]
     async fn test_duplex_framed_transport() {

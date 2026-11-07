@@ -21,7 +21,10 @@ pub enum PairingError {
     InvalidPayload(String),
 
     #[error("Pairing state transition invalid: cannot transition from {from:?} to {to:?}")]
-    InvalidStateTransition { from: PairingState, to: PairingState },
+    InvalidStateTransition {
+        from: PairingState,
+        to: PairingState,
+    },
 
     #[error("Cryptographic signature check failed during pairing verification")]
     SignatureVerificationFailed,

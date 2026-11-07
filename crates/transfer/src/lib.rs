@@ -143,11 +143,7 @@ pub fn read_file_chunk(
 }
 
 /// Writes a chunk to an existing or new destination file at the specified offset.
-pub fn write_file_chunk(
-    path: &Path,
-    offset: u64,
-    data: &[u8],
-) -> Result<(), TransferEngineError> {
+pub fn write_file_chunk(path: &Path, offset: u64, data: &[u8]) -> Result<(), TransferEngineError> {
     let mut file = std::fs::OpenOptions::new()
         .write(true)
         .create(true)

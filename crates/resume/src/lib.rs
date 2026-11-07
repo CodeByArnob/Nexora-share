@@ -26,12 +26,7 @@ pub struct TransferResumeTracker {
 }
 
 impl TransferResumeTracker {
-    pub fn new(
-        transfer_id: Uuid,
-        file_id: String,
-        chunk_size: u32,
-        total_bytes: u64,
-    ) -> Self {
+    pub fn new(transfer_id: Uuid, file_id: String, chunk_size: u32, total_bytes: u64) -> Self {
         let total_chunks = if total_bytes == 0 {
             1
         } else {
@@ -104,7 +99,8 @@ mod tests {
     fn test_resume_tracker_chunk_progress() {
         let tid = Uuid::new_v4();
         // 10 MB total with 1 MB chunks = 10 chunks
-        let mut tracker = TransferResumeTracker::new(tid, "file-1".into(), 1024 * 1024, 10 * 1024 * 1024);
+        let mut tracker =
+            TransferResumeTracker::new(tid, "file-1".into(), 1024 * 1024, 10 * 1024 * 1024);
         assert_eq!(tracker.total_chunks, 10);
         assert_eq!(tracker.next_missing_chunk(), Some(0));
         assert!(!tracker.is_complete());
@@ -134,8 +130,11 @@ mod tests {
         let mut tracker = TransferResumeTracker::new(tid, "file-abc".into(), 64 * 1024, 128 * 1024);
         tracker.mark_chunk_verified(0).unwrap();
 
-        let json = tracker.to_checkpoint_json().expect("Checkpoint JSON serialization");
-        let restored = TransferResumeTracker::from_checkpoint_json(&json).expect("Checkpoint JSON deserialization");
+        let json = tracker
+            .to_checkpoint_json()
+            .expect("Checkpoint JSON serialization");
+        let restored = TransferResumeTracker::from_checkpoint_json(&json)
+            .expect("Checkpoint JSON deserialization");
 
         assert_eq!(tracker, restored);
     }

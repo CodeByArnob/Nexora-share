@@ -46,10 +46,7 @@ impl NexoraCore {
 }
 
 /// Initializes the global NEXORA engine instance.
-pub fn init_nexora_engine(
-    display_name: String,
-    platform: String,
-) -> Result<DeviceInfo, String> {
+pub fn init_nexora_engine(display_name: String, platform: String) -> Result<DeviceInfo, String> {
     let core = NexoraCore::new(display_name, platform).map_err(|e| e.to_string())?;
     let info = core.device_info();
     let _ = CORE_INSTANCE.set(core);
