@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nexora_app/main.dart';
@@ -45,5 +46,15 @@ void main() {
     expect(find.text('DEVICE IDENTITY'), findsOneWidget);
     expect(find.text('Device Display Name'), findsOneWidget);
     expect(find.text('Theme Mode'), findsOneWidget);
+
+    // Tap back on Home tab
+    await tester.tap(find.text('Home'));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Tap on QR code icon
+    await tester.tap(find.byIcon(Icons.qr_code_2));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Pair Device'), findsOneWidget);
+    expect(find.text('Short Authentication Code (SAS)'), findsOneWidget);
   });
 }
