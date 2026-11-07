@@ -4,6 +4,7 @@ import '../models/transfer_model.dart';
 import '../network/network_controller.dart';
 import '../providers/app_state.dart';
 import '../theme/nexora_theme.dart';
+import '../widgets/nexora_motion.dart';
 import '../widgets/pairing_dialog.dart';
 
 class HomeView extends ConsumerWidget {
@@ -398,10 +399,14 @@ class HomeView extends ConsumerWidget {
                     ),
                     child: Row(
                       children: [
-                        CircleAvatar(
-                          radius: 24,
-                          backgroundColor: avatarColor.withValues(alpha: 0.15),
-                          child: Icon(iconData, color: avatarColor),
+                        NexoraPulseRing(
+                          child: CircleAvatar(
+                            radius: 24,
+                            backgroundColor: avatarColor.withValues(
+                              alpha: 0.15,
+                            ),
+                            child: Icon(iconData, color: avatarColor),
+                          ),
                         ),
                         const SizedBox(width: 14),
                         Expanded(

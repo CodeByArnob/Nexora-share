@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/transfer_model.dart';
 import '../providers/app_state.dart';
 import '../theme/nexora_theme.dart';
+import '../widgets/nexora_motion.dart';
 
 class TransfersScreen extends ConsumerWidget {
   const TransfersScreen({super.key});
@@ -105,10 +106,9 @@ class TransfersScreen extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 12),
-                        LinearProgressIndicator(
-                          value: t.progressPercentage,
-                          color: NexoraColors.electricBlue,
-                          backgroundColor: Colors.grey.shade200,
+                        NexoraAnimatedProgressBar(
+                          progress: t.progressPercentage,
+                          speedText: t.formattedSpeed,
                         ),
                         const SizedBox(height: 8),
                         Row(

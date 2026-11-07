@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="nexoraBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14243B" />
+      <stop offset="100%" stop-color="#0D1420" />
+    </linearGradient>
+
+    <!-- Transfer Flow Gradient: Electric Blue to Signal Teal -->
+    <linearGradient id="nexoraTransferFlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3978F6" />
+      <stop offset="100%" stop-color="#39C6B0" />
+    </linearGradient>
+
+    <!-- Subtle Glow for Active Transfer Vector -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Premium Squircle Container -->
+  <rect width="512" height="512" rx="112" fill="url(#nexoraBg)" />
+
+  <!-- Outer subtle circular orbit -->
+  <circle cx="256" cy="256" r="184" fill="none" stroke="#3978F6" stroke-width="4" stroke-dasharray="8 12" opacity="0.25" />
+
+  <!-- Geometric "N" Connected Device Transfer Structure -->
+  <g filter="url(#softGlow)">
+    <!-- Diagonal Dynamic Transfer Path -->
+    <path d="M 160 160 L 352 352" stroke="url(#nexoraTransferFlow)" stroke-width="44" stroke-linecap="round" />
+
+    <!-- Left Stem: Sender Column -->
+    <line x1="160" y1="160" x2="160" y2="352" stroke="#3978F6" stroke-width="44" stroke-linecap="round" />
+
+    <!-- Right Stem: Receiver Column -->
+    <line x1="352" y1="160" x2="352" y2="352" stroke="#39C6B0" stroke-width="44" stroke-linecap="round" />
+
+    <!-- Sender Device Node (Upper Left) -->
+    <circle cx="160" cy="160" r="32" fill="#14243B" stroke="#3978F6" stroke-width="12" />
+    <circle cx="160" cy="160" r="12" fill="#3978F6" />
+
+    <!-- Receiver Device Node (Lower Right) -->
+    <circle cx="352" cy="352" r="32" fill="#14243B" stroke="#39C6B0" stroke-width="12" />
+    <circle cx="352" cy="352" r="12" fill="#39C6B0" />
+
+    <!-- Central High-Speed Packet Waveform Accent -->
+    <circle cx="256" cy="256" r="10" fill="#FFFFFF" opacity="0.9" />
+  </g>
+</svg>

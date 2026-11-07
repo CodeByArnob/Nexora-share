@@ -1,0 +1,48 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group>
+        <!-- Monochrome Geometric N -->
+        <path
+            android:pathData="M34,34 L74,74"
+            android:strokeWidth="9"
+            android:strokeColor="#FFFFFF"
+            android:strokeLineCap="round" />
+
+        <path
+            android:pathData="M34,34 L34,74"
+            android:strokeWidth="9"
+            android:strokeColor="#FFFFFF"
+            android:strokeLineCap="round" />
+
+        <path
+            android:pathData="M74,34 L74,74"
+            android:strokeWidth="9"
+            android:strokeColor="#FFFFFF"
+            android:strokeLineCap="round" />
+
+        <!-- Sender Node Outer -->
+        <path
+            android:pathData="M34,34m-7,0a7,7 0,1 1,14 0a7,7 0,1 1,-14 0"
+            android:fillColor="#000000"
+            android:strokeWidth="2.5"
+            android:strokeColor="#FFFFFF" />
+        <!-- Sender Node Inner -->
+        <path
+            android:pathData="M34,34m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0"
+            android:fillColor="#FFFFFF" />
+
+        <!-- Receiver Node Outer -->
+        <path
+            android:pathData="M74,74m-7,0a7,7 0,1 1,14 0a7,7 0,1 1,-14 0"
+            android:fillColor="#000000"
+            android:strokeWidth="2.5"
+            android:strokeColor="#FFFFFF" />
+        <!-- Receiver Node Inner -->
+        <path
+            android:pathData="M74,74m-2.5,0a2.5,2.5 0,1 1,5 0a2.5,2.5 0,1 1,-5 0"
+            android:fillColor="#FFFFFF" />
+    </group>
+</vector>

@@ -280,6 +280,51 @@ class DatabaseService {
     }).toList();
   }
 
+  /// Safely marks any active transfers that were interrupted by an application crash,
+  /// power loss, or unexpected reboot as failed/interrupted so they can be resumed.
+  Future<int> markInterruptedTransfers() async {
+    return await db.update(
+      'transfers',
+      {'status': TransferState.failed.name},
+      where: 'status IN (?, ?, ?)',
+      whereArgs: [
+        TransferState.pending.name,
+        TransferState.inProgress.name,
+        'in_progress',
+      ],
+    );
+  }
+
+  /// Retrieves incomplete or interrupted transfers eligible for resumption.
+  Future<List<NexoraTransfer>> getIncompleteTransfers() async {
+    final rows = await db.query(
+      'transfers',
+      where: 'status IN (?, ?)',
+      whereArgs: [TransferState.failed.name, TransferState.pending.name],
+      orderBy: 'created_at DESC',
+    );
+    return rows.map((r) {
+      final dirStr = r['direction'] as String;
+      return NexoraTransfer(
+        transferId: r['transfer_id'] as String,
+        direction: dirStr == 'send'
+            ? TransferDirection.send
+            : TransferDirection.receive,
+        remoteDeviceId: r['remote_device_id'] as String,
+        remoteDeviceName: r['remote_device_name'] as String,
+        totalFiles: r['total_files'] as int,
+        totalBytes: r['total_bytes'] as int,
+        bytesTransferred: r['bytes_transferred'] as int,
+        currentFile: '',
+        state: TransferState.failed,
+        createdAt: DateTime.parse(r['created_at'] as String),
+        completedAt: r['completed_at'] != null
+            ? DateTime.parse(r['completed_at'] as String)
+            : null,
+      );
+    }).toList();
+  }
+
   // --- Resume Checkpoint Store ---
   Future<void> recordVerifiedChunk({
     required String transferId,

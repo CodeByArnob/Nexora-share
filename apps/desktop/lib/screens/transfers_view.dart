@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/transfer_model.dart';
 import '../providers/app_state.dart';
 import '../theme/nexora_theme.dart';
+import '../widgets/nexora_motion.dart';
 
 class TransfersView extends ConsumerWidget {
   const TransfersView({super.key});
@@ -219,18 +220,10 @@ class TransfersView extends ConsumerWidget {
                           ],
                         ),
                         const SizedBox(height: 16),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: LinearProgressIndicator(
-                            value: progressPct,
-                            minHeight: 8,
-                            backgroundColor: Colors.grey.withValues(alpha: 0.2),
-                            valueColor: AlwaysStoppedAnimation(
-                              isIncoming
-                                  ? NexoraColors.signalTeal
-                                  : NexoraColors.electricBlue,
-                            ),
-                          ),
+                        NexoraAnimatedProgressBar(
+                          progress: progressPct,
+                          speedText:
+                              '${_formatBytes(transfer.bytesPerSecond.round())}/s',
                         ),
                         const SizedBox(height: 12),
                         Row(

@@ -9,9 +9,12 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.os.PowerManager
 import androidx.core.app.NotificationCompat
 
 class NexoraTransferService : Service() {
+
+    private var wakeLock: PowerManager.WakeLock? = null
 
     companion object {
         const val CHANNEL_ID = "nexora_active_transfers"
@@ -74,6 +77,13 @@ class NexoraTransferService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
             ACTION_START -> {
+                // Acquire partial wake lock to prevent CPU sleep during background/screen-locked transfers
+                val powerManager = getSystemService(Context.POWER_SERVICE) as? PowerManager
+                wakeLock = powerManager?.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "nexora:transfer_lock")?.apply {
+                    setReferenceCounted(false)
+                    acquire(60 * 60 * 1000L) // 1-hour max safety timeout for multi-GB transfers
+                }
+
                 val fileName = intent.getStringExtra(EXTRA_FILE_NAME) ?: "File"
                 val isSending = intent.getBooleanExtra(EXTRA_IS_SENDING, true)
                 val notification = buildNotification(
@@ -101,11 +111,23 @@ class NexoraTransferService : Service() {
                 notificationManager.notify(NOTIFICATION_ID, notification)
             }
             ACTION_STOP -> {
+                wakeLock?.let {
+                    if (it.isHeld) it.release()
+                }
+                wakeLock = null
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             }
         }
         return START_NOT_STICKY
+    }
+
+    override fun onDestroy() {
+        wakeLock?.let {
+            if (it.isHeld) it.release()
+        }
+        wakeLock = null
+        super.onDestroy()
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

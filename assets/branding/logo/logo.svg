@@ -1,65 +1,50 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
     <!-- Background Gradient -->
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="nexoraBg" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#14243B" />
       <stop offset="100%" stop-color="#0D1420" />
     </linearGradient>
 
-    <!-- NEXORA Dynamic Diagonal Gradient (Transfer Path) -->
-    <linearGradient id="transferGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- Transfer Flow Gradient: Electric Blue to Signal Teal -->
+    <linearGradient id="nexoraTransferFlow" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#3978F6" />
-      <stop offset="50%" stop-color="#39C6B0" />
-      <stop offset="100%" stop-color="#3978F6" />
+      <stop offset="100%" stop-color="#39C6B0" />
     </linearGradient>
 
-    <!-- Node Glow Filter -->
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="12" result="blur" />
+    <!-- Subtle Glow for Active Transfer Vector -->
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
-
-    <linearGradient id="nodeGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#3978F6" />
-      <stop offset="100%" stop-color="#1E4491" />
-    </linearGradient>
-
-    <linearGradient id="nodeGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#39C6B0" />
-      <stop offset="100%" stop-color="#1E7569" />
-    </linearGradient>
   </defs>
 
-  <!-- Background with Rounded Squircle -->
-  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <!-- Premium Squircle Container -->
+  <rect width="512" height="512" rx="112" fill="url(#nexoraBg)" />
 
-  <!-- Subtle Ambient Circuit Ring -->
-  <circle cx="256" cy="256" r="180" fill="none" stroke="#17243A" stroke-width="6" stroke-dasharray="16 12" />
+  <!-- Outer subtle circular orbit -->
+  <circle cx="256" cy="256" r="184" fill="none" stroke="#3978F6" stroke-width="4" stroke-dasharray="8 12" opacity="0.25" />
 
-  <!-- NEXORA Stylized 'N' Geometry & Transfer Nodes -->
-  <!-- Left Pillar: Sender Device Node Upward -->
-  <line x1="144" y1="368" x2="144" y2="144" stroke="#3978F6" stroke-width="36" stroke-linecap="round" />
+  <!-- Geometric "N" Connected Device Transfer Structure -->
+  <g filter="url(#softGlow)">
+    <!-- Diagonal Dynamic Transfer Path -->
+    <path d="M 160 160 L 352 352" stroke="url(#nexoraTransferFlow)" stroke-width="44" stroke-linecap="round" />
 
-  <!-- Dynamic Diagonal Transfer Path -->
-  <line x1="144" y1="144" x2="368" y2="368" stroke="url(#transferGrad)" stroke-width="40" stroke-linecap="round" />
+    <!-- Left Stem: Sender Column -->
+    <line x1="160" y1="160" x2="160" y2="352" stroke="#3978F6" stroke-width="44" stroke-linecap="round" />
 
-  <!-- Right Pillar: Receiver Device Node Upward -->
-  <line x1="368" y1="368" x2="368" y2="144" stroke="#39C6B0" stroke-width="36" stroke-linecap="round" />
+    <!-- Right Stem: Receiver Column -->
+    <line x1="352" y1="160" x2="352" y2="352" stroke="#39C6B0" stroke-width="44" stroke-linecap="round" />
 
-  <!-- Device Node 1: Sender / Top-Left Junction -->
-  <circle cx="144" cy="144" r="26" fill="#3978F6" filter="url(#glow)" />
-  <circle cx="144" cy="144" r="14" fill="#FFFFFF" />
+    <!-- Sender Device Node (Upper Left) -->
+    <circle cx="160" cy="160" r="32" fill="#14243B" stroke="#3978F6" stroke-width="12" />
+    <circle cx="160" cy="160" r="12" fill="#3978F6" />
 
-  <!-- Device Node 2: Receiver / Bottom-Right Junction -->
-  <circle cx="368" cy="368" r="26" fill="#39C6B0" filter="url(#glow)" />
-  <circle cx="368" cy="368" r="14" fill="#FFFFFF" />
+    <!-- Receiver Device Node (Lower Right) -->
+    <circle cx="352" cy="352" r="32" fill="#14243B" stroke="#39C6B0" stroke-width="12" />
+    <circle cx="352" cy="352" r="12" fill="#39C6B0" />
 
-  <!-- Midpoint Transfer Flow Particles -->
-  <circle cx="218" cy="218" r="8" fill="#FFFFFF" opacity="0.9" />
-  <circle cx="256" cy="256" r="10" fill="#39C6B0" filter="url(#glow)" />
-  <circle cx="294" cy="294" r="8" fill="#FFFFFF" opacity="0.9" />
-
-  <!-- Terminal Nodes -->
-  <circle cx="144" cy="368" r="16" fill="#17243A" stroke="#3978F6" stroke-width="6" />
-  <circle cx="368" cy="144" r="16" fill="#17243A" stroke="#39C6B0" stroke-width="6" />
+    <!-- Central High-Speed Packet Waveform Accent -->
+    <circle cx="256" cy="256" r="10" fill="#FFFFFF" opacity="0.9" />
+  </g>
 </svg>

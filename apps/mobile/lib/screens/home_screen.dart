@@ -5,6 +5,7 @@ import '../models/transfer_model.dart';
 import '../network/network_controller.dart';
 import '../providers/app_state.dart';
 import '../theme/nexora_theme.dart';
+import '../widgets/nexora_motion.dart';
 import '../widgets/pairing_dialog.dart';
 
 class HomeScreen extends ConsumerWidget {
@@ -306,15 +307,17 @@ class HomeScreen extends ConsumerWidget {
               ...nearbyPeers.map(
                 (peer) => Card(
                   child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: NexoraColors.midnightNavy,
-                      child: Icon(
-                        peer.platform.toLowerCase().contains('android')
-                            ? Icons.phone_android
-                            : peer.platform.toLowerCase().contains('linux')
-                            ? Icons.terminal
-                            : Icons.laptop_windows,
-                        color: NexoraColors.signalTeal,
+                    leading: NexoraPulseRing(
+                      child: CircleAvatar(
+                        backgroundColor: NexoraColors.midnightNavy,
+                        child: Icon(
+                          peer.platform.toLowerCase().contains('android')
+                              ? Icons.phone_android
+                              : peer.platform.toLowerCase().contains('linux')
+                              ? Icons.terminal
+                              : Icons.laptop_windows,
+                          color: NexoraColors.signalTeal,
+                        ),
                       ),
                     ),
                     title: Text(

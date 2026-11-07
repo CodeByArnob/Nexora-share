@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
@@ -39,12 +40,14 @@ class TransferServer {
   final Future<bool> Function(IncomingTransferOffer offer) onRequestApproval;
   final void Function(NexoraTransfer transfer) onTransferProgress;
   final void Function(NexoraTransfer completedTransfer) onTransferCompleted;
+  final void Function(String error)? onError;
 
   TransferServer({
     this.customDestinationDirectory,
     required this.onRequestApproval,
     required this.onTransferProgress,
     required this.onTransferCompleted,
+    this.onError,
   });
 
   /// Starts the TCP transfer server listening for peer transfers.
@@ -270,8 +273,12 @@ class TransferServer {
               );
             } else if (type == 'ChunkData') {
               final fileId = payload['file_id'] as String? ?? 'f-0';
-              final chunkDataList = (payload['data'] as List).cast<int>();
-              final chunkBytes = Uint8List.fromList(chunkDataList);
+              final dynamic rawData = payload['data'];
+              final Uint8List chunkBytes = rawData is String
+                  ? base64Decode(rawData)
+                  : (rawData is List
+                        ? Uint8List.fromList(rawData.cast<int>())
+                        : Uint8List(0));
               final offset = payload['offset'] as int? ?? 0;
               final chunkIndex = payload['chunk_index'] as int? ?? 0;
               final chunkSha256 = payload['chunk_sha256'] as String?;
@@ -279,6 +286,9 @@ class TransferServer {
               if (chunkSha256 != null && chunkSha256.isNotEmpty) {
                 final computedHash = sha256.convert(chunkBytes).toString();
                 if (computedHash.toLowerCase() != chunkSha256.toLowerCase()) {
+                  onError?.call(
+                    'CHECKSUM_MISMATCH: Computed $computedHash != Expected $chunkSha256',
+                  );
                   socket.destroy();
                   return;
                 }
