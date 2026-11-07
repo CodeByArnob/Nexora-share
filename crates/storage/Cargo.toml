@@ -1,0 +1,16 @@
+[package]
+name = "nexora-storage"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "SQLite database models, migrations, and transfer history persistence for NEXORA"
+
+[dependencies]
+rusqlite.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+nexora-protocol.workspace = true

@@ -1,0 +1,16 @@
+[package]
+name = "nexora-discovery"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "mDNS / DNS-SD service announcement and device discovery for NEXORA"
+
+[dependencies]
+tokio.workspace = true
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+nexora-protocol.workspace = true
+tracing.workspace = true

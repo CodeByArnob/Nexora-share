@@ -1,0 +1,13 @@
+[package]
+name = "nexora-transport"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Framed network transport, async TCP/TLS stream reader and writer for NEXORA"
+
+[dependencies]
+tokio.workspace = true
+thiserror.workspace = true
+nexora-protocol.workspace = true
+tracing.workspace = true

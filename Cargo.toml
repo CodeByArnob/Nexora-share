@@ -1,0 +1,50 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/nexora_core",
+    "crates/discovery",
+    "crates/identity",
+    "crates/pairing",
+    "crates/security",
+    "crates/protocol",
+    "crates/transport",
+    "crates/transfer",
+    "crates/resume",
+    "crates/verification",
+    "crates/storage",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["NEXORA Contributors"]
+license = "Apache-2.0"
+repository = "https://github.com/CodeByArnob/Nexora-share"
+
+[workspace.dependencies]
+tokio = { version = "1.43", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+thiserror = "2.0"
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+rand = "0.8"
+uuid = { version = "1.10", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+tracing = "0.1"
+flutter_rust_bridge = "=2.14.0-beta.2"
+hex = "0.4"
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# Internal crates
+nexora-core = { path = "crates/nexora_core" }
+nexora-discovery = { path = "crates/discovery" }
+nexora-identity = { path = "crates/identity" }
+nexora-pairing = { path = "crates/pairing" }
+nexora-security = { path = "crates/security" }
+nexora-protocol = { path = "crates/protocol" }
+nexora-transport = { path = "crates/transport" }
+nexora-transfer = { path = "crates/transfer" }
+nexora-resume = { path = "crates/resume" }
+nexora-verification = { path = "crates/verification" }
+nexora-storage = { path = "crates/storage" }

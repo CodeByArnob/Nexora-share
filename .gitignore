@@ -1,0 +1,34 @@
+# Rust
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Flutter & Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+apps/**/build/
+packages/**/build/
+
+# Android
+apps/mobile/android/.gradle/
+apps/mobile/android/local.properties
+apps/mobile/android/**/build/
+*.keystore
+*.jks
+
+# IDE & Editor
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.DS_Store
+Thumbs.db
+
+# Logs & temp
+*.log
+*.tmp
+/scratch/
