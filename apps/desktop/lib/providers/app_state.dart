@@ -1,15 +1,28 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../models/device_model.dart';
 import '../models/transfer_model.dart';
 
-/// Provider for local device identity (Windows Desktop)
+/// Provider for local device identity (Windows & Linux Desktop)
 final localDeviceProvider = StateProvider<NexoraDevice>((ref) {
+  final platformName = Platform.isLinux
+      ? 'Linux'
+      : Platform.isWindows
+      ? 'Windows'
+      : Platform.isMacOS
+      ? 'macOS'
+      : 'Desktop';
+  final defaultName = Platform.isLinux
+      ? 'Linux PC (NEXORA)'
+      : 'Windows Workstation (NEXORA)';
+
   return NexoraDevice(
-    deviceId: 'nexora-windows-local',
-    displayName: 'Windows Workstation (NEXORA)',
-    platform: 'Windows',
-    fingerprint: '14243b3978f639c6b00d142017243af5f7fb00112233445566778899aabbccdd',
+    deviceId: 'nexora-${platformName.toLowerCase()}-local',
+    displayName: defaultName,
+    platform: platformName,
+    fingerprint:
+        '14243b3978f639c6b00d142017243af5f7fb00112233445566778899aabbccdd',
     lastSeen: DateTime.now(),
   );
 });

@@ -30,7 +30,10 @@ class ReceiverApprovalDialog extends StatelessWidget {
               color: NexoraColors.electricBlue.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.downloading, color: NexoraColors.electricBlue),
+            child: const Icon(
+              Icons.downloading,
+              color: NexoraColors.electricBlue,
+            ),
           ),
           const SizedBox(width: 12),
           const Expanded(
@@ -62,7 +65,11 @@ class ReceiverApprovalDialog extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.insert_drive_file, color: NexoraColors.midnightNavy, size: 20),
+                    const Icon(
+                      Icons.insert_drive_file,
+                      color: NexoraColors.midnightNavy,
+                      size: 20,
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -79,11 +86,17 @@ class ReceiverApprovalDialog extends StatelessWidget {
                   children: [
                     Text(
                       'Total Size: ${_formatBytes(offer.totalBytes)}',
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade700,
+                      ),
                     ),
                     Text(
                       '${offer.totalFiles} file(s)',
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade700,
+                      ),
                     ),
                   ],
                 ),
@@ -102,7 +115,9 @@ class ReceiverApprovalDialog extends StatelessWidget {
                           child: Row(
                             children: [
                               Icon(
-                                f.relativePath != null ? Icons.folder_open : Icons.insert_drive_file,
+                                f.relativePath != null
+                                    ? Icons.folder_open
+                                    : Icons.insert_drive_file,
                                 size: 14,
                                 color: Colors.grey,
                               ),
@@ -116,7 +131,10 @@ class ReceiverApprovalDialog extends StatelessWidget {
                               ),
                               Text(
                                 _formatBytes(f.sizeBytes),
-                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ],
                           ),
@@ -150,7 +168,9 @@ class ReceiverApprovalDialog extends StatelessWidget {
           style: OutlinedButton.styleFrom(
             foregroundColor: Colors.red.shade700,
             side: BorderSide(color: Colors.red.shade300),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
           onPressed: () => Navigator.of(context).pop(false),
           child: const Text('Decline'),
@@ -159,7 +179,9 @@ class ReceiverApprovalDialog extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             backgroundColor: NexoraColors.electricBlue,
             foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
           onPressed: () => Navigator.of(context).pop(true),
           child: const Text('Accept & Save'),

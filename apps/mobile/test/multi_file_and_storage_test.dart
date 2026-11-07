@@ -29,7 +29,8 @@ void main() {
       deviceId: 'mobile-peer-1',
       displayName: 'Windows Workstation',
       platform: 'Windows',
-      fingerprint: '14243b3978f639c6b00d142017243af5f7fb00112233445566778899aabbccdd',
+      fingerprint:
+          '14243b3978f639c6b00d142017243af5f7fb00112233445566778899aabbccdd',
       lastSeen: DateTime.now(),
     );
 
@@ -57,78 +58,83 @@ void main() {
     expect(history.first.transferId, equals('t-mobile-1'));
   });
 
-  test('Mobile Multi-file batch transfer: streams 2 files with verified integrity', () async {
-    final srcDir = Directory('${tempDir.path}${Platform.pathSeparator}src');
-    await srcDir.create();
+  test(
+    'Mobile Multi-file batch transfer: streams 2 files with verified integrity',
+    () async {
+      final srcDir = Directory('${tempDir.path}${Platform.pathSeparator}src');
+      await srcDir.create();
 
-    final f1 = File('${srcDir.path}${Platform.pathSeparator}photo1.jpg');
-    final p1Data = utf8.encode('PHOTO_1_BYTES_DATA_STREAM_TEST');
-    await f1.writeAsBytes(p1Data);
-    final f1Hash = sha256.convert(p1Data).toString();
+      final f1 = File('${srcDir.path}${Platform.pathSeparator}photo1.jpg');
+      final p1Data = utf8.encode('PHOTO_1_BYTES_DATA_STREAM_TEST');
+      await f1.writeAsBytes(p1Data);
+      final f1Hash = sha256.convert(p1Data).toString();
 
-    final f2 = File('${srcDir.path}${Platform.pathSeparator}photo2.jpg');
-    final p2Data = utf8.encode('PHOTO_2_BYTES_DATA_STREAM_TEST');
-    await f2.writeAsBytes(p2Data);
-    final f2Hash = sha256.convert(p2Data).toString();
+      final f2 = File('${srcDir.path}${Platform.pathSeparator}photo2.jpg');
+      final p2Data = utf8.encode('PHOTO_2_BYTES_DATA_STREAM_TEST');
+      await f2.writeAsBytes(p2Data);
+      final f2Hash = sha256.convert(p2Data).toString();
 
-    final destDir = Directory('${tempDir.path}${Platform.pathSeparator}dest');
-    await destDir.create();
+      final destDir = Directory('${tempDir.path}${Platform.pathSeparator}dest');
+      await destDir.create();
 
-    NexoraTransfer? serverCompleted;
-    final server = TransferServer(
-      customDestinationDirectory: destDir,
-      onRequestApproval: (offer) async => true,
-      onTransferProgress: (_) {},
-      onTransferCompleted: (c) => serverCompleted = c,
-    );
-    final port = await server.start();
+      NexoraTransfer? serverCompleted;
+      final server = TransferServer(
+        customDestinationDirectory: destDir,
+        onRequestApproval: (offer) async => true,
+        onTransferProgress: (_) {},
+        onTransferCompleted: (c) => serverCompleted = c,
+      );
+      final port = await server.start();
 
-    NexoraTransfer? clientCompleted;
-    final client = TransferClient(
-      onProgress: (_) {},
-      onCompleted: (c) => clientCompleted = c,
-      onError: (err) => fail(err),
-    );
+      NexoraTransfer? clientCompleted;
+      final client = TransferClient(
+        onProgress: (_) {},
+        onCompleted: (c) => clientCompleted = c,
+        onError: (err) => fail(err),
+      );
 
-    final peer = NexoraDevice(
-      deviceId: 'server',
-      displayName: 'Receiver',
-      platform: 'Android',
-      fingerprint: 'fp',
-      address: '127.0.0.1',
-      port: port,
-      lastSeen: DateTime.now(),
-    );
+      final peer = NexoraDevice(
+        deviceId: 'server',
+        displayName: 'Receiver',
+        platform: 'Android',
+        fingerprint: 'fp',
+        address: '127.0.0.1',
+        port: port,
+        lastSeen: DateTime.now(),
+      );
 
-    final local = NexoraDevice(
-      deviceId: 'sender',
-      displayName: 'Sender',
-      platform: 'Android',
-      fingerprint: 'fp',
-      lastSeen: DateTime.now(),
-    );
+      final local = NexoraDevice(
+        deviceId: 'sender',
+        displayName: 'Sender',
+        platform: 'Android',
+        fingerprint: 'fp',
+        lastSeen: DateTime.now(),
+      );
 
-    await client.sendFiles(
-      peer: peer,
-      files: [f1, f2],
-      localDevice: local,
-    );
+      await client.sendFiles(peer: peer, files: [f1, f2], localDevice: local);
 
-    await Future.delayed(const Duration(milliseconds: 300));
+      await Future.delayed(const Duration(milliseconds: 300));
 
-    expect(clientCompleted, isNotNull);
-    expect(serverCompleted, isNotNull);
-    expect(serverCompleted!.totalFiles, equals(2));
+      expect(clientCompleted, isNotNull);
+      expect(serverCompleted, isNotNull);
+      expect(serverCompleted!.totalFiles, equals(2));
 
-    final rf1 = File('${destDir.path}${Platform.pathSeparator}photo1.jpg');
-    final rf2 = File('${destDir.path}${Platform.pathSeparator}photo2.jpg');
+      final rf1 = File('${destDir.path}${Platform.pathSeparator}photo1.jpg');
+      final rf2 = File('${destDir.path}${Platform.pathSeparator}photo2.jpg');
 
-    expect(await rf1.exists(), isTrue);
-    expect(sha256.convert(await rf1.readAsBytes()).toString(), equals(f1Hash));
+      expect(await rf1.exists(), isTrue);
+      expect(
+        sha256.convert(await rf1.readAsBytes()).toString(),
+        equals(f1Hash),
+      );
 
-    expect(await rf2.exists(), isTrue);
-    expect(sha256.convert(await rf2.readAsBytes()).toString(), equals(f2Hash));
+      expect(await rf2.exists(), isTrue);
+      expect(
+        sha256.convert(await rf2.readAsBytes()).toString(),
+        equals(f2Hash),
+      );
 
-    server.stop();
-  });
+      server.stop();
+    },
+  );
 }

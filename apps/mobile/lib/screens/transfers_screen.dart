@@ -13,14 +13,21 @@ class TransfersScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transfers', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Transfers',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       body: activeTransfers.isEmpty
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.swap_horiz_rounded, size: 64, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.swap_horiz_rounded,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(height: 16),
                   const Text(
                     'No active transfers',
@@ -49,9 +56,14 @@ class TransfersScreen extends ConsumerWidget {
                         Row(
                           children: [
                             CircleAvatar(
-                              backgroundColor: t.direction == TransferDirection.send
-                                  ? NexoraColors.electricBlue.withValues(alpha: 0.15)
-                                  : NexoraColors.signalTeal.withValues(alpha: 0.15),
+                              backgroundColor:
+                                  t.direction == TransferDirection.send
+                                  ? NexoraColors.electricBlue.withValues(
+                                      alpha: 0.15,
+                                    )
+                                  : NexoraColors.signalTeal.withValues(
+                                      alpha: 0.15,
+                                    ),
                               child: Icon(
                                 t.direction == TransferDirection.send
                                     ? Icons.upload
@@ -68,18 +80,27 @@ class TransfersScreen extends ConsumerWidget {
                                 children: [
                                   Text(
                                     t.remoteDeviceName,
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   Text(
-                                    t.currentFile.isEmpty ? 'Preparing transfer...' : t.currentFile,
-                                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                                    t.currentFile.isEmpty
+                                        ? 'Preparing transfer...'
+                                        : t.currentFile,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.grey.shade600,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
                             Text(
                               t.formattedSpeed,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
@@ -95,7 +116,10 @@ class TransfersScreen extends ConsumerWidget {
                           children: [
                             Text(
                               '${(t.progressPercentage * 100).toStringAsFixed(1)}% • ETA: ${t.etaSeconds}s',
-                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
                             ),
                             Row(
                               children: [
@@ -104,7 +128,11 @@ class TransfersScreen extends ConsumerWidget {
                                   onPressed: () {},
                                 ),
                                 IconButton(
-                                  icon: const Icon(Icons.close, size: 20, color: Colors.red),
+                                  icon: const Icon(
+                                    Icons.close,
+                                    size: 20,
+                                    color: Colors.red,
+                                  ),
                                   onPressed: () {},
                                 ),
                               ],

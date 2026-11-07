@@ -19,20 +19,20 @@ class ManifestItem {
   });
 
   Map<String, dynamic> toJson() => {
-        'file_id': fileId,
-        'name': name,
-        'relative_path': relativePath,
-        'size_bytes': sizeBytes,
-        'sha256_hash': sha256Hash,
-      };
+    'file_id': fileId,
+    'name': name,
+    'relative_path': relativePath,
+    'size_bytes': sizeBytes,
+    'sha256_hash': sha256Hash,
+  };
 
   factory ManifestItem.fromJson(Map<String, dynamic> json) => ManifestItem(
-        fileId: json['file_id'] as String,
-        name: json['name'] as String,
-        relativePath: json['relative_path'] as String?,
-        sizeBytes: json['size_bytes'] as int,
-        sha256Hash: json['sha256_hash'] as String?,
-      );
+    fileId: json['file_id'] as String,
+    name: json['name'] as String,
+    relativePath: json['relative_path'] as String?,
+    sizeBytes: json['size_bytes'] as int,
+    sha256Hash: json['sha256_hash'] as String?,
+  );
 }
 
 class TransferManifest {
@@ -49,11 +49,11 @@ class TransferManifest {
   });
 
   Map<String, dynamic> toJson() => {
-        'transfer_id': transferId,
-        'total_files': totalFiles,
-        'total_bytes': totalBytes,
-        'files': files.map((f) => f.toJson()).toList(),
-      };
+    'transfer_id': transferId,
+    'total_files': totalFiles,
+    'total_bytes': totalBytes,
+    'files': files.map((f) => f.toJson()).toList(),
+  };
 
   factory TransferManifest.fromJson(Map<String, dynamic> json) {
     final rawFiles = (json['files'] as List).cast<Map<String, dynamic>>();
@@ -62,7 +62,9 @@ class TransferManifest {
       transferId: json['transfer_id'] as String,
       files: items,
       totalFiles: json['total_files'] as int? ?? items.length,
-      totalBytes: json['total_bytes'] as int? ?? items.fold(0, (acc, f) => acc + f.sizeBytes),
+      totalBytes:
+          json['total_bytes'] as int? ??
+          items.fold(0, (acc, f) => acc + f.sizeBytes),
     );
   }
 
@@ -77,13 +79,15 @@ class TransferManifest {
       final size = await file.length();
       final name = file.path.split(RegExp(r'[\\/]')).last;
       totalBytes += size;
-      items.add(ManifestItem(
-        fileId: const Uuid().v4(),
-        name: name,
-        relativePath: null,
-        sizeBytes: size,
-        localPath: file.path,
-      ));
+      items.add(
+        ManifestItem(
+          fileId: const Uuid().v4(),
+          name: name,
+          relativePath: null,
+          sizeBytes: size,
+          localPath: file.path,
+        ),
+      );
     }
 
     return TransferManifest(
@@ -103,23 +107,30 @@ class TransferManifest {
     final rootPath = directory.path.replaceAll(r'\', '/');
     final rootFolder = rootPath.split('/').last;
 
-    await for (final entity in directory.list(recursive: true, followLinks: false)) {
+    await for (final entity in directory.list(
+      recursive: true,
+      followLinks: false,
+    )) {
       if (entity is File) {
         final filePath = entity.path.replaceAll(r'\', '/');
         // Relative path inside the root folder
-        final subPath = filePath.substring(rootPath.length).replaceFirst(RegExp(r'^/'), '');
+        final subPath = filePath
+            .substring(rootPath.length)
+            .replaceFirst(RegExp(r'^/'), '');
         final relativePath = '$rootFolder/$subPath';
         final size = await entity.length();
         final name = entity.path.split(RegExp(r'[\\/]')).last;
 
         totalBytes += size;
-        items.add(ManifestItem(
-          fileId: const Uuid().v4(),
-          name: name,
-          relativePath: relativePath,
-          sizeBytes: size,
-          localPath: entity.path,
-        ));
+        items.add(
+          ManifestItem(
+            fileId: const Uuid().v4(),
+            name: name,
+            relativePath: relativePath,
+            sizeBytes: size,
+            localPath: entity.path,
+          ),
+        );
       }
     }
 
@@ -135,16 +146,35 @@ class TransferManifest {
 /// Validates and sanitizes received relative paths, preventing path traversal attacks.
 class PathSanitizer {
   static const _windowsReserved = {
-    'CON', 'PRN', 'AUX', 'NUL',
-    'COM1', 'COM2', 'COM3', 'COM4', 'COM5', 'COM6', 'COM7', 'COM8', 'COM9',
-    'LPT1', 'LPT2', 'LPT3', 'LPT4', 'LPT5', 'LPT6', 'LPT7', 'LPT8', 'LPT9'
+    'CON',
+    'PRN',
+    'AUX',
+    'NUL',
+    'COM1',
+    'COM2',
+    'COM3',
+    'COM4',
+    'COM5',
+    'COM6',
+    'COM7',
+    'COM8',
+    'COM9',
+    'LPT1',
+    'LPT2',
+    'LPT3',
+    'LPT4',
+    'LPT5',
+    'LPT6',
+    'LPT7',
+    'LPT8',
+    'LPT9',
   };
 
   /// Sanitizes a filename, removing illegal characters and reserved words.
   static String sanitizeFilename(String filename) {
     var sanitized = filename
         .replaceAll(RegExp(r'[\x00-\x1F\x7F]'), '') // remove control chars
-        .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_')    // replace forbidden chars
+        .replaceAll(RegExp(r'[<>:"/\\|?*]'), '_') // replace forbidden chars
         .trim();
 
     if (sanitized.isEmpty) {
@@ -171,7 +201,9 @@ class PathSanitizer {
     final sanitizedFileName = sanitizeFilename(filename);
 
     if (relativePath == null || relativePath.trim().isEmpty) {
-      return File('${destinationBaseDir.path}${Platform.pathSeparator}$sanitizedFileName');
+      return File(
+        '${destinationBaseDir.path}${Platform.pathSeparator}$sanitizedFileName',
+      );
     }
 
     // Normalize forward slashes and split path components
@@ -182,21 +214,27 @@ class PathSanitizer {
     for (final seg in segments) {
       final trimmed = seg.trim();
       // Guard against path traversal
-      if (trimmed.isEmpty || trimmed == '.' || trimmed == '..' || trimmed.contains(':')) {
+      if (trimmed.isEmpty ||
+          trimmed == '.' ||
+          trimmed == '..' ||
+          trimmed.contains(':')) {
         continue;
       }
       safeSegments.add(sanitizeFilename(trimmed));
     }
 
     if (safeSegments.isEmpty) {
-      return File('${destinationBaseDir.path}${Platform.pathSeparator}$sanitizedFileName');
+      return File(
+        '${destinationBaseDir.path}${Platform.pathSeparator}$sanitizedFileName',
+      );
     }
 
     // Replace final segment with sanitized filename
     safeSegments[safeSegments.length - 1] = sanitizedFileName;
 
     final subPath = safeSegments.join(Platform.pathSeparator);
-    final targetPath = '${destinationBaseDir.path}${Platform.pathSeparator}$subPath';
+    final targetPath =
+        '${destinationBaseDir.path}${Platform.pathSeparator}$subPath';
     return File(targetPath);
   }
 }

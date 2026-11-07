@@ -43,9 +43,7 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
         }
       } catch (_) {}
 
-      _controller.initialize(
-        approvalCallback: _handleIncomingApproval,
-      );
+      _controller.initialize(approvalCallback: _handleIncomingApproval);
     });
   }
 
@@ -97,8 +95,8 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
                   color: isSelected
                       ? NexoraColors.electricBlue
                       : (Theme.of(context).brightness == Brightness.dark
-                          ? Colors.grey.shade400
-                          : Colors.grey.shade700),
+                            ? Colors.grey.shade400
+                            : Colors.grey.shade700),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -106,18 +104,23 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
                     label,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: isSelected
+                          ? FontWeight.bold
+                          : FontWeight.w500,
                       color: isSelected
                           ? NexoraColors.electricBlue
                           : (Theme.of(context).brightness == Brightness.dark
-                              ? Colors.grey.shade300
-                              : Colors.grey.shade800),
+                                ? Colors.grey.shade300
+                                : Colors.grey.shade800),
                     ),
                   ),
                 ),
                 if (badgeCount > 0)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 7,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       color: NexoraColors.electricBlue,
                       borderRadius: BorderRadius.circular(10),
@@ -178,7 +181,9 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
           Container(
             width: 240,
             decoration: BoxDecoration(
-              color: isDark ? NexoraColors.darkSurface : NexoraColors.lightSurface,
+              color: isDark
+                  ? NexoraColors.darkSurface
+                  : NexoraColors.lightSurface,
               border: Border(
                 right: BorderSide(
                   color: isDark ? Colors.white12 : Colors.grey.shade300,
@@ -301,7 +306,11 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
                         const CircleAvatar(
                           radius: 14,
                           backgroundColor: NexoraColors.signalTeal,
-                          child: Icon(Icons.computer, size: 16, color: Colors.white),
+                          child: Icon(
+                            Icons.computer,
+                            size: 16,
+                            color: Colors.white,
+                          ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
@@ -310,12 +319,18 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
                             children: [
                               Text(
                                 localDevice.displayName,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                               Text(
                                 'Port ${_controller.tcpPort}',
-                                style: const TextStyle(color: NexoraColors.signalTeal, fontSize: 10),
+                                style: const TextStyle(
+                                  color: NexoraColors.signalTeal,
+                                  fontSize: 10,
+                                ),
                               ),
                             ],
                           ),
@@ -329,9 +344,7 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
           ),
 
           // Main View Pane
-          Expanded(
-            child: currentView,
-          ),
+          Expanded(child: currentView),
         ],
       ),
     );

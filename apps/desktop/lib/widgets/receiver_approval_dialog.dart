@@ -37,7 +37,11 @@ class ReceiverApprovalDialog extends StatelessWidget {
               color: NexoraColors.electricBlue.withValues(alpha: 0.15),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.downloading, color: NexoraColors.electricBlue, size: 24),
+            child: const Icon(
+              Icons.downloading,
+              color: NexoraColors.electricBlue,
+              size: 24,
+            ),
           ),
           const SizedBox(width: 12),
           const Expanded(
@@ -77,12 +81,19 @@ class ReceiverApprovalDialog extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.insert_drive_file, color: NexoraColors.electricBlue, size: 22),
+                      const Icon(
+                        Icons.insert_drive_file,
+                        color: NexoraColors.electricBlue,
+                        size: 22,
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
                           offer.fileName,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -112,7 +123,8 @@ class ReceiverApprovalDialog extends StatelessWidget {
                       ),
                     ],
                   ),
-                  if (offer.declaredSha256 != null && offer.totalFiles == 1) ...[
+                  if (offer.declaredSha256 != null &&
+                      offer.totalFiles == 1) ...[
                     const SizedBox(height: 8),
                     Text(
                       'SHA-256: ${offer.declaredSha256!.substring(0, 16)}...',
@@ -138,7 +150,9 @@ class ReceiverApprovalDialog extends StatelessWidget {
                             child: Row(
                               children: [
                                 Icon(
-                                  f.relativePath != null ? Icons.folder_open : Icons.insert_drive_file,
+                                  f.relativePath != null
+                                      ? Icons.folder_open
+                                      : Icons.insert_drive_file,
                                   size: 14,
                                   color: Colors.grey,
                                 ),
@@ -152,7 +166,10 @@ class ReceiverApprovalDialog extends StatelessWidget {
                                 ),
                                 Text(
                                   _formatBytes(f.sizeBytes),
-                                  style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
+                                  ),
                                 ),
                               ],
                             ),
@@ -167,7 +184,11 @@ class ReceiverApprovalDialog extends StatelessWidget {
             const SizedBox(height: 14),
             Row(
               children: [
-                const Icon(Icons.folder_open, size: 16, color: NexoraColors.signalTeal),
+                const Icon(
+                  Icons.folder_open,
+                  size: 16,
+                  color: NexoraColors.signalTeal,
+                ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
@@ -188,7 +209,9 @@ class ReceiverApprovalDialog extends StatelessWidget {
             foregroundColor: Colors.red.shade700,
             side: BorderSide(color: Colors.red.shade300),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
           onPressed: () => Navigator.of(context).pop(false),
           child: const Text('Decline'),
@@ -198,7 +221,9 @@ class ReceiverApprovalDialog extends StatelessWidget {
             backgroundColor: NexoraColors.electricBlue,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
           ),
           onPressed: () => Navigator.of(context).pop(true),
           child: const Text('Accept Transfer'),

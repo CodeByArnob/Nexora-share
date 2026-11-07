@@ -4,7 +4,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nexora_desktop/main.dart';
 
 void main() {
-  testWidgets('Desktop Shell renders sidebar navigation and NEXORA branding', (WidgetTester tester) async {
+  testWidgets('Desktop Shell renders sidebar navigation and NEXORA branding', (
+    WidgetTester tester,
+  ) async {
     tester.view.physicalSize = const Size(1280, 800);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -12,11 +14,7 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    await tester.pumpWidget(
-      const ProviderScope(
-        child: NexoraDesktopApp(),
-      ),
-    );
+    await tester.pumpWidget(const ProviderScope(child: NexoraDesktopApp()));
     await tester.pump(const Duration(milliseconds: 100));
 
     // Verify NEXORA branding in sidebar and top header

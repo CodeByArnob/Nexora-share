@@ -26,7 +26,7 @@ class DiscoveryService {
         InternetAddress.anyIPv4,
         discoveryPort,
         reuseAddress: true,
-        reusePort: false,
+        reusePort: !Platform.isWindows,
       );
       _socket?.broadcastEnabled = true;
 

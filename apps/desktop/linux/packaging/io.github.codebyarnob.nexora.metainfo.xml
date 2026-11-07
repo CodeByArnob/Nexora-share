@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.codebyarnob.nexora</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>Apache-2.0</project_license>
+  <name>NEXORA</name>
+  <summary>Private, fast, cross-platform peer-to-peer file sharing</summary>
+  <description>
+    <p>
+      NEXORA is a production-grade, private cross-platform peer-to-peer file sharing application
+      built with Flutter and Rust. It enables seamless high-speed transfers across Android, Windows,
+      and Linux over your local area network without requiring third-party cloud servers or internet access.
+    </p>
+    <p>Features include:</p>
+    <ul>
+      <li>Zero-configuration peer discovery via mDNS and UDP multicast.</li>
+      <li>End-to-end authenticated pairing and explicit receiver transfer approvals.</li>
+      <li>Length-prefixed binary streaming with SHA-256 chunk validation.</li>
+      <li>Recursive folder transfer preserving directory hierarchy with path traversal defenses.</li>
+      <li>Resumable transfers and automatic exponential backoff retry.</li>
+    </ul>
+  </description>
+  <launchable type="desktop-id">io.github.codebyarnob.nexora.desktop</launchable>
+  <url type="homepage">https://github.com/CodeByArnob/Nexora-share</url>
+  <url type="bugtracker">https://github.com/CodeByArnob/Nexora-share/issues</url>
+  <developer_name>Arnob (CodeByArnob)</developer_name>
+  <provides>
+    <binary>nexora</binary>
+  </provides>
+  <releases>
+    <release version="1.0.0" date="2026-11-07">
+      <description>
+        <p>Initial production release of NEXORA supporting Android, Windows, and Linux.</p>
+      </description>
+    </release>
+  </releases>
+  <content_rating type="oars-1.1" />
+</component>

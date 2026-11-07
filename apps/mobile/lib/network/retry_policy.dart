@@ -105,7 +105,8 @@ class NexoraException implements Exception {
   NexoraException(this.code, this.message, [this.details]);
 
   @override
-  String toString() => '[${code.code}] $message (Guidance: ${code.recoveryGuidance})';
+  String toString() =>
+      '[${code.code}] $message (Guidance: ${code.recoveryGuidance})';
 }
 
 /// Standardized retry executor with exponential backoff and jitter.
@@ -137,7 +138,9 @@ class RetryPolicy {
         }
 
         // Add 10-20% jitter to prevent thundering herd
-        final jitterMs = random.nextInt((currentDelay.inMilliseconds * 0.2).toInt() + 1);
+        final jitterMs = random.nextInt(
+          (currentDelay.inMilliseconds * 0.2).toInt() + 1,
+        );
         final delayWithJitter = currentDelay + Duration(milliseconds: jitterMs);
 
         await Future.delayed(delayWithJitter);

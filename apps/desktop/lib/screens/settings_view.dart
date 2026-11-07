@@ -25,8 +25,17 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
     final device = ref.read(localDeviceProvider);
     _nameController = TextEditingController(text: device.displayName);
 
-    final userProfile = Platform.environment['USERPROFILE'];
-    _downloadDirectory = userProfile != null ? '$userProfile\\Downloads\\NEXORA' : 'Downloads\\NEXORA';
+    if (Platform.isWindows) {
+      final userProfile = Platform.environment['USERPROFILE'];
+      _downloadDirectory = userProfile != null
+          ? '$userProfile\\Downloads\\NEXORA'
+          : 'Downloads\\NEXORA';
+    } else {
+      final homeDir = Platform.environment['HOME'];
+      _downloadDirectory = homeDir != null
+          ? '$homeDir/Downloads/NEXORA'
+          : 'Downloads/NEXORA';
+    }
   }
 
   @override
@@ -64,24 +73,45 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
       testUdp.close();
 
       setState(() {
-        _firewallStatus = 'SUCCESS: Network socket binding verified. Local interface allows UDP & TCP socket operations.';
+        _firewallStatus =
+            'SUCCESS: Network socket binding verified. Local interface allows UDP & TCP socket operations.';
         _isTestingFirewall = false;
       });
     } catch (e) {
       setState(() {
-        _firewallStatus = 'NOTICE: Socket check reported: $e. You may need to add Windows Defender Firewall rules.';
+        _firewallStatus =
+            'NOTICE: Socket check reported: $e. You may need to adjust your system firewall rules.';
         _isTestingFirewall = false;
       });
     }
   }
 
   void _copyFirewallCommands() {
-    const cmd = 'netsh advfirewall firewall add rule name="NEXORA File Sharing" dir=in action=allow protocol=TCP localport=48842\n'
-        'netsh advfirewall firewall add rule name="NEXORA Discovery" dir=in action=allow protocol=UDP localport=48843';
-    Clipboard.setData(const ClipboardData(text: cmd));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('PowerShell firewall rules copied to clipboard.')),
-    );
+    if (Platform.isLinux) {
+      const cmd =
+          '# UFW (Ubuntu/Debian):\n'
+          'sudo ufw allow 48842/tcp comment "NEXORA File Sharing"\n'
+          'sudo ufw allow 48843/udp comment "NEXORA Discovery"\n\n'
+          '# Firewalld (Fedora/RHEL/openSUSE):\n'
+          'sudo firewall-cmd --add-port=48842/tcp --add-port=48843/udp --permanent\n'
+          'sudo firewall-cmd --reload';
+      Clipboard.setData(const ClipboardData(text: cmd));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Linux firewall commands copied to clipboard.'),
+        ),
+      );
+    } else {
+      const cmd =
+          'netsh advfirewall firewall add rule name="NEXORA File Sharing" dir=in action=allow protocol=TCP localport=48842\n'
+          'netsh advfirewall firewall add rule name="NEXORA Discovery" dir=in action=allow protocol=UDP localport=48843';
+      Clipboard.setData(const ClipboardData(text: cmd));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('PowerShell firewall rules copied to clipboard.'),
+        ),
+      );
+    }
   }
 
   @override
@@ -111,14 +141,18 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                color:
+                    Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Device Identity', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const Text(
+                    'Device Identity',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
@@ -137,13 +171,21 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: NexoraColors.electricBlue,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 18,
+                          ),
                         ),
                         onPressed: () {
-                          final updated = localDevice.copyWith(displayName: _nameController.text.trim());
-                          ref.read(localDeviceProvider.notifier).state = updated;
+                          final updated = localDevice.copyWith(
+                            displayName: _nameController.text.trim(),
+                          );
+                          ref.read(localDeviceProvider.notifier).state =
+                              updated;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Device name updated.')),
+                            const SnackBar(
+                              content: Text('Device name updated.'),
+                            ),
                           );
                         },
                         child: const Text('Save Name'),
@@ -158,7 +200,11 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   const SizedBox(height: 4),
                   Text(
                     'Fingerprint: ${localDevice.fingerprint}',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12, fontFamily: 'monospace'),
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 12,
+                      fontFamily: 'monospace',
+                    ),
                   ),
                 ],
               ),
@@ -170,21 +216,28 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                color:
+                    Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Storage & Downloads', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const Text(
+                    'Storage & Downloads',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                   const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(
                         child: Text(
                           _downloadDirectory,
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
                         ),
                       ),
                       ElevatedButton.icon(
@@ -208,24 +261,41 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                color:
+                    Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Appearance', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const Text(
+                    'Appearance',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                   const SizedBox(height: 12),
                   SegmentedButton<ThemeMode>(
                     segments: const [
-                      ButtonSegment(value: ThemeMode.system, label: Text('System'), icon: Icon(Icons.brightness_auto)),
-                      ButtonSegment(value: ThemeMode.light, label: Text('Light'), icon: Icon(Icons.light_mode)),
-                      ButtonSegment(value: ThemeMode.dark, label: Text('Dark'), icon: Icon(Icons.dark_mode)),
+                      ButtonSegment(
+                        value: ThemeMode.system,
+                        label: Text('System'),
+                        icon: Icon(Icons.brightness_auto),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.light,
+                        label: Text('Light'),
+                        icon: Icon(Icons.light_mode),
+                      ),
+                      ButtonSegment(
+                        value: ThemeMode.dark,
+                        label: Text('Dark'),
+                        icon: Icon(Icons.dark_mode),
+                      ),
                     ],
                     selected: {themeMode},
                     onSelectionChanged: (selected) {
-                      ref.read(themeModeProvider.notifier).state = selected.first;
+                      ref.read(themeModeProvider.notifier).state =
+                          selected.first;
                     },
                   ),
                 ],
@@ -234,27 +304,42 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
 
             const SizedBox(height: 24),
 
-            // Windows Firewall Troubleshooter
+            // Network Diagnostics & Firewall Troubleshooter
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                color:
+                    Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Row(
+                  Row(
                     children: [
-                      Icon(Icons.security, color: NexoraColors.electricBlue, size: 22),
-                      SizedBox(width: 10),
-                      Text('Windows Firewall Troubleshooter', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const Icon(
+                        Icons.security,
+                        color: NexoraColors.electricBlue,
+                        size: 22,
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        Platform.isLinux
+                            ? 'Linux Network & Firewall Diagnostics'
+                            : 'Windows Firewall Troubleshooter',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Windows Defender Firewall can sometimes block peer discovery (UDP 48843) or incoming streaming connections (TCP 48842).',
+                    Platform.isLinux
+                        ? 'Local Linux firewalls (UFW, firewalld, iptables) can block peer discovery (UDP 48843) or incoming streaming connections (TCP 48842).'
+                        : 'Windows Defender Firewall can sometimes block peer discovery (UDP 48843) or incoming streaming connections (TCP 48842).',
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
                   ),
                   const SizedBox(height: 14),
@@ -267,9 +352,18 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                           backgroundColor: NexoraColors.electricBlue,
                           foregroundColor: Colors.white,
                         ),
-                        onPressed: _isTestingFirewall ? null : _runFirewallDiagnostics,
+                        onPressed: _isTestingFirewall
+                            ? null
+                            : _runFirewallDiagnostics,
                         icon: _isTestingFirewall
-                            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                            ? const SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
                             : const Icon(Icons.check_circle_outline, size: 18),
                         label: const Text('Run Port Check'),
                       ),
@@ -277,7 +371,11 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                       OutlinedButton.icon(
                         onPressed: _copyFirewallCommands,
                         icon: const Icon(Icons.copy, size: 18),
-                        label: const Text('Copy Inbound Firewall Rules (PowerShell)'),
+                        label: Text(
+                          Platform.isLinux
+                              ? 'Copy Linux Firewall Rules (UFW / firewalld)'
+                              : 'Copy Inbound Firewall Rules (PowerShell)',
+                        ),
                       ),
                     ],
                   ),
@@ -314,21 +412,45 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                color:
+                    Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('About NEXORA', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  const Text(
+                    'About NEXORA',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
                   const SizedBox(height: 6),
-                  const Text('CONNECT. SHARE. ANYWHERE.', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: NexoraColors.electricBlue)),
+                  const Text(
+                    'CONNECT. SHARE. ANYWHERE.',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                      color: NexoraColors.electricBlue,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  const Text('PRIVATE BY DESIGN. OPEN BY NATURE.', style: TextStyle(fontStyle: FontStyle.italic, fontSize: 12, color: Colors.grey)),
+                  const Text(
+                    'PRIVATE BY DESIGN. OPEN BY NATURE.',
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ),
                   const SizedBox(height: 12),
-                  Text('Version 1.0.0 • Apache License 2.0', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-                  Text('Repository: https://github.com/CodeByArnob/Nexora-share', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                  Text(
+                    'Version 1.0.0 • Apache License 2.0',
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                  ),
+                  Text(
+                    'Repository: https://github.com/CodeByArnob/Nexora-share',
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                  ),
                 ],
               ),
             ),

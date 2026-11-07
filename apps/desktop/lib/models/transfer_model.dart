@@ -2,14 +2,7 @@ import 'device_model.dart';
 
 enum TransferDirection { send, receive }
 
-enum TransferState {
-  pending,
-  inProgress,
-  paused,
-  completed,
-  failed,
-  cancelled,
-}
+enum TransferState { pending, inProgress, paused, completed, failed, cancelled }
 
 class NexoraTransfer {
   final String transferId;
@@ -53,12 +46,12 @@ class NexoraTransfer {
   Duration? get estimatedTimeRemaining => Duration(seconds: etaSeconds);
   DateTime get startTime => createdAt;
   NexoraDevice get remoteDevice => NexoraDevice(
-        deviceId: remoteDeviceId,
-        displayName: remoteDeviceName,
-        platform: 'Peer',
-        fingerprint: 'unknown',
-        lastSeen: createdAt,
-      );
+    deviceId: remoteDeviceId,
+    displayName: remoteDeviceName,
+    platform: 'Peer',
+    fingerprint: 'unknown',
+    lastSeen: createdAt,
+  );
 
   String get formattedSpeed {
     if (speedBytesPerSec >= 1024 * 1024) {

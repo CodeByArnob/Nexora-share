@@ -45,7 +45,10 @@ class TransfersView extends ConsumerWidget {
                     children: [
                       Text(
                         'Active Transfers',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       SizedBox(height: 6),
                       Text(
@@ -57,11 +60,16 @@ class TransfersView extends ConsumerWidget {
                 ),
                 const SizedBox(width: 16),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: NexoraColors.electricBlue.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: NexoraColors.electricBlue.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: NexoraColors.electricBlue.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Text(
                     '${activeTransfers.length} Active',
@@ -81,23 +89,35 @@ class TransfersView extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 60),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                  color:
+                      Theme.of(context).cardTheme.color ??
+                      NexoraColors.lightCard,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.swap_vert_circle_outlined, size: 56, color: Colors.grey.shade400),
+                    Icon(
+                      Icons.swap_vert_circle_outlined,
+                      size: 56,
+                      color: Colors.grey.shade400,
+                    ),
                     const SizedBox(height: 16),
                     const Text(
                       'No Transfers in Progress',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       'Transfers you send or receive will appear here in real time with progress and speed.',
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -109,18 +129,26 @@ class TransfersView extends ConsumerWidget {
                 itemCount: activeTransfers.length,
                 itemBuilder: (context, index) {
                   final transfer = activeTransfers[index];
-                  final isIncoming = transfer.direction == TransferDirection.receive;
+                  final isIncoming =
+                      transfer.direction == TransferDirection.receive;
                   final progressPct = transfer.totalBytes > 0
-                      ? (transfer.transferredBytes / transfer.totalBytes).clamp(0.0, 1.0)
+                      ? (transfer.transferredBytes / transfer.totalBytes).clamp(
+                          0.0,
+                          1.0,
+                        )
                       : 0.0;
 
                   return Container(
                     margin: const EdgeInsets.only(bottom: 16),
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                      color:
+                          Theme.of(context).cardTheme.color ??
+                          NexoraColors.lightCard,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: NexoraColors.electricBlue.withValues(alpha: 0.3)),
+                      border: Border.all(
+                        color: NexoraColors.electricBlue.withValues(alpha: 0.3),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,12 +157,18 @@ class TransfersView extends ConsumerWidget {
                           children: [
                             CircleAvatar(
                               backgroundColor: isIncoming
-                                  ? NexoraColors.signalTeal.withValues(alpha: 0.15)
-                                  : NexoraColors.electricBlue.withValues(alpha: 0.15),
+                                  ? NexoraColors.signalTeal.withValues(
+                                      alpha: 0.15,
+                                    )
+                                  : NexoraColors.electricBlue.withValues(
+                                      alpha: 0.15,
+                                    ),
                               radius: 22,
                               child: Icon(
                                 isIncoming ? Icons.download : Icons.upload,
-                                color: isIncoming ? NexoraColors.signalTeal : NexoraColors.electricBlue,
+                                color: isIncoming
+                                    ? NexoraColors.signalTeal
+                                    : NexoraColors.electricBlue,
                               ),
                             ),
                             const SizedBox(width: 16),
@@ -144,13 +178,19 @@ class TransfersView extends ConsumerWidget {
                                 children: [
                                   Text(
                                     transfer.fileName,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
                                     '${isIncoming ? "Receiving from" : "Sending to"} ${transfer.remoteDevice.displayName} (${transfer.remoteDevice.platform})',
-                                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 13,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -160,7 +200,10 @@ class TransfersView extends ConsumerWidget {
                               children: [
                                 Text(
                                   '${(progressPct * 100).toStringAsFixed(1)}%',
-                                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16),
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 16,
+                                  ),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
@@ -183,7 +226,9 @@ class TransfersView extends ConsumerWidget {
                             minHeight: 8,
                             backgroundColor: Colors.grey.withValues(alpha: 0.2),
                             valueColor: AlwaysStoppedAnimation(
-                              isIncoming ? NexoraColors.signalTeal : NexoraColors.electricBlue,
+                              isIncoming
+                                  ? NexoraColors.signalTeal
+                                  : NexoraColors.electricBlue,
                             ),
                           ),
                         ),
@@ -193,11 +238,17 @@ class TransfersView extends ConsumerWidget {
                           children: [
                             Text(
                               '${_formatBytes(transfer.transferredBytes)} of ${_formatBytes(transfer.totalBytes)}',
-                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
                             ),
                             Text(
                               'ETA: ${_formatEta(transfer.estimatedTimeRemaining)}',
-                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                              ),
                             ),
                           ],
                         ),

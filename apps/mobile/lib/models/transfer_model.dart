@@ -1,13 +1,6 @@
 enum TransferDirection { send, receive }
 
-enum TransferState {
-  pending,
-  inProgress,
-  paused,
-  completed,
-  failed,
-  cancelled,
-}
+enum TransferState { pending, inProgress, paused, completed, failed, cancelled }
 
 class NexoraTransfer {
   final String transferId;

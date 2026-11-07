@@ -13,7 +13,10 @@ class HistoryScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Transfer History', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Transfer History',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           if (history.isNotEmpty)
             IconButton(
@@ -30,7 +33,11 @@ class HistoryScreen extends ConsumerWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.history_rounded, size: 64, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.history_rounded,
+                    size: 64,
+                    color: Colors.grey.shade400,
+                  ),
                   const SizedBox(height: 16),
                   const Text(
                     'No transfer history',
@@ -57,23 +64,37 @@ class HistoryScreen extends ConsumerWidget {
                           ? NexoraColors.electricBlue.withValues(alpha: 0.1)
                           : NexoraColors.signalTeal.withValues(alpha: 0.1),
                       child: Icon(
-                        item.direction == TransferDirection.send ? Icons.upload : Icons.download,
+                        item.direction == TransferDirection.send
+                            ? Icons.upload
+                            : Icons.download,
                         color: item.direction == TransferDirection.send
                             ? NexoraColors.electricBlue
                             : NexoraColors.signalTeal,
                       ),
                     ),
-                    title: Text(item.remoteDeviceName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('${item.totalFiles} files • ${item.createdAt.toLocal().toString().split('.')[0]}'),
+                    title: Text(
+                      item.remoteDeviceName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      '${item.totalFiles} files • ${item.createdAt.toLocal().toString().split('.')[0]}',
+                    ),
                     trailing: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: NexoraColors.signalTeal.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Text(
                         'Verified',
-                        style: TextStyle(color: NexoraColors.signalTeal, fontWeight: FontWeight.bold, fontSize: 12),
+                        style: TextStyle(
+                          color: NexoraColors.signalTeal,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
                   ),

@@ -75,6 +75,7 @@ class TransferServer {
     DateTime startTime = DateTime.now();
     DateTime lastProgressUpdate = DateTime.now();
     String remoteDeviceName = 'Remote Peer';
+    String remoteDevicePlatform = 'Remote';
 
     Future<void> safeCloseFile() async {
       final f = destinationFile;
@@ -111,7 +112,10 @@ class TransferServer {
           }
 
           final allBytes = buffer.takeBytes();
-          final payloadBytes = allBytes.sublist(lengthPrefixSize, totalFrameRequired);
+          final payloadBytes = allBytes.sublist(
+            lengthPrefixSize,
+            totalFrameRequired,
+          );
 
           if (allBytes.length > totalFrameRequired) {
             buffer.add(allBytes.sublist(totalFrameRequired));
@@ -125,13 +129,25 @@ class TransferServer {
 
             if (type == 'Hello') {
               final device = payload['device'] as Map<String, dynamic>;
-              remoteDeviceName = device['display_name'] as String? ?? 'Remote Device';
+              remoteDeviceName =
+                  device['display_name'] as String? ?? 'Remote Device';
+              remoteDevicePlatform = device['platform'] as String? ?? 'Remote';
+              final currentPlatform = Platform.isLinux
+                  ? 'Linux'
+                  : Platform.isWindows
+                  ? 'Windows'
+                  : Platform.isMacOS
+                  ? 'macOS'
+                  : 'Desktop';
               final reply = encodeFrame({
                 'type': 'Hello',
                 'payload': {
                   'protocol_version': currentProtocolVersion,
-                  'device': {'display_name': 'NEXORA Windows', 'platform': 'Windows'}
-                }
+                  'device': {
+                    'display_name': 'NEXORA $currentPlatform',
+                    'platform': currentPlatform,
+                  },
+                },
               });
               socket.add(reply);
             } else if (type == 'TransferOffer') {
@@ -147,15 +163,19 @@ class TransferServer {
                 manifestFiles[f.fileId] = f;
               }
 
-              final firstFile = manifest.files.isNotEmpty ? manifest.files.first : null;
+              final firstFile = manifest.files.isNotEmpty
+                  ? manifest.files.first
+                  : null;
               currentFileName = firstFile != null
-                  ? (manifest.totalFiles > 1 ? '${firstFile.name} (+${manifest.totalFiles - 1} more)' : firstFile.name)
+                  ? (manifest.totalFiles > 1
+                        ? '${firstFile.name} (+${manifest.totalFiles - 1} more)'
+                        : firstFile.name)
                   : 'received_files';
 
               final offer = IncomingTransferOffer(
                 transferId: activeTransferId!,
                 senderName: remoteDeviceName,
-                senderPlatform: 'Remote',
+                senderPlatform: remoteDevicePlatform,
                 fileName: currentFileName!,
                 totalBytes: totalBytes,
                 totalFiles: totalFiles,
@@ -170,11 +190,17 @@ class TransferServer {
                   activeDownloadDir = customDestinationDirectory!;
                 } else {
                   final userProfile = Platform.environment['USERPROFILE'];
-                  if (userProfile != null) {
-                    activeDownloadDir = Directory('$userProfile\\Downloads\\NEXORA');
+                  final homeDir = Platform.environment['HOME'];
+                  if (Platform.isWindows && userProfile != null) {
+                    activeDownloadDir = Directory(
+                      '$userProfile\\Downloads\\NEXORA',
+                    );
+                  } else if (homeDir != null) {
+                    activeDownloadDir = Directory('$homeDir/Downloads/NEXORA');
                   } else {
                     try {
-                      activeDownloadDir = await getApplicationDocumentsDirectory();
+                      activeDownloadDir =
+                          await getApplicationDocumentsDirectory();
                     } catch (_) {
                       activeDownloadDir = Directory.systemTemp;
                     }
@@ -195,34 +221,42 @@ class TransferServer {
 
                 // Log in SQLite database
                 try {
-                  await DatabaseService.instance.logTransfer(NexoraTransfer(
-                    transferId: activeTransferId!,
-                    direction: TransferDirection.receive,
-                    remoteDeviceId: 'peer',
-                    remoteDeviceName: remoteDeviceName,
-                    totalFiles: totalFiles,
-                    totalBytes: totalBytes,
-                    currentFile: currentFileName!,
-                    state: TransferState.inProgress,
-                    createdAt: startTime,
-                  ));
+                  await DatabaseService.instance.logTransfer(
+                    NexoraTransfer(
+                      transferId: activeTransferId!,
+                      direction: TransferDirection.receive,
+                      remoteDeviceId: 'peer',
+                      remoteDeviceName: remoteDeviceName,
+                      totalFiles: totalFiles,
+                      totalBytes: totalBytes,
+                      currentFile: currentFileName!,
+                      state: TransferState.inProgress,
+                      createdAt: startTime,
+                    ),
+                  );
                 } catch (_) {}
 
-                socket.add(encodeFrame({
-                  'type': 'TransferAccept',
-                  'payload': {
-                    'transfer_id': activeTransferId,
-                    'accepted_file_ids': manifest.files.map((f) => f.fileId).toList(),
-                  }
-                }));
+                socket.add(
+                  encodeFrame({
+                    'type': 'TransferAccept',
+                    'payload': {
+                      'transfer_id': activeTransferId,
+                      'accepted_file_ids': manifest.files
+                          .map((f) => f.fileId)
+                          .toList(),
+                    },
+                  }),
+                );
               } else {
-                socket.add(encodeFrame({
-                  'type': 'TransferReject',
-                  'payload': {
-                    'transfer_id': activeTransferId,
-                    'reason': 'Transfer declined by receiver',
-                  }
-                }));
+                socket.add(
+                  encodeFrame({
+                    'type': 'TransferReject',
+                    'payload': {
+                      'transfer_id': activeTransferId,
+                      'reason': 'Transfer declined by receiver',
+                    },
+                  }),
+                );
                 socket.destroy();
                 return;
               }
@@ -231,17 +265,20 @@ class TransferServer {
               final reqFileId = payload['file_id'] as String;
               int verifiedOffset = 0;
               try {
-                verifiedOffset = await DatabaseService.instance.getHighestVerifiedOffset(activeTransferId!, reqFileId);
+                verifiedOffset = await DatabaseService.instance
+                    .getHighestVerifiedOffset(activeTransferId!, reqFileId);
               } catch (_) {}
 
-              socket.add(encodeFrame({
-                'type': 'TransferResumeAck',
-                'payload': {
-                  'transfer_id': activeTransferId,
-                  'file_id': reqFileId,
-                  'verified_offset': verifiedOffset,
-                }
-              }));
+              socket.add(
+                encodeFrame({
+                  'type': 'TransferResumeAck',
+                  'payload': {
+                    'transfer_id': activeTransferId,
+                    'file_id': reqFileId,
+                    'verified_offset': verifiedOffset,
+                  },
+                }),
+              );
             } else if (type == 'ChunkData') {
               final fileId = payload['file_id'] as String? ?? 'f-0';
               final chunkDataList = (payload['data'] as List).cast<int>();
@@ -278,7 +315,9 @@ class TransferServer {
                   await targetFile.parent.create(recursive: true);
                 }
 
-                destinationFile = await targetFile.open(mode: offset > 0 ? FileMode.append : FileMode.write);
+                destinationFile = await targetFile.open(
+                  mode: offset > 0 ? FileMode.append : FileMode.write,
+                );
               }
 
               if (destinationFile != null) {
@@ -302,24 +341,35 @@ class TransferServer {
                 }
               } catch (_) {}
 
-              socket.add(encodeFrame({
-                'type': 'ChunkAck',
-                'payload': {
-                  'transfer_id': activeTransferId,
-                  'file_id': fileId,
-                  'chunk_index': chunkIndex,
-                  'received_bytes': chunkBytes.length,
-                  'verified': true,
-                }
-              }));
+              socket.add(
+                encodeFrame({
+                  'type': 'ChunkAck',
+                  'payload': {
+                    'transfer_id': activeTransferId,
+                    'file_id': fileId,
+                    'chunk_index': chunkIndex,
+                    'received_bytes': chunkBytes.length,
+                    'verified': true,
+                  },
+                }),
+              );
 
               final now = DateTime.now();
-              if (now.difference(lastProgressUpdate).inMilliseconds >= 250 || receivedBytes >= totalBytes) {
+              if (now.difference(lastProgressUpdate).inMilliseconds >= 250 ||
+                  receivedBytes >= totalBytes) {
                 lastProgressUpdate = now;
-                final elapsedSeconds = now.difference(startTime).inMilliseconds / 1000.0;
-                final speedBps = elapsedSeconds > 0 ? (receivedBytes / elapsedSeconds) : 0.0;
-                final remainingBytes = (totalBytes - receivedBytes).clamp(0, totalBytes);
-                final eta = speedBps > 0 ? (remainingBytes / speedBps).round() : 0;
+                final elapsedSeconds =
+                    now.difference(startTime).inMilliseconds / 1000.0;
+                final speedBps = elapsedSeconds > 0
+                    ? (receivedBytes / elapsedSeconds)
+                    : 0.0;
+                final remainingBytes = (totalBytes - receivedBytes).clamp(
+                  0,
+                  totalBytes,
+                );
+                final eta = speedBps > 0
+                    ? (remainingBytes / speedBps).round()
+                    : 0;
 
                 final currentTransfer = NexoraTransfer(
                   transferId: activeTransferId ?? 'incoming',
@@ -331,7 +381,8 @@ class TransferServer {
                   bytesTransferred: receivedBytes,
                   speedBytesPerSec: speedBps,
                   etaSeconds: eta,
-                  currentFile: manifestFiles[fileId]?.name ?? currentFileName ?? 'File',
+                  currentFile:
+                      manifestFiles[fileId]?.name ?? currentFileName ?? 'File',
                   state: TransferState.inProgress,
                   createdAt: startTime,
                 );
@@ -349,7 +400,9 @@ class TransferServer {
                     totalBytes,
                     TransferState.completed,
                   );
-                  await DatabaseService.instance.clearResumeCheckpoints(activeTransferId!);
+                  await DatabaseService.instance.clearResumeCheckpoints(
+                    activeTransferId!,
+                  );
                 }
               } catch (_) {}
 

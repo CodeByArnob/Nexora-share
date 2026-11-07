@@ -9,7 +9,8 @@ final localDeviceProvider = StateProvider<NexoraDevice>((ref) {
     deviceId: 'nexora-android-local',
     displayName: 'Pixel 9 Pro (NEXORA)',
     platform: 'Android',
-    fingerprint: '3978f639c6b014243b0d142017243af5f7fb00112233445566778899aabbccdd',
+    fingerprint:
+        '3978f639c6b014243b0d142017243af5f7fb00112233445566778899aabbccdd',
     lastSeen: DateTime.now(),
   );
 });

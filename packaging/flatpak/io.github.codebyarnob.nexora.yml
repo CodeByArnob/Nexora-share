@@ -1,0 +1,41 @@
+app-id: io.github.codebyarnob.nexora
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: nexora
+
+finish-args:
+  # Local Network Access for mDNS discovery and TCP file streaming
+  - --share=network
+  - --share=ipc
+  # Display servers (X11 & Wayland)
+  - --socket=fallback-x11
+  - --socket=wayland
+  # Hardware Acceleration
+  - --device=dri
+  # File System Permissions
+  - --filesystem=xdg-download:create
+  # System Notifications
+  - --talk-name=org.freedesktop.Notifications
+
+modules:
+  - name: nexora
+    buildsystem: simple
+    build-commands:
+      # Install executable binary and bundled Flutter libraries
+      - install -D -m 0755 nexora /app/bin/nexora
+      - cp -r lib/ /app/bin/
+      - cp -r data/ /app/bin/
+      # Install desktop integration files
+      - install -D -m 0644 io.github.codebyarnob.nexora.desktop /app/share/applications/io.github.codebyarnob.nexora.desktop
+      - install -D -m 0644 io.github.codebyarnob.nexora.metainfo.xml /app/share/metainfo/io.github.codebyarnob.nexora.metainfo.xml
+      - install -D -m 0644 io.github.codebyarnob.nexora.svg /app/share/icons/hicolor/scalable/apps/io.github.codebyarnob.nexora.svg
+    sources:
+      - type: dir
+        path: ../../apps/desktop/build/linux/x64/release/bundle
+      - type: file
+        path: ../../apps/desktop/linux/packaging/io.github.codebyarnob.nexora.desktop
+      - type: file
+        path: ../../apps/desktop/linux/packaging/io.github.codebyarnob.nexora.metainfo.xml
+      - type: file
+        path: ../../apps/desktop/linux/packaging/icons/io.github.codebyarnob.nexora.svg

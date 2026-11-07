@@ -61,9 +61,16 @@ class HomeView extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: NexoraColors.electricBlue.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: NexoraColors.electricBlue, width: 2),
+                      border: Border.all(
+                        color: NexoraColors.electricBlue,
+                        width: 2,
+                      ),
                     ),
-                    child: const Icon(Icons.share_outlined, color: NexoraColors.signalTeal, size: 34),
+                    child: const Icon(
+                      Icons.share_outlined,
+                      color: NexoraColors.signalTeal,
+                      size: 34,
+                    ),
                   ),
                   const SizedBox(width: 20),
                   Expanded(
@@ -83,16 +90,28 @@ class HomeView extends ConsumerWidget {
                             ),
                             const SizedBox(width: 12),
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
                               decoration: BoxDecoration(
-                                color: NexoraColors.signalTeal.withValues(alpha: 0.2),
+                                color: NexoraColors.signalTeal.withValues(
+                                  alpha: 0.2,
+                                ),
                                 borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: NexoraColors.signalTeal, width: 1),
+                                border: Border.all(
+                                  color: NexoraColors.signalTeal,
+                                  width: 1,
+                                ),
                               ),
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(Icons.wifi, size: 14, color: NexoraColors.signalTeal),
+                                  Icon(
+                                    Icons.wifi,
+                                    size: 14,
+                                    color: NexoraColors.signalTeal,
+                                  ),
                                   SizedBox(width: 6),
                                   Text(
                                     'Online & Discoverable',
@@ -110,7 +129,10 @@ class HomeView extends ConsumerWidget {
                         const SizedBox(height: 6),
                         Text(
                           '${localDevice.displayName} • TCP Port ${networkController.tcpPort}',
-                          style: TextStyle(color: Colors.grey.shade400, fontSize: 13),
+                          style: TextStyle(
+                            color: Colors.grey.shade400,
+                            fontSize: 13,
+                          ),
                         ),
                         const SizedBox(height: 2),
                         Text(
@@ -128,8 +150,13 @@ class HomeView extends ConsumerWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: NexoraColors.electricBlue,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     onPressed: () {
                       showDialog(
@@ -137,7 +164,8 @@ class HomeView extends ConsumerWidget {
                         builder: (_) => PairingDialog(
                           localDevice: localDevice,
                           sasCode: '749-183',
-                          qrData: 'nexora://${localDevice.deviceId}?fp=${localDevice.fingerprint}&p=${networkController.tcpPort}',
+                          qrData:
+                              'nexora://${localDevice.deviceId}?fp=${localDevice.fingerprint}&p=${networkController.tcpPort}',
                         ),
                       );
                     },
@@ -156,25 +184,36 @@ class HomeView extends ConsumerWidget {
                 Expanded(
                   child: InkWell(
                     onTap: () {
-                      ref.read(activeNavSectionProvider.notifier).state = DesktopNavSection.send;
+                      ref.read(activeNavSectionProvider.notifier).state =
+                          DesktopNavSection.send;
                     },
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                        color:
+                            Theme.of(context).cardTheme.color ??
+                            NexoraColors.lightCard,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                        border: Border.all(
+                          color: Colors.grey.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: NexoraColors.electricBlue.withValues(alpha: 0.15),
+                              color: NexoraColors.electricBlue.withValues(
+                                alpha: 0.15,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.upload_file, color: NexoraColors.electricBlue, size: 28),
+                            child: const Icon(
+                              Icons.upload_file,
+                              color: NexoraColors.electricBlue,
+                              size: 28,
+                            ),
                           ),
                           const SizedBox(width: 16),
                           const Expanded(
@@ -183,12 +222,18 @@ class HomeView extends ConsumerWidget {
                               children: [
                                 Text(
                                   'Send Files',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
                                 ),
                                 SizedBox(height: 4),
                                 Text(
                                   'Pick files or drop to transfer',
-                                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey,
+                                  ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ],
@@ -203,25 +248,36 @@ class HomeView extends ConsumerWidget {
                 Expanded(
                   child: InkWell(
                     onTap: () {
-                      ref.read(activeNavSectionProvider.notifier).state = DesktopNavSection.receive;
+                      ref.read(activeNavSectionProvider.notifier).state =
+                          DesktopNavSection.receive;
                     },
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                        color:
+                            Theme.of(context).cardTheme.color ??
+                            NexoraColors.lightCard,
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                        border: Border.all(
+                          color: Colors.grey.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: Row(
                         children: [
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: NexoraColors.signalTeal.withValues(alpha: 0.15),
+                              color: NexoraColors.signalTeal.withValues(
+                                alpha: 0.15,
+                              ),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.download, color: NexoraColors.signalTeal, size: 28),
+                            child: const Icon(
+                              Icons.download,
+                              color: NexoraColors.signalTeal,
+                              size: 28,
+                            ),
                           ),
                           const SizedBox(width: 16),
                           const Expanded(
@@ -230,12 +286,18 @@ class HomeView extends ConsumerWidget {
                               children: [
                                 Text(
                                   'Receive Files',
-                                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
                                 ),
                                 SizedBox(height: 4),
                                 Text(
                                   'Ready for incoming streams',
-                                  style: TextStyle(fontSize: 13, color: Colors.grey),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey,
+                                  ),
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ],
@@ -271,7 +333,9 @@ class HomeView extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 36),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                  color:
+                      Theme.of(context).cardTheme.color ??
+                      NexoraColors.lightCard,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
                 ),
@@ -281,12 +345,18 @@ class HomeView extends ConsumerWidget {
                     const SizedBox(height: 12),
                     const Text(
                       'Searching for nearby NEXORA devices...',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Ensure other devices have NEXORA open on the same local Wi-Fi or subnet.',
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -304,25 +374,34 @@ class HomeView extends ConsumerWidget {
                 itemCount: discoveredPeers.length,
                 itemBuilder: (context, index) {
                   final peer = discoveredPeers[index];
-                  final isAndroid = peer.platform.toLowerCase().contains('android');
+                  final pLower = peer.platform.toLowerCase();
+                  final isAndroid = pLower.contains('android');
+                  final isLinux = pLower.contains('linux');
+                  final iconData = isAndroid
+                      ? Icons.phone_android
+                      : (isLinux ? Icons.terminal : Icons.laptop_windows);
+                  final avatarColor = isAndroid
+                      ? NexoraColors.signalTeal
+                      : (isLinux
+                            ? Colors.purpleAccent
+                            : NexoraColors.electricBlue);
                   return Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                      color:
+                          Theme.of(context).cardTheme.color ??
+                          NexoraColors.lightCard,
                       borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: Colors.grey.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Row(
                       children: [
                         CircleAvatar(
                           radius: 24,
-                          backgroundColor: isAndroid
-                              ? NexoraColors.signalTeal.withValues(alpha: 0.15)
-                              : NexoraColors.electricBlue.withValues(alpha: 0.15),
-                          child: Icon(
-                            isAndroid ? Icons.phone_android : Icons.laptop_windows,
-                            color: isAndroid ? NexoraColors.signalTeal : NexoraColors.electricBlue,
-                          ),
+                          backgroundColor: avatarColor.withValues(alpha: 0.15),
+                          child: Icon(iconData, color: avatarColor),
                         ),
                         const SizedBox(width: 14),
                         Expanded(
@@ -332,13 +411,19 @@ class HomeView extends ConsumerWidget {
                             children: [
                               Text(
                                 peer.displayName,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 2),
                               Text(
                                 '${peer.platform} • ${peer.address ?? "local"}',
-                                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
@@ -370,15 +455,22 @@ class HomeView extends ConsumerWidget {
               const SizedBox(height: 12),
               ...activeTransfers.map((transfer) {
                 final progressPct = transfer.totalBytes > 0
-                    ? (transfer.transferredBytes / transfer.totalBytes).clamp(0.0, 1.0)
+                    ? (transfer.transferredBytes / transfer.totalBytes).clamp(
+                        0.0,
+                        1.0,
+                      )
                     : 0.0;
                 return Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                    color:
+                        Theme.of(context).cardTheme.color ??
+                        NexoraColors.lightCard,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: NexoraColors.electricBlue.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: NexoraColors.electricBlue.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Column(
                     children: [
@@ -394,7 +486,9 @@ class HomeView extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               transfer.fileName,
-                              style: const TextStyle(fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -408,7 +502,9 @@ class HomeView extends ConsumerWidget {
                       LinearProgressIndicator(
                         value: progressPct,
                         backgroundColor: Colors.grey.withValues(alpha: 0.2),
-                        valueColor: const AlwaysStoppedAnimation(NexoraColors.electricBlue),
+                        valueColor: const AlwaysStoppedAnimation(
+                          NexoraColors.electricBlue,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Row(
@@ -416,11 +512,17 @@ class HomeView extends ConsumerWidget {
                         children: [
                           Text(
                             '${_formatBytes(transfer.transferredBytes)} / ${_formatBytes(transfer.totalBytes)}',
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
                           ),
                           Text(
                             '${_formatBytes(transfer.bytesPerSecond.round())}/s',
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
                           ),
                         ],
                       ),
@@ -439,14 +541,21 @@ class HomeView extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                    color:
+                        Theme.of(context).cardTheme.color ??
+                        NexoraColors.lightCard,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                    border: Border.all(
+                      color: Colors.grey.withValues(alpha: 0.2),
+                    ),
                   ),
                   child: Center(
                     child: Text(
                       'No recent transfers yet. Transferred files will appear here with cryptographic integrity verification.',
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 13,
+                      ),
                     ),
                   ),
                 )
@@ -456,15 +565,27 @@ class HomeView extends ConsumerWidget {
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                      color:
+                          Theme.of(context).cardTheme.color ??
+                          NexoraColors.lightCard,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: Colors.grey.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: ListTile(
                       dense: true,
-                      leading: const Icon(Icons.check_circle, color: NexoraColors.signalTeal),
-                      title: Text(item.fileName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text('${_formatBytes(item.totalBytes)} • Verified SHA-256'),
+                      leading: const Icon(
+                        Icons.check_circle,
+                        color: NexoraColors.signalTeal,
+                      ),
+                      title: Text(
+                        item.fileName,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Text(
+                        '${_formatBytes(item.totalBytes)} • Verified SHA-256',
+                      ),
                     ),
                   );
                 }),

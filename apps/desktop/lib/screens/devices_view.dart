@@ -44,7 +44,9 @@ class _DevicesViewState extends ConsumerState<DevicesView> {
     );
 
     // Add to discovered peers
-    final currentPeers = List<NexoraDevice>.from(ref.read(discoveredPeersProvider));
+    final currentPeers = List<NexoraDevice>.from(
+      ref.read(discoveredPeersProvider),
+    );
     if (!currentPeers.any((p) => p.address == ip && p.port == port)) {
       currentPeers.add(manualDevice);
       ref.read(discoveredPeersProvider.notifier).state = currentPeers;
@@ -53,9 +55,9 @@ class _DevicesViewState extends ConsumerState<DevicesView> {
     _ipController.clear();
     Navigator.of(context).pop();
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Added manual peer: $ip:$port')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Added manual peer: $ip:$port')));
   }
 
   void _showAddManualDeviceDialog() {
@@ -63,7 +65,9 @@ class _DevicesViewState extends ConsumerState<DevicesView> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           title: const Text('Add Manual Peer'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -131,7 +135,10 @@ class _DevicesViewState extends ConsumerState<DevicesView> {
                     children: [
                       Text(
                         'Trusted Devices',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       SizedBox(height: 6),
                       Text(
@@ -146,7 +153,9 @@ class _DevicesViewState extends ConsumerState<DevicesView> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: NexoraColors.electricBlue,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                   onPressed: _showAddManualDeviceDialog,
                   icon: const Icon(Icons.add_link, size: 18),
@@ -161,23 +170,35 @@ class _DevicesViewState extends ConsumerState<DevicesView> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 60),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                  color:
+                      Theme.of(context).cardTheme.color ??
+                      NexoraColors.lightCard,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.verified_user_outlined, size: 56, color: Colors.grey.shade400),
+                    Icon(
+                      Icons.verified_user_outlined,
+                      size: 56,
+                      color: Colors.grey.shade400,
+                    ),
                     const SizedBox(height: 16),
                     const Text(
                       'No Trusted Devices Paired',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       'Pair with your Android phone or other PC via QR Code or SAS code to save permanent trust.',
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -193,15 +214,23 @@ class _DevicesViewState extends ConsumerState<DevicesView> {
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                      color:
+                          Theme.of(context).cardTheme.color ??
+                          NexoraColors.lightCard,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: Colors.grey.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Row(
                       children: [
                         const CircleAvatar(
                           backgroundColor: NexoraColors.signalTeal,
-                          child: Icon(Icons.shield, color: Colors.white, size: 20),
+                          child: Icon(
+                            Icons.shield,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
                         const SizedBox(width: 16),
                         Expanded(
@@ -210,7 +239,10 @@ class _DevicesViewState extends ConsumerState<DevicesView> {
                             children: [
                               Text(
                                 device.displayName,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
                               ),
                               const SizedBox(height: 2),
                               Text(
@@ -225,11 +257,16 @@ class _DevicesViewState extends ConsumerState<DevicesView> {
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete_outline, color: Colors.red),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                          ),
                           onPressed: () {
-                            final list = List<NexoraDevice>.from(ref.read(trustedDevicesProvider))
-                              ..removeAt(index);
-                            ref.read(trustedDevicesProvider.notifier).state = list;
+                            final list = List<NexoraDevice>.from(
+                              ref.read(trustedDevicesProvider),
+                            )..removeAt(index);
+                            ref.read(trustedDevicesProvider.notifier).state =
+                                list;
                           },
                           tooltip: 'Revoke Trust',
                         ),

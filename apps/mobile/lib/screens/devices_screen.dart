@@ -12,7 +12,10 @@ class DevicesScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Trusted Devices', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Trusted Devices',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       body: trustedDevices.isEmpty
           ? Center(
@@ -21,11 +24,18 @@ class DevicesScreen extends ConsumerWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.verified_user_outlined, size: 64, color: Colors.grey.shade400),
+                    Icon(
+                      Icons.verified_user_outlined,
+                      size: 64,
+                      color: Colors.grey.shade400,
+                    ),
                     const SizedBox(height: 16),
                     const Text(
                       'No trusted devices',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -49,10 +59,16 @@ class DevicesScreen extends ConsumerWidget {
                       backgroundColor: NexoraColors.midnightNavy,
                       child: Icon(Icons.shield, color: NexoraColors.signalTeal),
                     ),
-                    title: Text(device.displayName, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    title: Text(
+                      device.displayName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     subtitle: Text(
                       'Fingerprint: ${device.fingerprint.substring(0, 16)}...',
-                      style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 11,
+                      ),
                     ),
                     trailing: PopupMenuButton(
                       itemBuilder: (context) => [
@@ -62,13 +78,17 @@ class DevicesScreen extends ConsumerWidget {
                         ),
                         const PopupMenuItem(
                           value: 'revoke',
-                          child: Text('Revoke Trust', style: TextStyle(color: Colors.red)),
+                          child: Text(
+                            'Revoke Trust',
+                            style: TextStyle(color: Colors.red),
+                          ),
                         ),
                       ],
                       onSelected: (val) {
                         if (val == 'revoke') {
                           final updated = [...trustedDevices]..removeAt(index);
-                          ref.read(trustedDevicesProvider.notifier).state = updated;
+                          ref.read(trustedDevicesProvider.notifier).state =
+                              updated;
                         }
                       },
                     ),

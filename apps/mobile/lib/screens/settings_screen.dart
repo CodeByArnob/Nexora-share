@@ -12,7 +12,10 @@ class SettingsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Settings',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
       ),
       body: ListView(
         children: [
@@ -35,14 +38,18 @@ class SettingsScreen extends ConsumerWidget {
             subtitle: Text(localDevice.displayName),
             trailing: const Icon(Icons.chevron_right),
             onTap: () {
-              final controller = TextEditingController(text: localDevice.displayName);
+              final controller = TextEditingController(
+                text: localDevice.displayName,
+              );
               showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text('Edit Device Name'),
                   content: TextField(
                     controller: controller,
-                    decoration: const InputDecoration(labelText: 'Display Name'),
+                    decoration: const InputDecoration(
+                      labelText: 'Display Name',
+                    ),
                   ),
                   actions: [
                     TextButton(
@@ -53,8 +60,11 @@ class SettingsScreen extends ConsumerWidget {
                       child: const Text('Save'),
                       onPressed: () {
                         if (controller.text.trim().isNotEmpty) {
-                          ref.read(localDeviceProvider.notifier).state =
-                              localDevice.copyWith(displayName: controller.text.trim());
+                          ref
+                              .read(localDeviceProvider.notifier)
+                              .state = localDevice.copyWith(
+                            displayName: controller.text.trim(),
+                          );
                         }
                         Navigator.pop(context);
                       },
@@ -98,7 +108,9 @@ class SettingsScreen extends ConsumerWidget {
           SwitchListTile(
             secondary: const Icon(Icons.auto_awesome),
             title: const Text('Auto-accept from Trusted Devices'),
-            subtitle: const Text('Skip explicit confirmation for verified peers'),
+            subtitle: const Text(
+              'Skip explicit confirmation for verified peers',
+            ),
             value: false,
             onChanged: (val) {},
           ),
@@ -162,7 +174,9 @@ class SettingsScreen extends ConsumerWidget {
           const ListTile(
             leading: Icon(Icons.security),
             title: Text('Privacy-First Design'),
-            subtitle: Text('No account, no cloud, no tracking. Direct local peer-to-peer transfers.'),
+            subtitle: Text(
+              'No account, no cloud, no tracking. Direct local peer-to-peer transfers.',
+            ),
           ),
           const ListTile(
             leading: Icon(Icons.info_outline),

@@ -17,7 +17,9 @@ class DatabaseService {
 
   Database get db {
     if (_db == null) {
-      throw StateError('DatabaseService has not been initialized. Call initialize() first.');
+      throw StateError(
+        'DatabaseService has not been initialized. Call initialize() first.',
+      );
     }
     return _db!;
   }
@@ -43,7 +45,9 @@ class DatabaseService {
       } catch (_) {
         docDir = Directory.systemTemp;
       }
-      final nexoraDir = Directory('${docDir.path}${Platform.pathSeparator}NEXORA');
+      final nexoraDir = Directory(
+        '${docDir.path}${Platform.pathSeparator}NEXORA',
+      );
       if (!await nexoraDir.exists()) {
         await nexoraDir.create(recursive: true);
       }
@@ -62,7 +66,11 @@ class DatabaseService {
     );
   }
 
-  Future<void> _runMigrations(Database db, int oldVersion, int newVersion) async {
+  Future<void> _runMigrations(
+    Database db,
+    int oldVersion,
+    int newVersion,
+  ) async {
     final batch = db.batch();
 
     if (oldVersion < 1) {
@@ -153,7 +161,8 @@ class DatabaseService {
   // --- Device Store ---
   Future<void> upsertDevice(NexoraDevice device, {bool? isTrusted}) async {
     final now = DateTime.now().toIso8601String();
-    await db.rawInsert('''
+    await db.rawInsert(
+      '''
       INSERT INTO devices (device_id, display_name, platform, fingerprint, is_trusted, paired_at, last_seen)
       VALUES (?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT(device_id) DO UPDATE SET
@@ -162,16 +171,18 @@ class DatabaseService {
         fingerprint = excluded.fingerprint,
         is_trusted = COALESCE(?, devices.is_trusted),
         last_seen = excluded.last_seen
-    ''', [
-      device.deviceId,
-      device.displayName,
-      device.platform,
-      device.fingerprint,
-      isTrusted == true ? 1 : 0,
-      isTrusted == true ? now : null,
-      now,
-      isTrusted == null ? null : (isTrusted ? 1 : 0),
-    ]);
+    ''',
+      [
+        device.deviceId,
+        device.displayName,
+        device.platform,
+        device.fingerprint,
+        isTrusted == true ? 1 : 0,
+        isTrusted == true ? now : null,
+        now,
+        isTrusted == null ? null : (isTrusted ? 1 : 0),
+      ],
+    );
   }
 
   Future<List<NexoraDevice>> getTrustedDevices() async {
@@ -195,10 +206,7 @@ class DatabaseService {
     final now = DateTime.now().toIso8601String();
     await db.update(
       'devices',
-      {
-        'is_trusted': isTrusted ? 1 : 0,
-        'paired_at': isTrusted ? now : null,
-      },
+      {'is_trusted': isTrusted ? 1 : 0, 'paired_at': isTrusted ? now : null},
       where: 'device_id = ?',
       whereArgs: [deviceId],
     );
@@ -206,31 +214,34 @@ class DatabaseService {
 
   // --- Transfer History Store ---
   Future<void> logTransfer(NexoraTransfer transfer) async {
-    await db.insert(
-      'transfers',
-      {
-        'transfer_id': transfer.transferId,
-        'direction': transfer.direction == TransferDirection.send ? 'send' : 'receive',
-        'remote_device_id': transfer.remoteDeviceId,
-        'remote_device_name': transfer.remoteDeviceName,
-        'total_files': transfer.totalFiles,
-        'total_bytes': transfer.totalBytes,
-        'bytes_transferred': transfer.bytesTransferred,
-        'status': transfer.state.name,
-        'created_at': transfer.createdAt.toIso8601String(),
-        'completed_at': transfer.completedAt?.toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('transfers', {
+      'transfer_id': transfer.transferId,
+      'direction': transfer.direction == TransferDirection.send
+          ? 'send'
+          : 'receive',
+      'remote_device_id': transfer.remoteDeviceId,
+      'remote_device_name': transfer.remoteDeviceName,
+      'total_files': transfer.totalFiles,
+      'total_bytes': transfer.totalBytes,
+      'bytes_transferred': transfer.bytesTransferred,
+      'status': transfer.state.name,
+      'created_at': transfer.createdAt.toIso8601String(),
+      'completed_at': transfer.completedAt?.toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
-  Future<void> updateTransferProgress(String transferId, int bytesTransferred, TransferState state) async {
+  Future<void> updateTransferProgress(
+    String transferId,
+    int bytesTransferred,
+    TransferState state,
+  ) async {
     await db.update(
       'transfers',
       {
         'bytes_transferred': bytesTransferred,
         'status': state.name,
-        if (state == TransferState.completed) 'completed_at': DateTime.now().toIso8601String(),
+        if (state == TransferState.completed)
+          'completed_at': DateTime.now().toIso8601String(),
       },
       where: 'transfer_id = ?',
       whereArgs: [transferId],
@@ -248,7 +259,9 @@ class DatabaseService {
       final stateStr = r['status'] as String;
       return NexoraTransfer(
         transferId: r['transfer_id'] as String,
-        direction: dirStr == 'send' ? TransferDirection.send : TransferDirection.receive,
+        direction: dirStr == 'send'
+            ? TransferDirection.send
+            : TransferDirection.receive,
         remoteDeviceId: r['remote_device_id'] as String,
         remoteDeviceName: r['remote_device_name'] as String,
         totalFiles: r['total_files'] as int,
@@ -260,7 +273,9 @@ class DatabaseService {
           orElse: () => TransferState.completed,
         ),
         createdAt: DateTime.parse(r['created_at'] as String),
-        completedAt: r['completed_at'] != null ? DateTime.parse(r['completed_at'] as String) : null,
+        completedAt: r['completed_at'] != null
+            ? DateTime.parse(r['completed_at'] as String)
+            : null,
       );
     }).toList();
   }
@@ -274,27 +289,26 @@ class DatabaseService {
     required int chunkSize,
     required String chunkSha256,
   }) async {
-    await db.insert(
-      'resume_chunks',
-      {
-        'transfer_id': transferId,
-        'file_id': fileId,
-        'chunk_index': chunkIndex,
-        'chunk_offset': chunkOffset,
-        'chunk_size': chunkSize,
-        'chunk_sha256': chunkSha256,
-        'verified_at': DateTime.now().toIso8601String(),
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('resume_chunks', {
+      'transfer_id': transferId,
+      'file_id': fileId,
+      'chunk_index': chunkIndex,
+      'chunk_offset': chunkOffset,
+      'chunk_size': chunkSize,
+      'chunk_sha256': chunkSha256,
+      'verified_at': DateTime.now().toIso8601String(),
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<int> getHighestVerifiedOffset(String transferId, String fileId) async {
-    final result = await db.rawQuery('''
+    final result = await db.rawQuery(
+      '''
       SELECT MAX(chunk_offset + chunk_size) as highest_offset
       FROM resume_chunks
       WHERE transfer_id = ? AND file_id = ?
-    ''', [transferId, fileId]);
+    ''',
+      [transferId, fileId],
+    );
 
     if (result.isNotEmpty && result.first['highest_offset'] != null) {
       return result.first['highest_offset'] as int;
@@ -312,11 +326,10 @@ class DatabaseService {
 
   // --- Settings Store ---
   Future<void> setSetting(String key, String value) async {
-    await db.insert(
-      'app_settings',
-      {'key': key, 'value': value},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    await db.insert('app_settings', {
+      'key': key,
+      'value': value,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<String?> getSetting(String key) async {

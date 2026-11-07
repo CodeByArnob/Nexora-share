@@ -23,7 +23,10 @@ class PairingDialog extends StatelessWidget {
         children: [
           Icon(Icons.qr_code_2, color: NexoraColors.electricBlue, size: 28),
           SizedBox(width: 10),
-          Text('Pair Device', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+          Text(
+            'Pair Device',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
         ],
       ),
       content: Column(

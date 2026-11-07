@@ -28,7 +28,11 @@ class TransferClient {
     required NexoraDevice localDevice,
   }) async {
     final manifest = await TransferManifest.fromFiles([file]);
-    await sendManifest(peer: peer, manifest: manifest, localDevice: localDevice);
+    await sendManifest(
+      peer: peer,
+      manifest: manifest,
+      localDevice: localDevice,
+    );
   }
 
   /// Sends multiple files in a single batch to a target peer device.
@@ -38,7 +42,11 @@ class TransferClient {
     required NexoraDevice localDevice,
   }) async {
     final manifest = await TransferManifest.fromFiles(files);
-    await sendManifest(peer: peer, manifest: manifest, localDevice: localDevice);
+    await sendManifest(
+      peer: peer,
+      manifest: manifest,
+      localDevice: localDevice,
+    );
   }
 
   /// Recursively scans and streams an entire directory to a target peer device.
@@ -48,7 +56,11 @@ class TransferClient {
     required NexoraDevice localDevice,
   }) async {
     final manifest = await TransferManifest.fromDirectory(directory);
-    await sendManifest(peer: peer, manifest: manifest, localDevice: localDevice);
+    await sendManifest(
+      peer: peer,
+      manifest: manifest,
+      localDevice: localDevice,
+    );
   }
 
   /// Streams a full multi-file/folder manifest with bounded chunking and resume support.
@@ -67,7 +79,11 @@ class TransferClient {
     final Socket socket;
     try {
       socket = await retryPolicy.execute((attempt) async {
-        return await Socket.connect(peer.address!, peer.port!, timeout: const Duration(seconds: 10));
+        return await Socket.connect(
+          peer.address!,
+          peer.port!,
+          timeout: const Duration(seconds: 10),
+        );
       });
     } catch (e) {
       await AndroidForegroundService.stopService();
@@ -79,22 +95,29 @@ class TransferClient {
       final transferId = manifest.transferId;
       final startTime = DateTime.now();
 
-      final firstFileName = manifest.files.isNotEmpty ? manifest.files.first.name : 'Files';
-      await AndroidForegroundService.startService(fileName: firstFileName, isSending: true);
+      final firstFileName = manifest.files.isNotEmpty
+          ? manifest.files.first.name
+          : 'Files';
+      await AndroidForegroundService.startService(
+        fileName: firstFileName,
+        isSending: true,
+      );
 
       // 1. Send Hello
-      socket.add(encodeFrame({
-        'type': 'Hello',
-        'payload': {
-          'protocol_version': currentProtocolVersion,
-          'device': {
-            'device_id': localDevice.deviceId,
-            'display_name': localDevice.displayName,
-            'platform': localDevice.platform,
-            'fingerprint': localDevice.fingerprint,
-          }
-        }
-      }));
+      socket.add(
+        encodeFrame({
+          'type': 'Hello',
+          'payload': {
+            'protocol_version': currentProtocolVersion,
+            'device': {
+              'device_id': localDevice.deviceId,
+              'display_name': localDevice.displayName,
+              'platform': localDevice.platform,
+              'fingerprint': localDevice.fingerprint,
+            },
+          },
+        }),
+      );
 
       final frameController = StreamController<Map<String, dynamic>>();
       final buffer = BytesBuilder(copy: false);
@@ -134,7 +157,9 @@ class TransferClient {
       final frameStream = frameController.stream.asBroadcastStream();
 
       // Wait for Hello response
-      final helloMsg = await frameStream.firstWhere((m) => m['type'] == 'Hello').timeout(const Duration(seconds: 5));
+      final helloMsg = await frameStream
+          .firstWhere((m) => m['type'] == 'Hello')
+          .timeout(const Duration(seconds: 5));
       if (helloMsg.isEmpty) {
         throw Exception('Peer handshake failed');
       }
@@ -153,14 +178,16 @@ class TransferClient {
             sha = (d ?? sha256.convert(const [])).toString();
           }
         }
-        verifiedItems.add(ManifestItem(
-          fileId: item.fileId,
-          name: item.name,
-          relativePath: item.relativePath,
-          sizeBytes: item.sizeBytes,
-          sha256Hash: sha,
-          localPath: item.localPath,
-        ));
+        verifiedItems.add(
+          ManifestItem(
+            fileId: item.fileId,
+            name: item.name,
+            relativePath: item.relativePath,
+            sizeBytes: item.sizeBytes,
+            sha256Hash: sha,
+            localPath: item.localPath,
+          ),
+        );
       }
 
       final verifiedManifest = TransferManifest(
@@ -172,40 +199,52 @@ class TransferClient {
 
       // Log in SQLite
       try {
-        await DatabaseService.instance.logTransfer(NexoraTransfer(
-          transferId: transferId,
-          direction: TransferDirection.send,
-          remoteDeviceId: peer.deviceId,
-          remoteDeviceName: peer.displayName,
-          totalFiles: manifest.totalFiles,
-          totalBytes: manifest.totalBytes,
-          currentFile: manifest.files.isNotEmpty ? manifest.files.first.name : '',
-          state: TransferState.inProgress,
-          createdAt: startTime,
-        ));
+        await DatabaseService.instance.logTransfer(
+          NexoraTransfer(
+            transferId: transferId,
+            direction: TransferDirection.send,
+            remoteDeviceId: peer.deviceId,
+            remoteDeviceName: peer.displayName,
+            totalFiles: manifest.totalFiles,
+            totalBytes: manifest.totalBytes,
+            currentFile: manifest.files.isNotEmpty
+                ? manifest.files.first.name
+                : '',
+            state: TransferState.inProgress,
+            createdAt: startTime,
+          ),
+        );
       } catch (_) {}
 
       // 2. Send TransferOffer
-      socket.add(encodeFrame({
-        'type': 'TransferOffer',
-        'payload': {
-          'transfer_id': transferId,
-          'sender': {
-            'device_id': localDevice.deviceId,
-            'display_name': localDevice.displayName,
-            'platform': localDevice.platform,
+      socket.add(
+        encodeFrame({
+          'type': 'TransferOffer',
+          'payload': {
+            'transfer_id': transferId,
+            'sender': {
+              'device_id': localDevice.deviceId,
+              'display_name': localDevice.displayName,
+              'platform': localDevice.platform,
+            },
+            'manifest': verifiedManifest.toJson(),
           },
-          'manifest': verifiedManifest.toJson(),
-        }
-      }));
+        }),
+      );
 
       // Wait for Accept or Reject
       final responseMsg = await frameStream
-          .firstWhere((m) => m['type'] == 'TransferAccept' || m['type'] == 'TransferReject')
+          .firstWhere(
+            (m) =>
+                m['type'] == 'TransferAccept' || m['type'] == 'TransferReject',
+          )
           .timeout(const Duration(seconds: 30));
 
       if (responseMsg['type'] == 'TransferReject') {
-        final reason = (responseMsg['payload'] as Map<String, dynamic>)['reason'] as String? ?? 'Declined';
+        final reason =
+            (responseMsg['payload'] as Map<String, dynamic>)['reason']
+                as String? ??
+            'Declined';
         onError('Transfer declined by ${peer.displayName}: $reason');
         await subscription.cancel();
         socket.destroy();
@@ -216,19 +255,22 @@ class TransferClient {
       // If resuming, send TransferResume query and negotiate starting offset
       int currentFileResumeOffset = resumeOffset;
       if (resumeOffset > 0 && verifiedItems.isNotEmpty) {
-        socket.add(encodeFrame({
-          'type': 'TransferResume',
-          'payload': {
-            'transfer_id': transferId,
-            'file_id': verifiedItems.first.fileId,
-            'resume_offset': resumeOffset,
-          }
-        }));
+        socket.add(
+          encodeFrame({
+            'type': 'TransferResume',
+            'payload': {
+              'transfer_id': transferId,
+              'file_id': verifiedItems.first.fileId,
+              'resume_offset': resumeOffset,
+            },
+          }),
+        );
 
         final resumeAck = await frameStream
             .firstWhere((m) => m['type'] == 'TransferResumeAck')
             .timeout(const Duration(seconds: 5));
-        currentFileResumeOffset = (resumeAck['payload']['verified_offset'] as int? ?? resumeOffset);
+        currentFileResumeOffset =
+            (resumeAck['payload']['verified_offset'] as int? ?? resumeOffset);
       }
 
       // 3. Stream all manifest files sequentially in 1 MB chunks with backpressure
@@ -246,7 +288,9 @@ class TransferClient {
         final startOffset = (fileIndex == 0) ? currentFileResumeOffset : 0;
         cumulativeBytesSent += startOffset;
 
-        final totalChunks = fileLength == 0 ? 1 : ((fileLength + defaultChunkSize - 1) ~/ defaultChunkSize);
+        final totalChunks = fileLength == 0
+            ? 1
+            : ((fileLength + defaultChunkSize - 1) ~/ defaultChunkSize);
         final startChunk = startOffset ~/ defaultChunkSize;
 
         final raf = await localFile.open(mode: FileMode.read);
@@ -258,22 +302,28 @@ class TransferClient {
           final chunkBytes = raf.readSync(chunkSize);
           final chunkHash = sha256.convert(chunkBytes).toString();
 
-          socket.add(encodeFrame({
-            'type': 'ChunkData',
-            'payload': {
-              'transfer_id': transferId,
-              'file_id': item.fileId,
-              'chunk_index': i,
-              'total_chunks': totalChunks,
-              'offset': offset,
-              'data': chunkBytes,
-              'chunk_sha256': chunkHash,
-            }
-          }));
+          socket.add(
+            encodeFrame({
+              'type': 'ChunkData',
+              'payload': {
+                'transfer_id': transferId,
+                'file_id': item.fileId,
+                'chunk_index': i,
+                'total_chunks': totalChunks,
+                'offset': offset,
+                'data': chunkBytes,
+                'chunk_sha256': chunkHash,
+              },
+            }),
+          );
 
           // Await ChunkAck from receiver for flow control
           await frameStream
-              .firstWhere((m) => m['type'] == 'ChunkAck' && (m['payload']['chunk_index'] as int) == i)
+              .firstWhere(
+                (m) =>
+                    m['type'] == 'ChunkAck' &&
+                    (m['payload']['chunk_index'] as int) == i,
+              )
               .timeout(const Duration(seconds: 15));
 
           cumulativeBytesSent += chunkBytes.length;
@@ -291,11 +341,16 @@ class TransferClient {
           } catch (_) {}
 
           final now = DateTime.now();
-          if (now.difference(lastUpdate).inMilliseconds >= 250 || cumulativeBytesSent >= manifest.totalBytes) {
+          if (now.difference(lastUpdate).inMilliseconds >= 250 ||
+              cumulativeBytesSent >= manifest.totalBytes) {
             lastUpdate = now;
-            final elapsedSeconds = now.difference(startTime).inMilliseconds / 1000.0;
-            final speedBps = elapsedSeconds > 0 ? (cumulativeBytesSent / elapsedSeconds) : 0.0;
-            final remainingBytes = (manifest.totalBytes - cumulativeBytesSent).clamp(0, manifest.totalBytes);
+            final elapsedSeconds =
+                now.difference(startTime).inMilliseconds / 1000.0;
+            final speedBps = elapsedSeconds > 0
+                ? (cumulativeBytesSent / elapsedSeconds)
+                : 0.0;
+            final remainingBytes = (manifest.totalBytes - cumulativeBytesSent)
+                .clamp(0, manifest.totalBytes);
             final eta = speedBps > 0 ? (remainingBytes / speedBps).round() : 0;
 
             final pct = manifest.totalBytes > 0
@@ -334,13 +389,15 @@ class TransferClient {
       }
 
       // 4. Send TransferComplete
-      socket.add(encodeFrame({
-        'type': 'TransferComplete',
-        'payload': {
-          'transfer_id': transferId,
-          'verified_files': manifest.totalFiles,
-        }
-      }));
+      socket.add(
+        encodeFrame({
+          'type': 'TransferComplete',
+          'payload': {
+            'transfer_id': transferId,
+            'verified_files': manifest.totalFiles,
+          },
+        }),
+      );
 
       await AndroidForegroundService.stopService();
 
@@ -364,7 +421,9 @@ class TransferClient {
         bytesTransferred: manifest.totalBytes,
         speedBytesPerSec: 0.0,
         etaSeconds: 0,
-        currentFile: manifest.files.isNotEmpty ? manifest.files.first.name : 'Done',
+        currentFile: manifest.files.isNotEmpty
+            ? manifest.files.first.name
+            : 'Done',
         state: TransferState.completed,
         createdAt: startTime,
         completedAt: DateTime.now(),

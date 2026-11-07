@@ -1,0 +1,19 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=NEXORA
+GenericName=Peer-to-Peer File Sharing
+Comment=Private, fast, cross-platform peer-to-peer file sharing
+Exec=nexora %U
+Icon=io.github.codebyarnob.nexora
+Terminal=false
+StartupNotify=true
+StartupWMClass=nexora
+Categories=Network;FileTransfer;P2P;Utility;
+Keywords=share;transfer;p2p;nearby;lan;file;
+MimeType=x-scheme-handler/nexora;
+Actions=Receive;
+
+[Desktop Action Receive]
+Name=Receive Files
+Exec=nexora --receive

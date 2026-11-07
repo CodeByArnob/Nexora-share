@@ -13,8 +13,8 @@ void main() {
             'device_id': 'nexora-test-01',
             'display_name': 'Pixel 9 Pro',
             'platform': 'Android',
-          }
-        }
+          },
+        },
       };
 
       final frame = encodeFrame(sampleMessage);
@@ -32,9 +32,7 @@ void main() {
     test('encodeFrame rejects payloads exceeding maxFrameSize', () {
       final hugeMessage = {
         'type': 'ChunkData',
-        'payload': {
-          'data': List.filled(maxFrameSize + 10, 0x41),
-        }
+        'payload': {'data': List.filled(maxFrameSize + 10, 0x41)},
       };
 
       expect(() => encodeFrame(hugeMessage), throwsException);

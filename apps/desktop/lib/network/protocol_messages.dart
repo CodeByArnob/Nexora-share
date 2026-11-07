@@ -12,7 +12,9 @@ Uint8List encodeFrame(Map<String, dynamic> message) {
   final jsonBytes = utf8.encode(jsonEncode(message));
   final length = jsonBytes.length;
   if (length > maxFrameSize) {
-    throw Exception('Message size $length exceeds maximum allowed frame size $maxFrameSize');
+    throw Exception(
+      'Message size $length exceeds maximum allowed frame size $maxFrameSize',
+    );
   }
 
   final frame = Uint8List(lengthPrefixSize + length);

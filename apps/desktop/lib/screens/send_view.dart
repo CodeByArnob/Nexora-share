@@ -30,9 +30,7 @@ class _SendViewState extends ConsumerState<SendView> {
   }
 
   Future<void> _pickFiles() async {
-    final files = await FilePicker.pickFiles(
-      type: FileType.any,
-    );
+    final files = await FilePicker.pickFiles(type: FileType.any);
 
     if (files.isNotEmpty) {
       setState(() {
@@ -55,7 +53,8 @@ class _SendViewState extends ConsumerState<SendView> {
       final list = await dir.list(recursive: false).toList();
       setState(() {
         for (final entity in list) {
-          if (entity is File && !_stagedFiles.any((existing) => existing.path == entity.path)) {
+          if (entity is File &&
+              !_stagedFiles.any((existing) => existing.path == entity.path)) {
             _stagedFiles.add(entity);
           }
         }
@@ -66,14 +65,18 @@ class _SendViewState extends ConsumerState<SendView> {
   Future<void> _sendStagedFiles() async {
     if (_selectedDevice == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a target device to send to.')),
+        const SnackBar(
+          content: Text('Please select a target device to send to.'),
+        ),
       );
       return;
     }
 
     if (_stagedFiles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one file to send.')),
+        const SnackBar(
+          content: Text('Please select at least one file to send.'),
+        ),
       );
       return;
     }
@@ -86,7 +89,8 @@ class _SendViewState extends ConsumerState<SendView> {
       _stagedFiles.clear();
     });
 
-    ref.read(activeNavSectionProvider.notifier).state = DesktopNavSection.transfers;
+    ref.read(activeNavSectionProvider.notifier).state =
+        DesktopNavSection.transfers;
 
     await controller.sendFiles(peer: target, files: filesToSend);
   }
@@ -124,9 +128,13 @@ class _SendViewState extends ConsumerState<SendView> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(18),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                  color:
+                      Theme.of(context).cardTheme.color ??
+                      NexoraColors.lightCard,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.orange.withValues(alpha: 0.4)),
+                  border: Border.all(
+                    color: Colors.orange.withValues(alpha: 0.4),
+                  ),
                 ),
                 child: Row(
                   children: [
@@ -135,7 +143,10 @@ class _SendViewState extends ConsumerState<SendView> {
                     Expanded(
                       child: Text(
                         'No nearby NEXORA peers discovered. Ensure target phone or PC is connected to the same network.',
-                        style: TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
@@ -143,17 +154,28 @@ class _SendViewState extends ConsumerState<SendView> {
               )
             else
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                  color:
+                      Theme.of(context).cardTheme.color ??
+                      NexoraColors.lightCard,
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: Colors.grey.withValues(alpha: 0.3)),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<NexoraDevice>(
                     isExpanded: true,
-                    value: _selectedDevice != null && peers.any((p) => p.deviceId == _selectedDevice!.deviceId)
-                        ? peers.firstWhere((p) => p.deviceId == _selectedDevice!.deviceId)
+                    value:
+                        _selectedDevice != null &&
+                            peers.any(
+                              (p) => p.deviceId == _selectedDevice!.deviceId,
+                            )
+                        ? peers.firstWhere(
+                            (p) => p.deviceId == _selectedDevice!.deviceId,
+                          )
                         : (peers.isNotEmpty ? peers.first : null),
                     hint: const Text('Select a nearby discovered device'),
                     onChanged: (device) {
@@ -162,20 +184,28 @@ class _SendViewState extends ConsumerState<SendView> {
                       });
                     },
                     items: peers.map((p) {
-                      final isAndroid = p.platform.toLowerCase().contains('android');
+                      final pLower = p.platform.toLowerCase();
+                      final isAndroid = pLower.contains('android');
+                      final isLinux = pLower.contains('linux');
+                      final iconData = isAndroid
+                          ? Icons.phone_android
+                          : (isLinux ? Icons.terminal : Icons.laptop_windows);
+                      final iconColor = isAndroid
+                          ? NexoraColors.signalTeal
+                          : (isLinux
+                                ? Colors.purpleAccent
+                                : NexoraColors.electricBlue);
                       return DropdownMenuItem<NexoraDevice>(
                         value: p,
                         child: Row(
                           children: [
-                            Icon(
-                              isAndroid ? Icons.phone_android : Icons.laptop_windows,
-                              color: isAndroid ? NexoraColors.signalTeal : NexoraColors.electricBlue,
-                              size: 20,
-                            ),
+                            Icon(iconData, color: iconColor, size: 20),
                             const SizedBox(width: 12),
                             Text(
                               '${p.displayName} (${p.platform} - ${p.address ?? "local"})',
-                              style: const TextStyle(fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ],
                         ),
@@ -197,7 +227,8 @@ class _SendViewState extends ConsumerState<SendView> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                color:
+                    Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: NexoraColors.electricBlue.withValues(alpha: 0.5),
@@ -213,7 +244,11 @@ class _SendViewState extends ConsumerState<SendView> {
                       color: NexoraColors.electricBlue.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.cloud_upload_outlined, size: 48, color: NexoraColors.electricBlue),
+                    child: const Icon(
+                      Icons.cloud_upload_outlined,
+                      size: 48,
+                      color: NexoraColors.electricBlue,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -233,8 +268,13 @@ class _SendViewState extends ConsumerState<SendView> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: NexoraColors.electricBlue,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                         onPressed: _pickFiles,
                         icon: const Icon(Icons.attach_file, size: 18),
@@ -244,9 +284,16 @@ class _SendViewState extends ConsumerState<SendView> {
                       OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
                           foregroundColor: NexoraColors.electricBlue,
-                          side: const BorderSide(color: NexoraColors.electricBlue),
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          side: const BorderSide(
+                            color: NexoraColors.electricBlue,
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                         onPressed: _pickFolder,
                         icon: const Icon(Icons.folder_open, size: 18),
@@ -267,7 +314,10 @@ class _SendViewState extends ConsumerState<SendView> {
                 children: [
                   Text(
                     'Staged for Sending (${_stagedFiles.length})',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   TextButton.icon(
                     onPressed: () {
@@ -292,30 +342,51 @@ class _SendViewState extends ConsumerState<SendView> {
 
                   return Container(
                     margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                      color:
+                          Theme.of(context).cardTheme.color ??
+                          NexoraColors.lightCard,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: Colors.grey.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.insert_drive_file, color: NexoraColors.electricBlue),
+                        const Icon(
+                          Icons.insert_drive_file,
+                          color: NexoraColors.electricBlue,
+                        ),
                         const SizedBox(width: 14),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              Text(
+                                name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               Text(
                                 _formatBytes(size),
-                                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                                style: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete_outline, color: Colors.red),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.red,
+                          ),
                           onPressed: () {
                             setState(() {
                               _stagedFiles.removeAt(index);
@@ -335,13 +406,18 @@ class _SendViewState extends ConsumerState<SendView> {
                     backgroundColor: NexoraColors.signalTeal,
                     foregroundColor: NexoraColors.midnightNavy,
                     padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   onPressed: _sendStagedFiles,
                   icon: const Icon(Icons.send_rounded, size: 22),
                   label: Text(
                     'Send ${_stagedFiles.length} File(s) Now',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),

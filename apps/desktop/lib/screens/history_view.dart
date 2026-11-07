@@ -20,17 +20,26 @@ class HistoryView extends ConsumerWidget {
   }
 
   Future<void> _openDownloadsFolder(BuildContext context) async {
-    final userProfile = Platform.environment['USERPROFILE'];
-    final path = userProfile != null ? '$userProfile\\Downloads\\NEXORA' : 'Downloads';
+    final path = Platform.isWindows
+        ? (Platform.environment['USERPROFILE'] != null
+              ? '${Platform.environment['USERPROFILE']}\\Downloads\\NEXORA'
+              : 'Downloads\\NEXORA')
+        : (Platform.environment['HOME'] != null
+              ? '${Platform.environment['HOME']}/Downloads/NEXORA'
+              : 'Downloads/NEXORA');
     try {
       if (Platform.isWindows) {
         await Process.run('explorer.exe', [path]);
+      } else if (Platform.isLinux) {
+        await Process.run('xdg-open', [path]);
+      } else if (Platform.isMacOS) {
+        await Process.run('open', [path]);
       }
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open folder: $path')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not open folder: $path')));
       }
     }
   }
@@ -54,7 +63,10 @@ class HistoryView extends ConsumerWidget {
                     children: [
                       Text(
                         'Transfer History',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                       SizedBox(height: 6),
                       Text(
@@ -81,7 +93,9 @@ class HistoryView extends ConsumerWidget {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 60),
                 decoration: BoxDecoration(
-                  color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                  color:
+                      Theme.of(context).cardTheme.color ??
+                      NexoraColors.lightCard,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
                 ),
@@ -92,12 +106,18 @@ class HistoryView extends ConsumerWidget {
                     const SizedBox(height: 16),
                     const Text(
                       'No Transfer History Yet',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       'Completed inbound and outbound transfers will be recorded here.',
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 13,
+                      ),
                     ),
                   ],
                 ),
@@ -109,23 +129,32 @@ class HistoryView extends ConsumerWidget {
                 itemCount: history.length,
                 itemBuilder: (context, index) {
                   final item = history[index];
-                  final isIncoming = item.direction == TransferDirection.receive;
+                  final isIncoming =
+                      item.direction == TransferDirection.receive;
 
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                      color:
+                          Theme.of(context).cardTheme.color ??
+                          NexoraColors.lightCard,
                       borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: Colors.grey.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Row(
                       children: [
                         CircleAvatar(
                           radius: 20,
-                          backgroundColor: NexoraColors.signalTeal.withValues(alpha: 0.15),
+                          backgroundColor: NexoraColors.signalTeal.withValues(
+                            alpha: 0.15,
+                          ),
                           child: Icon(
-                            isIncoming ? Icons.download_done : Icons.upload_file,
+                            isIncoming
+                                ? Icons.download_done
+                                : Icons.upload_file,
                             color: NexoraColors.signalTeal,
                             size: 20,
                           ),
@@ -137,7 +166,10 @@ class HistoryView extends ConsumerWidget {
                             children: [
                               Text(
                                 item.fileName,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 4),
@@ -145,13 +177,21 @@ class HistoryView extends ConsumerWidget {
                                 children: [
                                   Text(
                                     '${_formatBytes(item.totalBytes)} • ${item.remoteDevice.displayName} (${item.remoteDevice.platform})',
-                                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                                    style: TextStyle(
+                                      color: Colors.grey.shade600,
+                                      fontSize: 12,
+                                    ),
                                   ),
                                   const SizedBox(width: 8),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 2,
+                                    ),
                                     decoration: BoxDecoration(
-                                      color: NexoraColors.signalTeal.withValues(alpha: 0.1),
+                                      color: NexoraColors.signalTeal.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
                                     child: const Text(
@@ -170,7 +210,10 @@ class HistoryView extends ConsumerWidget {
                         ),
                         Text(
                           '${item.startTime.hour.toString().padLeft(2, '0')}:${item.startTime.minute.toString().padLeft(2, '0')}',
-                          style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                          style: TextStyle(
+                            color: Colors.grey.shade500,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),

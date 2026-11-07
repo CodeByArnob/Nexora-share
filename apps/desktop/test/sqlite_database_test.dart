@@ -20,7 +20,8 @@ void main() {
       deviceId: 'test-device-uuid-1',
       displayName: 'Pixel 9 Pro (NEXORA)',
       platform: 'Android',
-      fingerprint: '3978f639c6b014243b0d142017243af5f7fb00112233445566778899aabbccdd',
+      fingerprint:
+          '3978f639c6b014243b0d142017243af5f7fb00112233445566778899aabbccdd',
       lastSeen: DateTime.now(),
     );
 
@@ -64,7 +65,11 @@ void main() {
     expect(history.first.state, equals(TransferState.inProgress));
 
     // Update progress to completed
-    await dbService.updateTransferProgress('t-uuid-101', 5242880, TransferState.completed);
+    await dbService.updateTransferProgress(
+      't-uuid-101',
+      5242880,
+      TransferState.completed,
+    );
 
     history = await dbService.getTransferHistory();
     expect(history.first.bytesTransferred, equals(5242880));
@@ -85,7 +90,10 @@ void main() {
       chunkSha256: 'chunk0hash',
     );
 
-    var highestOffset = await dbService.getHighestVerifiedOffset(transferId, fileId);
+    var highestOffset = await dbService.getHighestVerifiedOffset(
+      transferId,
+      fileId,
+    );
     expect(highestOffset, equals(1048576));
 
     await dbService.recordVerifiedChunk(
@@ -97,11 +105,17 @@ void main() {
       chunkSha256: 'chunk1hash',
     );
 
-    highestOffset = await dbService.getHighestVerifiedOffset(transferId, fileId);
+    highestOffset = await dbService.getHighestVerifiedOffset(
+      transferId,
+      fileId,
+    );
     expect(highestOffset, equals(2097152));
 
     await dbService.clearResumeCheckpoints(transferId);
-    highestOffset = await dbService.getHighestVerifiedOffset(transferId, fileId);
+    highestOffset = await dbService.getHighestVerifiedOffset(
+      transferId,
+      fileId,
+    );
     expect(highestOffset, equals(0));
   });
 

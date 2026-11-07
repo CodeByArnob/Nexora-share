@@ -3,7 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:nexora_app/main.dart';
 
 void main() {
-  testWidgets('NEXORA smoke test and navigation verify', (WidgetTester tester) async {
+  testWidgets('NEXORA smoke test and navigation verify', (
+    WidgetTester tester,
+  ) async {
     // Build NEXORA inside ProviderScope
     await tester.pumpWidget(const ProviderScope(child: NexoraApp()));
     await tester.pump(const Duration(milliseconds: 100));

@@ -10,17 +10,26 @@ class ReceiveView extends ConsumerWidget {
   const ReceiveView({super.key});
 
   Future<void> _openDownloadsFolder(BuildContext context) async {
-    final userProfile = Platform.environment['USERPROFILE'];
-    final path = userProfile != null ? '$userProfile\\Downloads\\NEXORA' : 'Downloads';
+    final path = Platform.isWindows
+        ? (Platform.environment['USERPROFILE'] != null
+              ? '${Platform.environment['USERPROFILE']}\\Downloads\\NEXORA'
+              : 'Downloads\\NEXORA')
+        : (Platform.environment['HOME'] != null
+              ? '${Platform.environment['HOME']}/Downloads/NEXORA'
+              : 'Downloads/NEXORA');
     try {
       if (Platform.isWindows) {
         await Process.run('explorer.exe', [path]);
+      } else if (Platform.isLinux) {
+        await Process.run('xdg-open', [path]);
+      } else if (Platform.isMacOS) {
+        await Process.run('open', [path]);
       }
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not open folder: $path')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Could not open folder: $path')));
       }
     }
   }
@@ -29,9 +38,15 @@ class ReceiveView extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final localDevice = ref.watch(localDeviceProvider);
     final controller = ref.watch(networkControllerProvider);
-    final userProfile = Platform.environment['USERPROFILE'];
-    final downloadPath = userProfile != null ? '$userProfile\\Downloads\\NEXORA' : 'Downloads\\NEXORA';
-    final qrData = 'nexora://${localDevice.deviceId}?fp=${localDevice.fingerprint}&p=${controller.tcpPort}';
+    final downloadPath = Platform.isWindows
+        ? (Platform.environment['USERPROFILE'] != null
+              ? '${Platform.environment['USERPROFILE']}\\Downloads\\NEXORA'
+              : 'Downloads\\NEXORA')
+        : (Platform.environment['HOME'] != null
+              ? '${Platform.environment['HOME']}/Downloads/NEXORA'
+              : 'Downloads/NEXORA');
+    final qrData =
+        'nexora://${localDevice.deviceId}?fp=${localDevice.fingerprint}&p=${controller.tcpPort}';
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -55,9 +70,12 @@ class ReceiveView extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                color:
+                    Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: NexoraColors.signalTeal.withValues(alpha: 0.4)),
+                border: Border.all(
+                  color: NexoraColors.signalTeal.withValues(alpha: 0.4),
+                ),
               ),
               child: Row(
                 children: [
@@ -68,7 +86,11 @@ class ReceiveView extends ConsumerWidget {
                       color: NexoraColors.signalTeal.withValues(alpha: 0.15),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.check_circle_outline, color: NexoraColors.signalTeal, size: 30),
+                    child: const Icon(
+                      Icons.check_circle_outline,
+                      color: NexoraColors.signalTeal,
+                      size: 30,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -77,25 +99,38 @@ class ReceiveView extends ConsumerWidget {
                       children: [
                         const Text(
                           'Receiver Engine Active',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Listening on 0.0.0.0:${controller.tcpPort} • mDNS & UDP Multicast Announcement Active',
-                          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: NexoraColors.signalTeal.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Text(
                       'READY',
-                      style: TextStyle(color: NexoraColors.signalTeal, fontWeight: FontWeight.bold, fontSize: 12),
+                      style: TextStyle(
+                        color: NexoraColors.signalTeal,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
                     ),
                   ),
                 ],
@@ -108,7 +143,8 @@ class ReceiveView extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                color:
+                    Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
               ),
@@ -143,12 +179,18 @@ class ReceiveView extends ConsumerWidget {
                       children: [
                         const Text(
                           'Quick Pair with Android Phone',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                         const SizedBox(height: 6),
                         Text(
                           'Scan this QR code from NEXORA on your mobile device to establish mutual authentication without cloud intermediaries.',
-                          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 13,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         const Text(
@@ -157,9 +199,14 @@ class ReceiveView extends ConsumerWidget {
                         ),
                         const SizedBox(height: 6),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
                           decoration: BoxDecoration(
-                            color: NexoraColors.signalTeal.withValues(alpha: 0.15),
+                            color: NexoraColors.signalTeal.withValues(
+                              alpha: 0.15,
+                            ),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: const Text(
@@ -176,7 +223,10 @@ class ReceiveView extends ConsumerWidget {
                         const SizedBox(height: 12),
                         Text(
                           'Receiver Approval: When a device sends a file, an explicit modal prompt will appear on your desktop requiring your authorization before any data is written to disk.',
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                          ),
                         ),
                       ],
                     ),
@@ -191,13 +241,18 @@ class ReceiveView extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
+                color:
+                    Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.folder, color: NexoraColors.electricBlue, size: 32),
+                  const Icon(
+                    Icons.folder,
+                    color: NexoraColors.electricBlue,
+                    size: 32,
+                  ),
                   const SizedBox(width: 16),
                   Expanded(
                     child: Column(
@@ -205,12 +260,18 @@ class ReceiveView extends ConsumerWidget {
                       children: [
                         const Text(
                           'Default Download Location',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           downloadPath,
-                          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 13,
+                          ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],

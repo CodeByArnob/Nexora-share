@@ -29,7 +29,8 @@ class DesktopNetworkController {
 
   /// Initializes local network services, TCP server, and discovery broadcaster.
   Future<void> initialize({
-    required Future<bool> Function(IncomingTransferOffer offer) approvalCallback,
+    required Future<bool> Function(IncomingTransferOffer offer)
+    approvalCallback,
     Directory? customDestinationDirectory,
   }) async {
     onApprovalRequested = approvalCallback;
@@ -61,10 +62,7 @@ class DesktopNetworkController {
       },
     );
 
-    await _discovery!.start(
-      localDevice: localDevice,
-      tcpPort: _tcpPort,
-    );
+    await _discovery!.start(localDevice: localDevice, tcpPort: _tcpPort);
 
     // Initialize Transfer Client
     _client = TransferClient(
@@ -98,7 +96,10 @@ class DesktopNetworkController {
     _ref.read(activeTransfersProvider.notifier).state = active;
 
     // Add to history
-    final history = <NexoraTransfer>[transfer, ..._ref.read(transferHistoryProvider)];
+    final history = <NexoraTransfer>[
+      transfer,
+      ..._ref.read(transferHistoryProvider),
+    ];
     _ref.read(transferHistoryProvider.notifier).state = history;
   }
 
@@ -109,11 +110,7 @@ class DesktopNetworkController {
   }) async {
     if (_client == null) return;
     final localDevice = _ref.read(localDeviceProvider);
-    await _client!.sendFile(
-      peer: peer,
-      file: file,
-      localDevice: localDevice,
-    );
+    await _client!.sendFile(peer: peer, file: file, localDevice: localDevice);
   }
 
   /// Sends multiple files in a batch to a peer.
@@ -149,9 +146,7 @@ class DesktopNetworkController {
     required BuildContext context,
     required NexoraDevice targetPeer,
   }) async {
-    final pickedFile = await FilePicker.pickFile(
-      type: FileType.any,
-    );
+    final pickedFile = await FilePicker.pickFile(type: FileType.any);
 
     if (pickedFile != null && pickedFile.path != null) {
       final file = File(pickedFile.path!);

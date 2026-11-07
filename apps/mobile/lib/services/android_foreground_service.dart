@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 
 class AndroidForegroundService {
-  static const _channel = MethodChannel('io.github.codebyarnob.nexora/foreground_service');
+  static const _channel = MethodChannel(
+    'io.github.codebyarnob.nexora/foreground_service',
+  );
 
   /// Starts the Android Foreground Service with an ongoing notification.
   static Future<void> startService({

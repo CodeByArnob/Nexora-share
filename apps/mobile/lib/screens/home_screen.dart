@@ -28,7 +28,10 @@ class HomeScreen extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: NexoraColors.midnightNavy,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: NexoraColors.electricBlue, width: 1.5),
+                border: Border.all(
+                  color: NexoraColors.electricBlue,
+                  width: 1.5,
+                ),
               ),
               child: const Center(
                 child: Text(
@@ -95,7 +98,10 @@ class HomeScreen extends ConsumerWidget {
                         color: NexoraColors.electricBlue.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.phone_android, color: NexoraColors.electricBlue),
+                      child: const Icon(
+                        Icons.phone_android,
+                        color: NexoraColors.electricBlue,
+                      ),
                     ),
                     const SizedBox(width: 16),
                     Expanded(
@@ -104,7 +110,10 @@ class HomeScreen extends ConsumerWidget {
                         children: [
                           Text(
                             localDevice.displayName,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                           const SizedBox(height: 4),
                           Row(
@@ -120,7 +129,10 @@ class HomeScreen extends ConsumerWidget {
                               const SizedBox(width: 6),
                               const Text(
                                 'Local Network Discovery Active',
-                                style: TextStyle(fontSize: 12, color: Colors.grey),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey,
+                                ),
                               ),
                             ],
                           ),
@@ -143,15 +155,22 @@ class HomeScreen extends ConsumerWidget {
                       backgroundColor: NexoraColors.electricBlue,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     icon: const Icon(Icons.upload_file),
-                    label: const Text('Send Files', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: const Text(
+                      'Send Files',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     onPressed: () {
                       if (nearbyPeers.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('No nearby NEXORA peers detected yet. Wait for discovery.'),
+                            content: Text(
+                              'No nearby NEXORA peers detected yet. Wait for discovery.',
+                            ),
                           ),
                         );
                       } else {
@@ -169,16 +188,26 @@ class HomeScreen extends ConsumerWidget {
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
                       foregroundColor: NexoraColors.electricBlue,
-                      side: const BorderSide(color: NexoraColors.electricBlue, width: 1.5),
+                      side: const BorderSide(
+                        color: NexoraColors.electricBlue,
+                        width: 1.5,
+                      ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                     icon: const Icon(Icons.download),
-                    label: const Text('Receive Files', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: const Text(
+                      'Receive Files',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('Receiver active. Waiting for incoming transfer offer...'),
+                          content: Text(
+                            'Receiver active. Waiting for incoming transfer offer...',
+                          ),
                         ),
                       );
                     },
@@ -191,25 +220,32 @@ class HomeScreen extends ConsumerWidget {
 
             // Active Transfer Summary if any
             if (activeTransfers.isNotEmpty) ...[
-              const Text('Active Transfers', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              const Text(
+                'Active Transfers',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
               const SizedBox(height: 8),
-              ...activeTransfers.map((t) => Card(
-                child: ListTile(
-                  leading: Icon(
-                    t.direction == TransferDirection.send ? Icons.arrow_upward : Icons.arrow_downward,
-                    color: NexoraColors.electricBlue,
-                  ),
-                  title: Text(t.remoteDeviceName),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('${t.currentFile} • ${t.formattedSpeed}'),
-                      const SizedBox(height: 4),
-                      LinearProgressIndicator(value: t.progressPercentage),
-                    ],
+              ...activeTransfers.map(
+                (t) => Card(
+                  child: ListTile(
+                    leading: Icon(
+                      t.direction == TransferDirection.send
+                          ? Icons.arrow_upward
+                          : Icons.arrow_downward,
+                      color: NexoraColors.electricBlue,
+                    ),
+                    title: Text(t.remoteDeviceName),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('${t.currentFile} • ${t.formattedSpeed}'),
+                        const SizedBox(height: 4),
+                        LinearProgressIndicator(value: t.progressPercentage),
+                      ],
+                    ),
                   ),
                 ),
-              )),
+              ),
               const SizedBox(height: 16),
             ],
 
@@ -237,10 +273,17 @@ class HomeScreen extends ConsumerWidget {
             if (nearbyPeers.isEmpty)
               Card(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 32,
+                    horizontal: 16,
+                  ),
                   child: Column(
                     children: [
-                      Icon(Icons.wifi_tethering, size: 48, color: Colors.grey.shade400),
+                      Icon(
+                        Icons.wifi_tethering,
+                        size: 48,
+                        color: Colors.grey.shade400,
+                      ),
                       const SizedBox(height: 12),
                       const Text(
                         'Searching for nearby NEXORA devices',
@@ -250,37 +293,54 @@ class HomeScreen extends ConsumerWidget {
                       Text(
                         'Ensure the other device is on the same Wi-Fi network and has NEXORA open.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ],
                   ),
                 ),
               )
             else
-              ...nearbyPeers.map((peer) => Card(
-                child: ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: NexoraColors.midnightNavy,
-                    child: Icon(Icons.devices, color: NexoraColors.signalTeal),
-                  ),
-                  title: Text(peer.displayName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: Text('${peer.platform} • ${peer.address ?? 'mDNS'}'),
-                  trailing: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: NexoraColors.electricBlue,
-                      foregroundColor: Colors.white,
+              ...nearbyPeers.map(
+                (peer) => Card(
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: NexoraColors.midnightNavy,
+                      child: Icon(
+                        peer.platform.toLowerCase().contains('android')
+                            ? Icons.phone_android
+                            : peer.platform.toLowerCase().contains('linux')
+                            ? Icons.terminal
+                            : Icons.laptop_windows,
+                        color: NexoraColors.signalTeal,
+                      ),
                     ),
-                    icon: const Icon(Icons.send, size: 16),
-                    label: const Text('Send'),
-                    onPressed: () {
-                      controller.pickAndSendFile(
-                        context: context,
-                        targetPeer: peer,
-                      );
-                    },
+                    title: Text(
+                      peer.displayName,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      '${peer.platform} • ${peer.address ?? 'mDNS'}',
+                    ),
+                    trailing: ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: NexoraColors.electricBlue,
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: const Icon(Icons.send, size: 16),
+                      label: const Text('Send'),
+                      onPressed: () {
+                        controller.pickAndSendFile(
+                          context: context,
+                          targetPeer: peer,
+                        );
+                      },
+                    ),
                   ),
                 ),
-              )),
+              ),
 
             const SizedBox(height: 24),
 
@@ -304,17 +364,29 @@ class HomeScreen extends ConsumerWidget {
                 ),
               )
             else
-              ...history.take(3).map((item) => Card(
-                child: ListTile(
-                  leading: Icon(
-                    item.direction == TransferDirection.send ? Icons.upload : Icons.download,
-                    color: NexoraColors.signalTeal,
+              ...history
+                  .take(3)
+                  .map(
+                    (item) => Card(
+                      child: ListTile(
+                        leading: Icon(
+                          item.direction == TransferDirection.send
+                              ? Icons.upload
+                              : Icons.download,
+                          color: NexoraColors.signalTeal,
+                        ),
+                        title: Text(item.remoteDeviceName),
+                        subtitle: Text(
+                          '${item.totalFiles} files • ${item.createdAt.toLocal().toString().split('.')[0]}',
+                        ),
+                        trailing: const Icon(
+                          Icons.check_circle,
+                          color: NexoraColors.signalTeal,
+                          size: 20,
+                        ),
+                      ),
+                    ),
                   ),
-                  title: Text(item.remoteDeviceName),
-                  subtitle: Text('${item.totalFiles} files • ${item.createdAt.toLocal().toString().split('.')[0]}'),
-                  trailing: const Icon(Icons.check_circle, color: NexoraColors.signalTeal, size: 20),
-                ),
-              )),
           ],
         ),
       ),
