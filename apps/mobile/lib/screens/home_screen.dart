@@ -46,12 +46,12 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 10),
-            const Text(
+            Text(
               'NEXORA',
               style: TextStyle(
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1.2,
-                color: NexoraColors.midnightNavy,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],

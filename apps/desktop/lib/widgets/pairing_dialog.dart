@@ -69,11 +69,11 @@ class PairingDialog extends StatelessWidget {
               ),
               child: Text(
                 sasCode,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 26,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 5.0,
-                  color: NexoraColors.midnightNavy,
+                  color: Theme.of(context).colorScheme.primary,
                   fontFamily: 'monospace',
                 ),
               ),

@@ -20,6 +20,7 @@ class ReceiverApprovalDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: Row(
@@ -56,9 +57,9 @@ class ReceiverApprovalDialog extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: NexoraColors.midnightNavy.withValues(alpha: 0.05),
+              color: isDark ? NexoraColors.darkSurfaceVariant : NexoraColors.lightBackground,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: isDark ? const Color(0xFF223554) : Colors.grey.shade300),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -67,7 +68,7 @@ class ReceiverApprovalDialog extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.insert_drive_file,
-                      color: NexoraColors.midnightNavy,
+                      color: NexoraColors.electricBlue,
                       size: 20,
                     ),
                     const SizedBox(width: 8),
@@ -88,14 +89,14 @@ class ReceiverApprovalDialog extends StatelessWidget {
                       'Total Size: ${_formatBytes(offer.totalBytes)}',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade700,
+                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
                       ),
                     ),
                     Text(
                       '${offer.totalFiles} file(s)',
                       style: TextStyle(
                         fontSize: 12,
-                        color: Colors.grey.shade700,
+                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade700,
                       ),
                     ),
                   ],
