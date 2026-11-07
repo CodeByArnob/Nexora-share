@@ -29,6 +29,10 @@ release/**/*.zip
 !release/**/README.md
 !release/**/SHA256SUMS.txt
 
+# Node & Website
+website/node_modules/
+website/dist/
+
 # IDE & Editor
 .idea/
 .vscode/

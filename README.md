@@ -5,38 +5,49 @@
   <h3>CONNECT. SHARE. ANYWHERE.</h3>
   <p><strong>PRIVATE BY DESIGN. OPEN BY NATURE.</strong></p>
   <p>
-    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest"><img src="https://img.shields.io/github/v/release/CodeByArnob/Nexora-share?color=3978F6&label=Latest%20Version&style=flat-square" alt="Latest Version" /></a>
-    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.0-release.apk"><img src="https://img.shields.io/badge/Download-Android%20APK%20(54MB)-39C6B0?style=flat-square&logo=android&logoColor=white" alt="Download APK" /></a>
+    <a href="https://codebyarnob.github.io/Nexora-share/"><img src="https://img.shields.io/badge/Website-Live%20on%20GitHub%20Pages-39C6B0?style=flat-square&logo=githubpages&logoColor=white" alt="Website" /></a>
+    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest"><img src="https://img.shields.io/github/v/release/CodeByArnob/Nexora-share?color=3978F6&label=Latest%20Release&style=flat-square" alt="Latest Version" /></a>
+    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.0-release.apk"><img src="https://img.shields.io/badge/Download-Android%20APK%20(54MB)-3978F6?style=flat-square&logo=android&logoColor=white" alt="Download APK" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-14243B.svg?style=flat-square" alt="License" /></a>
     <img src="https://img.shields.io/badge/platforms-Android%20%7C%20Windows%20%7C%20Linux-17243A.svg?style=flat-square" alt="Platforms" />
-    <img src="https://img.shields.io/badge/tests-39%20passing-brightgreen.svg?style=flat-square" alt="Tests" />
   </p>
 
   <p>
+    <a href="https://codebyarnob.github.io/Nexora-share/">
+      <img src="https://img.shields.io/badge/🌐%20OFFICIAL%20WEBSITE-39C6B0?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Official Website" height="38" />
+    </a>
+    &nbsp;&nbsp;
     <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.0-release.apk">
-      <img src="https://img.shields.io/badge/⚡%20DOWNLOAD%20LATEST%20APK%20(v1.0.0)-3978F6?style=for-the-badge&logo=android&logoColor=white" alt="Download Latest APK" height="38" />
+      <img src="https://img.shields.io/badge/⚡%20DOWNLOAD%20APK%20(v1.0.0)-3978F6?style=for-the-badge&logo=android&logoColor=white" alt="Download Latest APK" height="38" />
     </a>
     &nbsp;&nbsp;
     <a href="https://github.com/CodeByArnob/Nexora-share/releases">
-      <img src="https://img.shields.io/badge/📦%20RELEASE%20ARCHIVE%20&%20NOTES-14243B?style=for-the-badge&logo=github&logoColor=white" alt="Release Archive" height="38" />
+      <img src="https://img.shields.io/badge/📦%20RELEASE%20ARCHIVE-14243B?style=for-the-badge&logo=github&logoColor=white" alt="Release Archive" height="38" />
     </a>
   </p>
 </div>
 
 ---
 
+## 🌐 Official Project Links
+
+- 🚀 **Live Website**: [https://codebyarnob.github.io/Nexora-share/](https://codebyarnob.github.io/Nexora-share/)
+- 📱 **Direct APK Download**: [nexora-v1.0.0-release.apk](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.0-release.apk)
+- 🔒 **Privacy Policy**: [https://codebyarnob.github.io/Nexora-share/privacy](https://codebyarnob.github.io/Nexora-share/privacy)
+- 🛡️ **Security Policy**: [https://codebyarnob.github.io/Nexora-share/security](https://codebyarnob.github.io/Nexora-share/security)
+- 📦 **Latest Release Notes**: [https://github.com/CodeByArnob/Nexora-share/releases/latest](https://github.com/CodeByArnob/Nexora-share/releases/latest)
+
+---
+
 ## 📲 Download Latest APK
 
-The latest tested, production-signed Android APK is always accessible directly from the **[GitHub Releases](https://github.com/CodeByArnob/Nexora-share/releases/latest)** section.
+The latest tested, production-signed Android APK is always accessible directly from the **[GitHub Releases](https://github.com/CodeByArnob/Nexora-share/releases/latest)** section or the **[Official Website](https://codebyarnob.github.io/Nexora-share/)**.
 
 | Package | Version | Platform | Size | SHA-256 Checksum | Download |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Universal Release APK** | `v1.0.0` (Build 100) | Android 8.0+ (ARM64, ARMv7, x86_64) | 54.4 MB | `669823bdfe58adb7c036880cfcab05eac6b7bbe97287351dd5e1c5ae2b83eb5b` | [**Download APK**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.0-release.apk) |
 | **Android App Bundle (AAB)** | `v1.0.0` (Build 100) | Google Play Distribution | 53.7 MB | `8f087e1d9f05a1987e1c75a54ca2849409c8257bac0903755a3747396e3f346b` | [**Download AAB**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.0-release.aab) |
 | **Integrity Ledger** | `v1.0.0` | All Packages | 170 B | Ledger verification | [**SHA256SUMS.txt**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/SHA256SUMS.txt) |
-
-> 📌 **Latest Release Page**: [https://github.com/CodeByArnob/Nexora-share/releases/latest](https://github.com/CodeByArnob/Nexora-share/releases/latest)  
-> 📜 **Complete Release History**: [https://github.com/CodeByArnob/Nexora-share/releases](https://github.com/CodeByArnob/Nexora-share/releases)
 
 ### Quick Android Installation Guide
 1. Tap [**Download NEXORA for Android (APK)**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.0-release.apk).
@@ -153,6 +164,7 @@ nexora-share/
     flatpak/        # Linux Flatpak packaging manifest
     appimage/       # Linux AppRun entrypoint
   scripts/          # Production release build automation scripts
+  website/          # Production React + TypeScript + Vite project website
   assets/
     branding/       # Geometric N logo, platform icons, colors
   docs/             # Architectural, protocol, and testing specifications
@@ -167,6 +179,7 @@ nexora-share/
 - [Flutter 3.44+](https://flutter.dev) & Dart SDK
 - [Rust 1.94+](https://rust-lang.org) (stable)
 - Android SDK & NDK (for mobile APK builds)
+- Node.js 20+ (for website)
 
 ### Running Tests
 ```bash
@@ -207,6 +220,7 @@ flutter analyze apps/desktop apps/mobile
 
 - **Maintainer**: [CodeByArnob](https://github.com/CodeByArnob)
 - **Repository**: [https://github.com/CodeByArnob/Nexora-share](https://github.com/CodeByArnob/Nexora-share)
+- **Website**: [https://codebyarnob.github.io/Nexora-share/](https://codebyarnob.github.io/Nexora-share/)
 - **License**: [Apache License 2.0](LICENSE)
 
 *CONNECT. SHARE. ANYWHERE.*  
