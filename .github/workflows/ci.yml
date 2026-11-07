@@ -68,7 +68,7 @@ jobs:
           flutter pub get
           dart format --output=none --set-exit-if-changed .
           flutter analyze
-          flutter test --coverage
+          flutter test --concurrency=1 --coverage
 
       - name: Verify Flutter Desktop
         run: |
@@ -76,7 +76,7 @@ jobs:
           flutter pub get
           dart format --output=none --set-exit-if-changed .
           flutter analyze
-          flutter test
+          flutter test --concurrency=1
 
   # ---------------------------------------------------------------------------
   # Android Build Verification

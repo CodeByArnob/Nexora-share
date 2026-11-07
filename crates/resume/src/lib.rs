@@ -30,7 +30,7 @@ impl TransferResumeTracker {
         let total_chunks = if total_bytes == 0 {
             1
         } else {
-            (total_bytes + chunk_size as u64 - 1) / chunk_size as u64
+            total_bytes.div_ceil(chunk_size as u64)
         };
 
         Self {
@@ -62,12 +62,7 @@ impl TransferResumeTracker {
 
     /// Finds the lowest chunk index that has not yet been verified.
     pub fn next_missing_chunk(&self) -> Option<u64> {
-        for idx in 0..self.total_chunks {
-            if !self.verified_chunks.contains(&idx) {
-                return Some(idx);
-            }
-        }
-        None
+        (0..self.total_chunks).find(|&idx| !self.verified_chunks.contains(&idx))
     }
 
     /// Returns the number of verified chunks.
