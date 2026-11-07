@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "io.github.codebyarnob" "\0"
-            VALUE "FileDescription", "nexora_desktop" "\0"
+            VALUE "FileDescription", "NEXORA" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "nexora_desktop" "\0"
+            VALUE "InternalName", "nexora" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 io.github.codebyarnob. All rights reserved." "\0"
-            VALUE "OriginalFilename", "nexora_desktop.exe" "\0"
-            VALUE "ProductName", "nexora_desktop" "\0"
+            VALUE "OriginalFilename", "nexora.exe" "\0"
+            VALUE "ProductName", "NEXORA" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
