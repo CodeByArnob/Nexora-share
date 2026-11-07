@@ -1,0 +1,239 @@
+name: NEXORA Release & APK Distribution
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v1.0.0)'
+        required: false
+        default: ''
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Pre-Release Quality Verification
+  # ---------------------------------------------------------------------------
+  verify-quality:
+    name: Pre-Release Quality Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java Toolchain
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Verify Formatting & Static Analysis
+        run: |
+          cd apps/mobile
+          flutter pub get
+          dart format --output=none --set-exit-if-changed .
+          flutter analyze
+
+      - name: Run Unit & Widget Tests
+        run: |
+          cd apps/mobile
+          flutter test --concurrency=1
+
+  # ---------------------------------------------------------------------------
+  # Build Production APK & AAB
+  # ---------------------------------------------------------------------------
+  build-android-release:
+    name: Build Signed Android Production APK
+    runs-on: ubuntu-latest
+    needs: [verify-quality]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Extract Version Tag
+        id: vars
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Building NEXORA version: ${VERSION} (Tag: ${TAG})"
+
+      - name: Setup Java Toolchain
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Configure Production Signing Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          KEY_PROPS="apps/mobile/android/key.properties"
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ]; then
+            echo "Production release keystore secrets detected. Configuring release signing..."
+            echo "$KEYSTORE_BASE64" | base64 -d > apps/mobile/android/app/release.jks
+            cat <<EOF > $KEY_PROPS
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=release.jks
+          EOF
+          else
+            echo "Notice: Repository signing secrets not set. Using workflow build signing key..."
+            keytool -genkey -v -keystore apps/mobile/android/app/release.jks \
+              -alias nexora-release -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass nexora_release_pass -keypass nexora_release_pass \
+              -dname "CN=NEXORA, OU=Distribution, O=CodeByArnob, L=Dhaka, C=BD"
+            cat <<EOF > $KEY_PROPS
+          storePassword=nexora_release_pass
+          keyPassword=nexora_release_pass
+          keyAlias=nexora-release
+          storeFile=release.jks
+          EOF
+          fi
+
+      - name: Build Android Release APK
+        run: |
+          cd apps/mobile
+          flutter pub get
+          flutter build apk --release
+
+      - name: Build Android App Bundle (AAB)
+        run: |
+          cd apps/mobile
+          flutter build appbundle --release
+
+      - name: Prepare Release Artifacts & Checksums
+        id: artifacts
+        run: |
+          TAG="${{ steps.vars.outputs.tag }}"
+          mkdir -p dist/
+          cp apps/mobile/build/app/outputs/flutter-apk/app-release.apk "dist/nexora-${TAG}-release.apk"
+          cp apps/mobile/build/app/outputs/bundle/release/app-release.aab "dist/nexora-${TAG}-release.aab"
+          cd dist/
+          sha256sum nexora-*.apk nexora-*.aab > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          APK_SHA=$(sha256sum "nexora-${TAG}-release.apk" | awk '{print $1}')
+          AAB_SHA=$(sha256sum "nexora-${TAG}-release.aab" | awk '{print $1}')
+          APK_SIZE=$(du -h "nexora-${TAG}-release.apk" | cut -f1)
+          echo "apk_sha=${APK_SHA}" >> $GITHUB_OUTPUT
+          echo "aab_sha=${AAB_SHA}" >> $GITHUB_OUTPUT
+          echo "apk_size=${APK_SIZE}" >> $GITHUB_OUTPUT
+
+      - name: Generate Release Notes
+        run: |
+          TAG="${{ steps.vars.outputs.tag }}"
+          VERSION="${{ steps.vars.outputs.version }}"
+          APK_SHA="${{ steps.artifacts.outputs.apk_sha }}"
+          AAB_SHA="${{ steps.artifacts.outputs.aab_sha }}"
+          APK_SIZE="${{ steps.artifacts.outputs.apk_size }}"
+          
+          cat <<EOF > dist/RELEASE_NOTES.md
+          # NEXORA ${TAG} — Official Production Release
+
+          > **CONNECT. SHARE. ANYWHERE.**  
+          > *PRIVATE BY DESIGN. OPEN BY NATURE.*
+
+          ---
+
+          ### 🚀 Primary Download Link
+          👉 **[Download NEXORA for Android (APK)](https://github.com/CodeByArnob/Nexora-share/releases/download/${TAG}/nexora-${TAG}-release.apk)** (Direct Download, ${APK_SIZE})
+
+          ---
+
+          ## ✨ Highlights & New Features
+
+          - **Root-Level Android Discovery**: Fixed local peer discovery across Android phones. Unique persistent device IDs prevent echo-packet discarding.
+          - **MulticastLock & Subnet Broadcast**: Native Android \`WifiManager.MulticastLock\` and directed subnet broadcasts (\`192.168.x.255\`) ensure instantaneous peer discovery over Wi-Fi and mobile hotspots.
+          - **Direct IP & QR Pairing**: Added direct IP connect and QR pairing payload with IP/port metadata for networks with AP Isolation / Client Isolation.
+          - **Real Device Identity**: Dynamic device model detection (Realme, Samsung, Pixel, etc.) via \`device_info_plus\` replaces hardcoded generic labels.
+          - **Bounded-Memory Streaming**: 1MB chunk slicing streams multi-GB files without memory exhaustion.
+          - **Android Foreground Service**: Sustained background file transfers compliant with Android 14+ \`dataSync\` foreground execution restrictions.
+          - **SHA-256 Checksum Integrity**: Automatic verification of every chunk and overall file checksum.
+
+          ---
+
+          ## 📦 Release Artifacts & Verification
+
+          | File | Format | Size | SHA-256 Checksum |
+          | :--- | :--- | :--- | :--- |
+          | **\`nexora-${TAG}-release.apk\`** | Universal APK | ${APK_SIZE} | \`${APK_SHA}\` |
+          | **\`nexora-${TAG}-release.aab\`** | Google Play Bundle | ~54 MB | \`${AAB_SHA}\` |
+          | **\`SHA256SUMS.txt\`** | Checksums | 170 B | SHA-256 integrity ledger |
+
+          ### Verify Checksum
+          \`\`\`bash
+          # Verify APK integrity on your machine
+          sha256sum -c SHA256SUMS.txt
+          \`\`\`
+
+          ---
+
+          ## 📱 Minimum Requirements
+          - **Android**: Android 8.0 Oreo (API level 26) or newer (Targeting Android 15 / API 35)
+          - **Architecture**: ARM64-v8a, ARMv7, x86_64
+          - **Network**: Wi-Fi, Local Area Network (LAN), or Mobile Hotspot (No Internet connection required)
+
+          ---
+
+          ## 🔧 Installation Instructions
+          1. Tap **[Download NEXORA for Android (APK)](https://github.com/CodeByArnob/Nexora-share/releases/download/${TAG}/nexora-${TAG}-release.apk)** to download the APK.
+          2. Open the downloaded \`.apk\` file on your Android device.
+          3. If prompted, allow **"Install unknown apps"** for your browser or file manager.
+          4. Tap **Install** and launch **NEXORA**.
+
+          ---
+
+          **Maintainer**: [CodeByArnob](https://github.com/CodeByArnob)  
+          **Repository**: [CodeByArnob/Nexora-share](https://github.com/CodeByArnob/Nexora-share)  
+          **License**: Apache License 2.0
+          EOF
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.tag }}
+          name: NEXORA ${{ steps.vars.outputs.tag }}
+          body_path: dist/RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+          files: |
+            dist/nexora-${{ steps.vars.outputs.tag }}-release.apk
+            dist/nexora-${{ steps.vars.outputs.tag }}-release.aab
+            dist/SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

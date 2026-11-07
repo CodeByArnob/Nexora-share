@@ -5,13 +5,45 @@
   <h3>CONNECT. SHARE. ANYWHERE.</h3>
   <p><strong>PRIVATE BY DESIGN. OPEN BY NATURE.</strong></p>
   <p>
-    <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue.svg" alt="License" /></a>
-    <img src="https://img.shields.io/badge/version-1.0.0--production-success.svg" alt="Version" />
-    <img src="https://img.shields.io/badge/platforms-Android%20%7C%20Windows%20%7C%20Linux-teal.svg" alt="Platforms" />
-    <img src="https://img.shields.io/badge/tests-36%2F36%20passing-brightgreen.svg" alt="Tests" />
-    <img src="https://img.shields.io/badge/core-Rust%20%2B%20Flutter-14243B.svg" alt="Tech" />
+    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest"><img src="https://img.shields.io/github/v/release/CodeByArnob/Nexora-share?color=3978F6&label=Latest%20Version&style=flat-square" alt="Latest Version" /></a>
+    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.0-release.apk"><img src="https://img.shields.io/badge/Download-Android%20APK%20(54MB)-39C6B0?style=flat-square&logo=android&logoColor=white" alt="Download APK" /></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-14243B.svg?style=flat-square" alt="License" /></a>
+    <img src="https://img.shields.io/badge/platforms-Android%20%7C%20Windows%20%7C%20Linux-17243A.svg?style=flat-square" alt="Platforms" />
+    <img src="https://img.shields.io/badge/tests-39%20passing-brightgreen.svg?style=flat-square" alt="Tests" />
+  </p>
+
+  <p>
+    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.0-release.apk">
+      <img src="https://img.shields.io/badge/⚡%20DOWNLOAD%20LATEST%20APK%20(v1.0.0)-3978F6?style=for-the-badge&logo=android&logoColor=white" alt="Download Latest APK" height="38" />
+    </a>
+    &nbsp;&nbsp;
+    <a href="https://github.com/CodeByArnob/Nexora-share/releases">
+      <img src="https://img.shields.io/badge/📦%20RELEASE%20ARCHIVE%20&%20NOTES-14243B?style=for-the-badge&logo=github&logoColor=white" alt="Release Archive" height="38" />
+    </a>
   </p>
 </div>
+
+---
+
+## 📲 Download Latest APK
+
+The latest tested, production-signed Android APK is always accessible directly from the **[GitHub Releases](https://github.com/CodeByArnob/Nexora-share/releases/latest)** section.
+
+| Package | Version | Platform | Size | SHA-256 Checksum | Download |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Universal Release APK** | `v1.0.0` (Build 100) | Android 8.0+ (ARM64, ARMv7, x86_64) | 54.4 MB | `669823bdfe58adb7c036880cfcab05eac6b7bbe97287351dd5e1c5ae2b83eb5b` | [**Download APK**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.0-release.apk) |
+| **Android App Bundle (AAB)** | `v1.0.0` (Build 100) | Google Play Distribution | 53.7 MB | `8f087e1d9f05a1987e1c75a54ca2849409c8257bac0903755a3747396e3f346b` | [**Download AAB**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.0-release.aab) |
+| **Integrity Ledger** | `v1.0.0` | All Packages | 170 B | Ledger verification | [**SHA256SUMS.txt**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/SHA256SUMS.txt) |
+
+> 📌 **Latest Release Page**: [https://github.com/CodeByArnob/Nexora-share/releases/latest](https://github.com/CodeByArnob/Nexora-share/releases/latest)  
+> 📜 **Complete Release History**: [https://github.com/CodeByArnob/Nexora-share/releases](https://github.com/CodeByArnob/Nexora-share/releases)
+
+### Quick Android Installation Guide
+1. Tap [**Download NEXORA for Android (APK)**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.0-release.apk).
+2. Open the downloaded file `nexora-v1.0.0-release.apk` on your phone.
+3. When prompted, tap **Settings** and allow **"Install unknown apps"** for your browser or file manager.
+4. Tap **Install** and launch **NEXORA**.
+5. Connect both devices to the same Wi-Fi or Mobile Hotspot for instant peer discovery!
 
 ---
 
@@ -30,7 +62,10 @@ NEXORA is a high-performance, privacy-first cross-platform peer-to-peer file sha
 
 ## 2. Core Features
 
-- **Local Discovery**: Instant zero-configuration local network discovery via UDP multicast (`224.0.0.167:48843`) and mDNS.
+- **Local Discovery**: Instant zero-configuration local network discovery via UDP multicast (`224.0.0.167:48843`), subnet-directed broadcast (`192.168.x.255`), and mDNS.
+- **Native Android MulticastLock**: Hardware-level Wi-Fi multicast lock prevents packet drops on Android power-saving chipsets.
+- **Unique Device Identity**: Automated hardware model identification (`device_info_plus`) and persistent cryptographic UUID.
+- **Direct IP & QR Pairing**: Connect directly by IP or QR code on corporate or guest networks with router AP Isolation / Client Isolation.
 - **Secure Pairing**: Ephemeral QR pairing, 6-digit Short Authentication String (SAS) confirmation, and cryptographic challenge-response validation.
 - **Receiver Approval**: Senders cannot push unapproved files; receivers inspect file manifests, sizes, and file counts before explicitly approving.
 - **Folder & Multi-File Hierarchy**: Recursive directory streaming preserving relative folder structures with path traversal defenses.
@@ -52,7 +87,7 @@ NEXORA is a high-performance, privacy-first cross-platform peer-to-peer file sha
   - **Dark Background**: `#0D1420`
   - **Dark Surface**: `#17243A`
 - **Core Engine**: Rust (Zero-copy networking, async Tokio runtime, Ed25519 cryptographic identity, SHA-256 verification)
-- **Native Android**: Kotlin (Foreground service with `WakeLock`, Storage Access Framework, Notification channels, Share intents)
+- **Native Android**: Kotlin (Foreground service with `WakeLock`, `MulticastLock`, Storage Access Framework, Share intents)
 - **Native Desktop**: C++ / CMake runner for Windows & Linux
 - **Storage**: SQLite with versioned migrations (`DatabaseService`)
 
@@ -67,7 +102,7 @@ Flutter Material 3 UI (Mobile & Desktop)
                  │
         Typed Rust FFI Bridge
                  │
-       NEXORA Rust Core Engine
+        NEXORA Rust Core Engine
   ┌──────────────┼──────────────┐
   │              │              │
 Discovery    Identity        Transfer
@@ -137,11 +172,11 @@ nexora-share/
 ```bash
 # Run all Desktop & Linux test suites (28 tests)
 cd apps/desktop
-flutter test
+flutter test --concurrency=1
 
-# Run all Android mobile test suites (8 tests)
+# Run all Android mobile test suites (11 tests)
 cd apps/mobile
-flutter test
+flutter test --concurrency=1
 
 # Static analysis
 flutter analyze apps/desktop apps/mobile
@@ -168,8 +203,11 @@ flutter analyze apps/desktop apps/mobile
 
 ---
 
-## 8. License
+## 8. License & Maintainer
 
-NEXORA is licensed under the [Apache License 2.0](LICENSE).  
+- **Maintainer**: [CodeByArnob](https://github.com/CodeByArnob)
+- **Repository**: [https://github.com/CodeByArnob/Nexora-share](https://github.com/CodeByArnob/Nexora-share)
+- **License**: [Apache License 2.0](LICENSE)
+
 *CONNECT. SHARE. ANYWHERE.*  
 *PRIVATE BY DESIGN. OPEN BY NATURE.*
