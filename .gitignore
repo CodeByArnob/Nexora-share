@@ -19,6 +19,15 @@ apps/mobile/android/local.properties
 apps/mobile/android/**/build/
 *.keystore
 *.jks
+key.properties
+**/key.properties
+
+# Release Binaries (stored locally and distributed via GitHub Releases)
+release/**/*.apk
+release/**/*.aab
+release/**/*.zip
+!release/**/README.md
+!release/**/SHA256SUMS.txt
 
 # IDE & Editor
 .idea/

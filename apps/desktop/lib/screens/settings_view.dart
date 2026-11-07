@@ -444,12 +444,23 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Version 1.0.0 • Apache License 2.0',
+                    'Version 1.0.0 (Build 100) • Apache License 2.0',
+                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Developer: CodeByArnob (https://github.com/CodeByArnob)',
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
                   ),
+                  const SizedBox(height: 2),
                   Text(
                     'Repository: https://github.com/CodeByArnob/Nexora-share',
                     style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Technologies: Flutter, Rust core crates, Riverpod, SQLite, SHA-256',
+                    style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
                   ),
                 ],
               ),

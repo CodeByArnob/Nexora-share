@@ -152,3 +152,39 @@ jobs:
         run: |
           test -x apps/desktop/build/linux/x64/release/bundle/nexora
           echo "Linux release binary successfully built and validated."
+
+  # ---------------------------------------------------------------------------
+  # Windows Desktop Build & Executable Packaging
+  # ---------------------------------------------------------------------------
+  windows-build:
+    name: Windows PC Executable Build (.exe)
+    runs-on: windows-latest
+    needs: [rust-check, flutter-check]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.4"
+          channel: "stable"
+
+      - name: Enable Windows Desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Build Windows Executable (Release)
+        run: |
+          cd apps/desktop
+          flutter pub get
+          flutter build windows --release
+
+      - name: Package Windows Release (.zip)
+        run: |
+          Compress-Archive -Path apps\desktop\build\windows\x64\runner\Release\* -DestinationPath release-windows-x64.zip
+
+      - name: Upload Windows Release Executable Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexora-windows-x64-release
+          path: release-windows-x64.zip
