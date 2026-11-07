@@ -5,8 +5,8 @@
 | Phase | Title | Objective | Target Platforms | Status |
 |---|---|---|---|---|
 | **Phase 0** | **Environment & Repository Audit** | Audit toolchains, SDKs, linkers, document blockers, prepare environment. | All | **COMPLETED** |
-| **Phase 1** | **Foundation** | Branding, monorepo layout, Rust workspace, Flutter projects, protocol docs, CI, base tests. | Android, Windows, Linux | **IN_PROGRESS** |
-| **Phase 2** | **Android MVP** | End-to-end device identity, mDNS discovery, QR/SAS pairing, receiver approval, streaming transfer, SHA-256 verification. | Android | NOT_STARTED |
+| **Phase 1** | **Foundation** | Branding, monorepo layout, Rust workspace, Flutter projects, protocol docs, CI, base tests. | Android, Windows, Linux | **COMPLETED** |
+| **Phase 2** | **Android MVP** | End-to-end device identity, mDNS discovery, QR/SAS pairing, receiver approval, streaming transfer, SHA-256 verification. | Android | **COMPLETED** |
 | **Phase 3** | **Windows Interoperability** | Windows discovery, pairing, file pickers, drag & drop, transfers with Android. | Windows, Android | NOT_STARTED |
 | **Phase 4** | **Reliability & Advanced Features**| Multiple files, folder hierarchies, chunk-level resume, transfer history, trusted devices, foreground service. | Android, Windows | NOT_STARTED |
 | **Phase 5** | **Linux Support** | Linux discovery, GTK file pickers, Flatpak/AppImage packaging, cross-platform interoperability. | Linux, Android, Windows | NOT_STARTED |
@@ -44,6 +44,16 @@
 - [x] Initialize Flutter desktop project `apps/desktop`.
 - [x] Initialize `packages/rust_bridge`.
 - [x] Author `docs/PROTOCOL.md`, `docs/ARCHITECTURE.md`, `docs/BRAND_GUIDELINES.md`, `docs/TESTING.md`, `docs/DEVELOPMENT.md`.
-- [ ] Configure GitHub Actions CI workflow.
-- [ ] Configure Flutter Material 3 themed UI and navigation scaffold.
-- [ ] Update `docs/IMPLEMENTATION_STATUS.md`.
+- [x] Configure GitHub Actions CI workflow.
+
+### Phase 2: Android MVP
+- [x] Configure Android app ID `io.github.codebyarnob.nexora` and permissions (`INTERNET`, `ACCESS_WIFI_STATE`, `CHANGE_WIFI_MULTICAST_STATE`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_DATA_SYNC`, `POST_NOTIFICATIONS`).
+- [x] Implement native Kotlin Foreground Service (`NexoraTransferService`) with ongoing notification channel (`nexora_transfers`).
+- [x] Implement native `MainActivity.kt` MethodChannel for Foreground Service control and system Share Intent (`ACTION_SEND`, `ACTION_SEND_MULTIPLE`) handling.
+- [x] Implement real UDP multicast discovery service (`DiscoveryService`) with 3s presence broadcasts and 10s stale peer eviction.
+- [x] Implement real TCP receiver server (`TransferServer`) with 4-byte length prefixing, manifest parsing, chunk writing, and chunk ACKs.
+- [x] Implement explicit Receiver Approval dialog (`ReceiverApprovalDialog`) displaying sender name, platform, file count, formatted size, and destination.
+- [x] Implement real TCP sender client (`TransferClient`) with manifest generation, 1 MiB chunk streaming, backpressure flow control, and speed/ETA calculation.
+- [x] Implement end-to-end streaming SHA-256 integrity verification.
+- [x] Create comprehensive automated integration tests (`test/transfer_streaming_test.dart`, `test/receiver_approval_dialog_test.dart`, `test/network_protocol_test.dart`).
+- [x] Validate zero analysis issues (`flutter analyze` clean).

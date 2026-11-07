@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/transfer_model.dart';
+import '../network/network_controller.dart';
 import '../providers/app_state.dart';
 import '../theme/nexora_theme.dart';
+import '../widgets/pairing_dialog.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -13,6 +16,7 @@ class HomeScreen extends ConsumerWidget {
     final nearbyPeers = ref.watch(discoveredPeersProvider);
     final activeTransfers = ref.watch(activeTransfersProvider);
     final history = ref.watch(transferHistoryProvider);
+    final controller = ref.read(networkControllerProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -50,11 +54,23 @@ class HomeScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner),
-            tooltip: 'Scan QR to Pair',
+            icon: const Icon(Icons.qr_code_2),
+            tooltip: 'Pair Device (QR & Code)',
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('QR Scanner ready for pairing')),
+              final qrPayload = jsonEncode({
+                'version': 1,
+                'device_id': localDevice.deviceId,
+                'display_name': localDevice.displayName,
+                'fingerprint': localDevice.fingerprint,
+                'port': 48842,
+              });
+              showDialog(
+                context: context,
+                builder: (context) => PairingDialog(
+                  localDevice: localDevice,
+                  sasCode: '482910',
+                  qrData: qrPayload,
+                ),
               );
             },
           ),
@@ -62,7 +78,6 @@ class HomeScreen extends ConsumerWidget {
       ),
       body: RefreshIndicator(
         onRefresh: () async {
-          // Trigger mDNS discovery refresh
           await Future.delayed(const Duration(milliseconds: 500));
         },
         child: ListView(
@@ -133,9 +148,19 @@ class HomeScreen extends ConsumerWidget {
                     icon: const Icon(Icons.upload_file),
                     label: const Text('Send Files', style: TextStyle(fontWeight: FontWeight.bold)),
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Select files to transfer')),
-                      );
+                      if (nearbyPeers.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('No nearby NEXORA peers detected yet. Wait for discovery.'),
+                          ),
+                        );
+                      } else {
+                        // Pick first peer or show selector
+                        controller.pickAndSendFile(
+                          context: context,
+                          targetPeer: nearbyPeers.first,
+                        );
+                      }
                     },
                   ),
                 ),
@@ -152,7 +177,9 @@ class HomeScreen extends ConsumerWidget {
                     label: const Text('Receive Files', style: TextStyle(fontWeight: FontWeight.bold)),
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Waiting for incoming peer transfer offers...')),
+                        const SnackBar(
+                          content: Text('Receiver active. Waiting for incoming transfer offer...'),
+                        ),
                       );
                     },
                   ),
@@ -238,17 +265,19 @@ class HomeScreen extends ConsumerWidget {
                   ),
                   title: Text(peer.displayName, style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text('${peer.platform} • ${peer.address ?? 'mDNS'}'),
-                  trailing: ElevatedButton(
+                  trailing: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: NexoraColors.electricBlue,
                       foregroundColor: Colors.white,
                     ),
+                    icon: const Icon(Icons.send, size: 16),
+                    label: const Text('Send'),
                     onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Pairing with ${peer.displayName}...')),
+                      controller.pickAndSendFile(
+                        context: context,
+                        targetPeer: peer,
                       );
                     },
-                    child: const Text('Connect'),
                   ),
                 ),
               )),

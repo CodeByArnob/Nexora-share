@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../network/network_controller.dart';
+import '../widgets/receiver_approval_dialog.dart';
 import 'home_screen.dart';
 import 'transfers_screen.dart';
 import 'history_screen.dart';
 import 'devices_screen.dart';
 import 'settings_screen.dart';
 
-class NavigationShell extends StatefulWidget {
+class NavigationShell extends ConsumerStatefulWidget {
   const NavigationShell({super.key});
 
   @override
-  State<NavigationShell> createState() => _NavigationShellState();
+  ConsumerState<NavigationShell> createState() => _NavigationShellState();
 }
 
-class _NavigationShellState extends State<NavigationShell> {
+class _NavigationShellState extends ConsumerState<NavigationShell> {
   int _currentIndex = 0;
+  late NetworkController _controller;
 
   final List<Widget> _screens = const [
     HomeScreen(),
@@ -22,6 +26,35 @@ class _NavigationShellState extends State<NavigationShell> {
     DevicesScreen(),
     SettingsScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ref.read(networkControllerProvider);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initNetwork();
+    });
+  }
+
+  void _initNetwork() {
+    _controller.initialize(
+      approvalCallback: (offer) async {
+        if (!mounted) return false;
+        final result = await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => ReceiverApprovalDialog(offer: offer),
+        );
+        return result ?? false;
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

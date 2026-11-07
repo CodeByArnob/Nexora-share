@@ -14,6 +14,7 @@ packages/**/build/
 
 # Android
 apps/mobile/android/.gradle/
+apps/mobile/android/.kotlin/
 apps/mobile/android/local.properties
 apps/mobile/android/**/build/
 *.keystore
