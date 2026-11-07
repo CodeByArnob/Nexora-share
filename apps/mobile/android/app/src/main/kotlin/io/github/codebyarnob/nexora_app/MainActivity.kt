@@ -2,17 +2,21 @@ package io.github.codebyarnob.nexora_app
 
 import android.content.Context
 import android.content.Intent
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.Bundle
+import android.os.Environment
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import java.io.File
 
 class MainActivity : FlutterActivity() {
 
     private val SERVICE_CHANNEL = "io.github.codebyarnob.nexora/foreground_service"
     private val SHARE_CHANNEL = "io.github.codebyarnob.nexora/share_intent"
+    private val MEDIA_STORE_CHANNEL = "io.github.codebyarnob.nexora/media_store"
 
     private var initialSharedUris: ArrayList<String>? = null
     private var shareMethodChannel: MethodChannel? = null
@@ -122,6 +126,59 @@ class MainActivity : FlutterActivity() {
                 } else {
                     result.notImplemented()
                 }
+            }
+        }
+
+        // Media Store & Gallery Scan Channel
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, MEDIA_STORE_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "getPublicDownloadDirectory" -> {
+                    try {
+                        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+                        val nexoraDir = File(downloadsDir, "Nexora")
+                        if (!nexoraDir.exists()) {
+                            nexoraDir.mkdirs()
+                        }
+                        result.success(nexoraDir.absolutePath)
+                    } catch (e: Exception) {
+                        try {
+                            val extFiles = applicationContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
+                            val nexoraDir = File(extFiles, "Nexora")
+                            if (!nexoraDir.exists()) {
+                                nexoraDir.mkdirs()
+                            }
+                            result.success(nexoraDir.absolutePath)
+                        } catch (ex: Exception) {
+                            result.error("DIR_ERROR", ex.message, null)
+                        }
+                    }
+                }
+                "scanFile" -> {
+                    val path = call.argument<String>("path")
+                    val mimeType = call.argument<String>("mimeType")
+                    if (path != null) {
+                        try {
+                            val mimeArray = if (mimeType != null) arrayOf(mimeType) else null
+                            MediaScannerConnection.scanFile(
+                                applicationContext,
+                                arrayOf(path),
+                                mimeArray
+                            ) { _, _ -> }
+
+                            val file = File(path)
+                            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE).apply {
+                                data = Uri.fromFile(file)
+                            }
+                            applicationContext.sendBroadcast(mediaScanIntent)
+                            result.success(true)
+                        } catch (e: Exception) {
+                            result.error("SCAN_ERROR", e.message, null)
+                        }
+                    } else {
+                        result.error("INVALID_ARG", "Path cannot be null", null)
+                    }
+                }
+                else -> result.notImplemented()
             }
         }
     }

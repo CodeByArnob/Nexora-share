@@ -3,10 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
-import 'package:path_provider/path_provider.dart';
 import '../database/database_service.dart';
 import '../models/transfer_model.dart';
 import '../services/android_foreground_service.dart';
+import '../services/media_store_service.dart';
 import 'file_transfer_manifest.dart';
 import 'protocol_messages.dart';
 
@@ -42,6 +42,10 @@ class TransferServer {
   final void Function(NexoraTransfer completedTransfer) onTransferCompleted;
   final void Function(String error)? onError;
 
+  final Map<String, Socket> _activeSockets = {};
+  final Set<String> _cancelledTransferIds = {};
+  final Set<String> _pausedTransferIds = {};
+
   TransferServer({
     this.customDestinationDirectory,
     required this.onRequestApproval,
@@ -49,6 +53,62 @@ class TransferServer {
     required this.onTransferCompleted,
     this.onError,
   });
+
+  /// Cancels an in-flight transfer from the receiver side.
+  void cancel(String transferId) {
+    _cancelledTransferIds.add(transferId);
+    _pausedTransferIds.remove(transferId);
+
+    final socket = _activeSockets[transferId];
+    if (socket != null) {
+      try {
+        socket.add(
+          encodeFrame({
+            'type': 'TransferCancel',
+            'payload': {
+              'transfer_id': transferId,
+              'reason': 'Cancelled by receiver',
+            },
+          }),
+        );
+      } catch (_) {}
+      try {
+        socket.destroy();
+      } catch (_) {}
+    }
+  }
+
+  /// Pauses an incoming transfer from the receiver side.
+  void pause(String transferId) {
+    _pausedTransferIds.add(transferId);
+    final socket = _activeSockets[transferId];
+    if (socket != null) {
+      try {
+        socket.add(
+          encodeFrame({
+            'type': 'TransferPause',
+            'payload': {'transfer_id': transferId},
+          }),
+        );
+      } catch (_) {}
+    }
+  }
+
+  /// Resumes an incoming transfer from the receiver side.
+  void resume(String transferId) {
+    _pausedTransferIds.remove(transferId);
+    final socket = _activeSockets[transferId];
+    if (socket != null) {
+      try {
+        socket.add(
+          encodeFrame({
+            'type': 'TransferResume',
+            'payload': {'transfer_id': transferId},
+          }),
+        );
+      } catch (_) {}
+    }
+  }
 
   /// Starts the TCP transfer server listening for peer transfers.
   Future<int> start() async {
@@ -63,6 +123,10 @@ class TransferServer {
   }
 
   void _handleClientConnection(Socket socket) {
+    try {
+      socket.setOption(SocketOption.tcpNoDelay, true);
+    } catch (_) {}
+
     final buffer = BytesBuilder(copy: false);
     int expectedLength = -1;
 
@@ -71,8 +135,11 @@ class TransferServer {
     int totalBytes = 0;
     int totalFiles = 1;
     int receivedBytes = 0;
+    int lastDbCheckpoint = 0;
     RandomAccessFile? destinationFile;
     String? activeFileId;
+    String? currentFilePath;
+    final List<String> completedFilePaths = [];
     Directory? activeDownloadDir;
     final Map<String, ManifestItem> manifestFiles = {};
 
@@ -83,11 +150,17 @@ class TransferServer {
 
     Future<void> safeCloseFile() async {
       final f = destinationFile;
+      final path = currentFilePath;
       destinationFile = null;
       if (f != null) {
         try {
           await f.close();
         } catch (_) {}
+      }
+      if (path != null) {
+        completedFilePaths.add(path);
+        // Automatically scan into Android MediaStore so Gallery shows images/videos
+        unawaited(MediaStoreService.scanFile(path));
       }
     }
 
@@ -147,11 +220,73 @@ class TransferServer {
                 },
               });
               socket.add(reply);
+            } else if (type == 'TransferCancel') {
+              // Sender cancelled transfer
+              if (activeTransferId != null) {
+                _cancelledTransferIds.add(activeTransferId!);
+              }
+              await safeCloseFile();
+              await AndroidForegroundService.stopService();
+
+              if (activeTransferId != null) {
+                try {
+                  await DatabaseService.instance.updateTransferProgress(
+                    activeTransferId!,
+                    receivedBytes,
+                    TransferState.cancelled,
+                  );
+                } catch (_) {}
+
+                final cancelledTransfer = NexoraTransfer(
+                  transferId: activeTransferId!,
+                  direction: TransferDirection.receive,
+                  remoteDeviceId: 'peer',
+                  remoteDeviceName: remoteDeviceName,
+                  totalFiles: totalFiles,
+                  totalBytes: totalBytes,
+                  bytesTransferred: receivedBytes,
+                  speedBytesPerSec: 0.0,
+                  etaSeconds: 0,
+                  currentFile: currentFileName ?? 'Cancelled',
+                  state: TransferState.cancelled,
+                  createdAt: startTime,
+                );
+                onTransferProgress(cancelledTransfer);
+              }
+              socket.destroy();
+              return;
+            } else if (type == 'TransferPause') {
+              if (activeTransferId != null) {
+                _pausedTransferIds.add(activeTransferId!);
+                final pausedTransfer = NexoraTransfer(
+                  transferId: activeTransferId!,
+                  direction: TransferDirection.receive,
+                  remoteDeviceId: 'peer',
+                  remoteDeviceName: remoteDeviceName,
+                  totalFiles: totalFiles,
+                  totalBytes: totalBytes,
+                  bytesTransferred: receivedBytes,
+                  speedBytesPerSec: 0.0,
+                  etaSeconds: 0,
+                  currentFile: currentFileName ?? 'Paused',
+                  state: TransferState.paused,
+                  createdAt: startTime,
+                );
+                onTransferProgress(pausedTransfer);
+              }
+            } else if (type == 'TransferResume') {
+              if (activeTransferId != null) {
+                _pausedTransferIds.remove(activeTransferId!);
+              }
             } else if (type == 'TransferOffer') {
               final manifestMap = payload['manifest'] as Map<String, dynamic>;
               final manifest = TransferManifest.fromJson(manifestMap);
 
               activeTransferId = payload['transfer_id'] as String;
+              _activeSockets[activeTransferId!] = socket;
+              _cancelledTransferIds.remove(activeTransferId!);
+              _pausedTransferIds.remove(activeTransferId!);
+
               totalBytes = manifest.totalBytes;
               totalFiles = manifest.totalFiles;
 
@@ -186,12 +321,9 @@ class TransferServer {
                 if (customDestinationDirectory != null) {
                   activeDownloadDir = customDestinationDirectory!;
                 } else {
-                  try {
-                    activeDownloadDir =
-                        await getApplicationDocumentsDirectory();
-                  } catch (_) {
-                    activeDownloadDir = Directory.systemTemp;
-                  }
+                  // Resolve public Downloads/Nexora so gallery & file manager immediately see files
+                  activeDownloadDir =
+                      await MediaStoreService.getDownloadDirectory();
                 }
 
                 if (!await activeDownloadDir!.exists()) {
@@ -250,6 +382,7 @@ class TransferServer {
                     },
                   }),
                 );
+                _activeSockets.remove(activeTransferId);
                 socket.destroy();
                 return;
               }
@@ -272,13 +405,22 @@ class TransferServer {
                 }),
               );
             } else if (type == 'ChunkData') {
+              if (activeTransferId != null &&
+                  _cancelledTransferIds.contains(activeTransferId!)) {
+                await safeCloseFile();
+                socket.destroy();
+                return;
+              }
+
               final fileId = payload['file_id'] as String? ?? 'f-0';
               final dynamic rawData = payload['data'];
-              final Uint8List chunkBytes = rawData is String
-                  ? base64Decode(rawData)
-                  : (rawData is List
-                        ? Uint8List.fromList(rawData.cast<int>())
-                        : Uint8List(0));
+              final Uint8List chunkBytes = rawData is Uint8List
+                  ? rawData
+                  : (rawData is String
+                        ? base64Decode(rawData)
+                        : (rawData is List
+                              ? Uint8List.fromList(rawData.cast<int>())
+                              : Uint8List(0)));
               final offset = payload['offset'] as int? ?? 0;
               final chunkIndex = payload['chunk_index'] as int? ?? 0;
               final chunkSha256 = payload['chunk_sha256'] as String?;
@@ -309,6 +451,8 @@ class TransferServer {
                   relativePath: relativePath,
                 );
 
+                currentFilePath = targetFile.path;
+
                 if (!await targetFile.parent.exists()) {
                   await targetFile.parent.create(recursive: true);
                 }
@@ -325,20 +469,25 @@ class TransferServer {
 
               receivedBytes += chunkBytes.length;
 
-              // Record checkpoint in SQLite
-              try {
-                if (activeTransferId != null) {
-                  await DatabaseService.instance.recordVerifiedChunk(
-                    transferId: activeTransferId!,
-                    fileId: fileId,
-                    chunkIndex: chunkIndex,
-                    chunkOffset: offset,
-                    chunkSize: chunkBytes.length,
-                    chunkSha256: chunkSha256 ?? '',
-                  );
-                }
-              } catch (_) {}
+              // Throttle SQLite writes: checkpoint every 5 MB or on completion
+              if (receivedBytes - lastDbCheckpoint >= 5 * 1024 * 1024 ||
+                  receivedBytes >= totalBytes) {
+                lastDbCheckpoint = receivedBytes;
+                try {
+                  if (activeTransferId != null) {
+                    await DatabaseService.instance.recordVerifiedChunk(
+                      transferId: activeTransferId!,
+                      fileId: fileId,
+                      chunkIndex: chunkIndex,
+                      chunkOffset: offset,
+                      chunkSize: chunkBytes.length,
+                      chunkSha256: chunkSha256 ?? '',
+                    );
+                  }
+                } catch (_) {}
+              }
 
+              // Send ChunkAck immediately for sliding window flow control
               socket.add(
                 encodeFrame({
                   'type': 'ChunkAck',
@@ -353,7 +502,7 @@ class TransferServer {
               );
 
               final now = DateTime.now();
-              if (now.difference(lastProgressUpdate).inMilliseconds >= 250 ||
+              if (now.difference(lastProgressUpdate).inMilliseconds >= 200 ||
                   receivedBytes >= totalBytes) {
                 lastProgressUpdate = now;
                 final elapsedSeconds =
@@ -404,6 +553,11 @@ class TransferServer {
             } else if (type == 'TransferComplete') {
               await safeCloseFile();
 
+              // Trigger MediaScanner for all received files to show in Gallery
+              for (final path in completedFilePaths) {
+                await MediaStoreService.scanFile(path);
+              }
+
               await AndroidForegroundService.stopService();
 
               // Update SQLite state
@@ -437,19 +591,31 @@ class TransferServer {
               );
 
               onTransferCompleted(completed);
+              if (activeTransferId != null) {
+                _activeSockets.remove(activeTransferId);
+              }
               socket.destroy();
             }
           } catch (_) {
+            if (activeTransferId != null) {
+              _activeSockets.remove(activeTransferId);
+            }
             socket.destroy();
           }
         }
       },
       onDone: () async {
         await safeCloseFile();
+        if (activeTransferId != null) {
+          _activeSockets.remove(activeTransferId);
+        }
         await AndroidForegroundService.stopService();
       },
       onError: (_) async {
         await safeCloseFile();
+        if (activeTransferId != null) {
+          _activeSockets.remove(activeTransferId);
+        }
         await AndroidForegroundService.stopService();
       },
     );
@@ -458,5 +624,11 @@ class TransferServer {
   void stop() {
     _serverSocket?.close();
     _serverSocket = null;
+    for (final s in _activeSockets.values) {
+      try {
+        s.destroy();
+      } catch (_) {}
+    }
+    _activeSockets.clear();
   }
 }

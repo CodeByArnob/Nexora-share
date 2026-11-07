@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../database/database_service.dart';
 import '../models/device_model.dart';
 import '../models/transfer_model.dart';
 import '../providers/app_state.dart';
@@ -88,6 +89,10 @@ class NetworkController {
   }
 
   void _updateActiveTransfer(NexoraTransfer transfer) {
+    if (transfer.state == TransferState.cancelled) {
+      _completeTransfer(transfer);
+      return;
+    }
     final list = List<NexoraTransfer>.from(_ref.read(activeTransfersProvider));
     final idx = list.indexWhere((t) => t.transferId == transfer.transferId);
     if (idx >= 0) {
@@ -110,6 +115,76 @@ class NetworkController {
       ..._ref.read(transferHistoryProvider),
     ];
     _ref.read(transferHistoryProvider.notifier).state = history;
+  }
+
+  /// Cancels an active in-flight transfer (sending or receiving).
+  Future<void> cancelTransfer(String transferId) async {
+    _client?.cancel(transferId);
+    _server?.cancel(transferId);
+
+    final active = List<NexoraTransfer>.from(
+      _ref.read(activeTransfersProvider),
+    );
+    final idx = active.indexWhere((t) => t.transferId == transferId);
+    if (idx >= 0) {
+      final cancelled = active[idx].copyWith(
+        state: TransferState.cancelled,
+        speedBytesPerSec: 0,
+        etaSeconds: 0,
+        completedAt: DateTime.now(),
+      );
+      active.removeAt(idx);
+      _ref.read(activeTransfersProvider.notifier).state = active;
+
+      final history = <NexoraTransfer>[
+        cancelled,
+        ..._ref.read(transferHistoryProvider),
+      ];
+      _ref.read(transferHistoryProvider.notifier).state = history;
+
+      try {
+        await DatabaseService.instance.updateTransferProgress(
+          transferId,
+          cancelled.bytesTransferred,
+          TransferState.cancelled,
+        );
+      } catch (_) {}
+    }
+  }
+
+  /// Pauses an active in-flight transfer.
+  void pauseTransfer(String transferId) {
+    _client?.pause(transferId);
+    _server?.pause(transferId);
+
+    final active = List<NexoraTransfer>.from(
+      _ref.read(activeTransfersProvider),
+    );
+    final idx = active.indexWhere((t) => t.transferId == transferId);
+    if (idx >= 0) {
+      active[idx] = active[idx].copyWith(
+        state: TransferState.paused,
+        speedBytesPerSec: 0,
+      );
+      _ref.read(activeTransfersProvider.notifier).state = active;
+    }
+  }
+
+  /// Resumes a paused transfer.
+  void resumeTransfer(String transferId) {
+    _client?.resume(transferId);
+    _server?.resume(transferId);
+
+    final active = List<NexoraTransfer>.from(
+      _ref.read(activeTransfersProvider),
+    );
+    final idx = active.indexWhere((t) => t.transferId == transferId);
+    if (idx >= 0) {
+      active[idx] = active[idx].copyWith(
+        state: TransferState.inProgress,
+      );
+      _ref.read(activeTransfersProvider.notifier).state = active;
+    }
   }
 
   /// Sends a specific file to a peer (e.g. from file picker, Share Intent, or tests).

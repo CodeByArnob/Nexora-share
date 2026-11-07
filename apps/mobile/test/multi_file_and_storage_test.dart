@@ -19,7 +19,14 @@ void main() {
   tearDown(() async {
     await DatabaseService.instance.close();
     if (await tempDir.exists()) {
-      await tempDir.delete(recursive: true);
+      for (int i = 0; i < 5; i++) {
+        try {
+          await tempDir.delete(recursive: true);
+          break;
+        } catch (_) {
+          await Future.delayed(const Duration(milliseconds: 150));
+        }
+      }
     }
   });
 
