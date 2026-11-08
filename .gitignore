@@ -28,6 +28,13 @@ release/**/*.aab
 release/**/*.zip
 !release/**/README.md
 !release/**/SHA256SUMS.txt
+dist/**/*.apk
+dist/**/*.aab
+dist/**/*.exe
+dist/**/*.zip
+!dist/**/README.md
+!dist/**/APK_SIZE_ANALYSIS.md
+!dist/**/SHA256SUMS.txt
 
 # Node & Website
 website/node_modules/

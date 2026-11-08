@@ -1,3 +1,4 @@
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:crypto/crypto.dart';
@@ -9,6 +10,11 @@ import 'package:nexora_app/network/transfer_client.dart';
 import 'package:nexora_app/network/transfer_server.dart';
 
 void main() {
+  setUpAll(() {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  });
+
   late Directory tempDir;
 
   setUp(() async {

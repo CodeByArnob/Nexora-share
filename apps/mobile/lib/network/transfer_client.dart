@@ -557,6 +557,11 @@ class TransferClient {
 
       await ackSubscription.cancel();
 
+      // Setup TransferCompleteAck future before dispatching TransferComplete
+      final completeAckFuture = frameStream
+          .firstWhere((m) => m['type'] == 'TransferCompleteAck')
+          .timeout(const Duration(seconds: 10), onTimeout: () => {});
+
       // 4. Send TransferComplete
       socket.add(
         encodeFrame({
@@ -567,6 +572,12 @@ class TransferClient {
           },
         }),
       );
+      try {
+        await socket.flush();
+      } catch (_) {}
+
+      // Await confirmation that receiver has flushed and verified files
+      await completeAckFuture;
 
       await AndroidForegroundService.stopService();
 
@@ -603,7 +614,12 @@ class TransferClient {
       await peerCancelSub.cancel();
       await subscription.cancel();
       _activeSockets.remove(transferId);
-      socket.destroy();
+      try {
+        await socket.flush();
+        await socket.close();
+      } catch (_) {
+        socket.destroy();
+      }
     } catch (e) {
       if (activeRaf != null) {
         try {

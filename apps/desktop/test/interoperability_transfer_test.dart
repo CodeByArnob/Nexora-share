@@ -298,4 +298,86 @@ void main() {
       server.stop();
     },
   );
+
+  test(
+    'ISSUE 2 Regression: Small file (18.3 KB) transfer completes cleanly with TransferCompleteAck',
+    () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'nexora_desk_18kb_',
+      );
+      final sourceFile = File('${tempDir.path}/test_small.pdf');
+      final testBytes = Uint8List(18739);
+      for (int i = 0; i < testBytes.length; i++) {
+        testBytes[i] = (i * 41) % 256;
+      }
+      await sourceFile.writeAsBytes(testBytes);
+      final expectedSha = sha256.convert(testBytes).toString();
+
+      final serverCompleter = Completer<NexoraTransfer>();
+      final clientCompleter = Completer<NexoraTransfer>();
+
+      final server = TransferServer(
+        customDestinationDirectory: tempDir,
+        onRequestApproval: (offer) async => true,
+        onTransferProgress: (progress) {},
+        onTransferCompleted: (completed) {
+          serverCompleter.complete(completed);
+        },
+      );
+
+      final port = await server.start();
+
+      final targetPeer = NexoraDevice(
+        deviceId: 'server-peer',
+        displayName: 'Receiver Host',
+        platform: 'Android',
+        fingerprint: 'dummy-fp',
+        address: '127.0.0.1',
+        port: port,
+        lastSeen: DateTime.now(),
+      );
+
+      final localDevice = NexoraDevice(
+        deviceId: 'local-peer',
+        displayName: 'Sender Host',
+        platform: 'Windows',
+        fingerprint: 'dummy-fp2',
+        lastSeen: DateTime.now(),
+      );
+
+      final client = TransferClient(
+        onProgress: (_) {},
+        onCompleted: (c) {
+          clientCompleter.complete(c);
+        },
+        onError: (err) => fail('Client error: '),
+      );
+
+      await client.sendFile(
+        peer: targetPeer,
+        file: sourceFile,
+        localDevice: localDevice,
+      );
+
+      final serverDone = await serverCompleter.future.timeout(
+        const Duration(seconds: 10),
+      );
+      final clientDone = await clientCompleter.future.timeout(
+        const Duration(seconds: 10),
+      );
+
+      expect(serverDone.state, TransferState.completed);
+      expect(clientDone.state, TransferState.completed);
+      expect(serverDone.speedBytesPerSec, 0.0);
+      expect(serverDone.etaSeconds, 0);
+
+      final savedFile = File('${tempDir.path}/test_small.pdf');
+      expect(await savedFile.exists(), isTrue);
+      final savedBytes = await savedFile.readAsBytes();
+      expect(sha256.convert(savedBytes).toString(), expectedSha);
+
+      server.stop();
+      await tempDir.delete(recursive: true);
+    },
+  );
 }

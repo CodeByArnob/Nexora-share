@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/database_service.dart';
@@ -174,178 +175,203 @@ class _DesktopShellState extends ConsumerState<DesktopShell> {
         break;
     }
 
-    return Scaffold(
-      body: Row(
-        children: [
-          // Left Sidebar
-          Container(
-            width: 240,
-            decoration: BoxDecoration(
-              color: isDark
-                  ? NexoraColors.darkSurface
-                  : NexoraColors.lightSurface,
-              border: Border(
-                right: BorderSide(
-                  color: isDark ? Colors.white12 : Colors.grey.shade300,
-                  width: 1,
-                ),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top Brand Header
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: NexoraColors.midnightNavy,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Icon(
-                          Icons.share_outlined,
-                          color: NexoraColors.signalTeal,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'NEXORA',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontSize: 17,
-                              letterSpacing: 1.5,
-                            ),
-                          ),
-                          Text(
-                            'CONNECT. SHARE.',
-                            style: TextStyle(
-                              fontSize: 9,
-                              fontWeight: FontWeight.bold,
-                              letterSpacing: 0.8,
-                              color: NexoraColors.electricBlue,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.keyO, control: true): () {
+          ref.read(activeNavSectionProvider.notifier).state =
+              DesktopNavSection.send;
+        },
+        const SingleActivator(LogicalKeyboardKey.keyR, control: true): () {
+          ref.read(activeNavSectionProvider.notifier).state =
+              DesktopNavSection.receive;
+        },
+        const SingleActivator(LogicalKeyboardKey.keyD, control: true): () {
+          ref.read(activeNavSectionProvider.notifier).state =
+              DesktopNavSection.trustedDevices;
+        },
+        const SingleActivator(LogicalKeyboardKey.comma, control: true): () {
+          ref.read(activeNavSectionProvider.notifier).state =
+              DesktopNavSection.settings;
+        },
+      },
+      child: Focus(
+        autofocus: true,
+        child: Scaffold(
+          body: Row(
+            children: [
+              // Left Sidebar
+              Container(
+                width: 240,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? NexoraColors.darkSurface
+                      : NexoraColors.lightSurface,
+                  border: Border(
+                    right: BorderSide(
+                      color: isDark ? Colors.white12 : Colors.grey.shade300,
+                      width: 1,
+                    ),
                   ),
                 ),
-
-                const Divider(height: 1),
-                const SizedBox(height: 12),
-
-                // Navigation Items
-                _buildNavDestination(
-                  icon: Icons.home_outlined,
-                  label: 'Home',
-                  section: DesktopNavSection.home,
-                  currentSection: activeSection,
-                ),
-                _buildNavDestination(
-                  icon: Icons.upload_file_outlined,
-                  label: 'Send',
-                  section: DesktopNavSection.send,
-                  currentSection: activeSection,
-                ),
-                _buildNavDestination(
-                  icon: Icons.download_outlined,
-                  label: 'Receive',
-                  section: DesktopNavSection.receive,
-                  currentSection: activeSection,
-                ),
-                _buildNavDestination(
-                  icon: Icons.swap_vert_outlined,
-                  label: 'Transfers',
-                  section: DesktopNavSection.transfers,
-                  currentSection: activeSection,
-                  badgeCount: activeTransfers.length,
-                ),
-                _buildNavDestination(
-                  icon: Icons.history_outlined,
-                  label: 'History',
-                  section: DesktopNavSection.history,
-                  currentSection: activeSection,
-                ),
-                _buildNavDestination(
-                  icon: Icons.verified_user_outlined,
-                  label: 'Trusted Devices',
-                  section: DesktopNavSection.trustedDevices,
-                  currentSection: activeSection,
-                ),
-                _buildNavDestination(
-                  icon: Icons.settings_outlined,
-                  label: 'Settings',
-                  section: DesktopNavSection.settings,
-                  currentSection: activeSection,
-                ),
-
-                const Spacer(),
-
-                // Bottom Device Card in Sidebar
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isDark ? NexoraColors.darkCard : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isDark ? Colors.white10 : Colors.grey.shade300,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        const CircleAvatar(
-                          radius: 14,
-                          backgroundColor: NexoraColors.signalTeal,
-                          child: Icon(
-                            Icons.computer,
-                            size: 16,
-                            color: Colors.white,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top Brand Header
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: NexoraColors.midnightNavy,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(
+                              Icons.share_outlined,
+                              color: NexoraColors.signalTeal,
+                              size: 20,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Column(
+                          const SizedBox(width: 12),
+                          const Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                localDevice.displayName,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 11,
+                                'NEXORA',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w900,
+                                  fontSize: 17,
+                                  letterSpacing: 1.5,
                                 ),
-                                overflow: TextOverflow.ellipsis,
                               ),
                               Text(
-                                'Port ${_controller.tcpPort}',
-                                style: const TextStyle(
-                                  color: NexoraColors.signalTeal,
-                                  fontSize: 10,
+                                'CONNECT. SHARE.',
+                                style: TextStyle(
+                                  fontSize: 9,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.8,
+                                  color: NexoraColors.electricBlue,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            ),
-          ),
 
-          // Main View Pane
-          Expanded(child: currentView),
-        ],
+                    const Divider(height: 1),
+                    const SizedBox(height: 12),
+
+                    // Navigation Items
+                    _buildNavDestination(
+                      icon: Icons.home_outlined,
+                      label: 'Home',
+                      section: DesktopNavSection.home,
+                      currentSection: activeSection,
+                    ),
+                    _buildNavDestination(
+                      icon: Icons.upload_file_outlined,
+                      label: 'Send',
+                      section: DesktopNavSection.send,
+                      currentSection: activeSection,
+                    ),
+                    _buildNavDestination(
+                      icon: Icons.download_outlined,
+                      label: 'Receive',
+                      section: DesktopNavSection.receive,
+                      currentSection: activeSection,
+                    ),
+                    _buildNavDestination(
+                      icon: Icons.swap_vert_outlined,
+                      label: 'Transfers',
+                      section: DesktopNavSection.transfers,
+                      currentSection: activeSection,
+                      badgeCount: activeTransfers.length,
+                    ),
+                    _buildNavDestination(
+                      icon: Icons.history_outlined,
+                      label: 'History',
+                      section: DesktopNavSection.history,
+                      currentSection: activeSection,
+                    ),
+                    _buildNavDestination(
+                      icon: Icons.verified_user_outlined,
+                      label: 'Trusted Devices',
+                      section: DesktopNavSection.trustedDevices,
+                      currentSection: activeSection,
+                    ),
+                    _buildNavDestination(
+                      icon: Icons.settings_outlined,
+                      label: 'Settings',
+                      section: DesktopNavSection.settings,
+                      currentSection: activeSection,
+                    ),
+
+                    const Spacer(),
+
+                    // Bottom Device Card in Sidebar
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isDark ? NexoraColors.darkCard : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark
+                                ? Colors.white10
+                                : Colors.grey.shade300,
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            const CircleAvatar(
+                              radius: 14,
+                              backgroundColor: NexoraColors.signalTeal,
+                              child: Icon(
+                                Icons.computer,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    localDevice.displayName,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 11,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    'Port ${_controller.tcpPort}',
+                                    style: const TextStyle(
+                                      color: NexoraColors.signalTeal,
+                                      fontSize: 10,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Main View Pane
+              Expanded(child: currentView),
+            ],
+          ),
+        ),
       ),
     );
   }

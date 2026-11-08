@@ -154,13 +154,108 @@ class TransferServer {
       destinationFile = null;
       if (f != null) {
         try {
+          f.flushSync();
           await f.close();
         } catch (_) {}
       }
-      if (path != null) {
+      if (path != null && !completedFilePaths.contains(path)) {
         completedFilePaths.add(path);
         // Automatically scan into Android MediaStore so Gallery shows images/videos
         unawaited(MediaStoreService.scanFile(path));
+      }
+    }
+
+    bool isCompleted = false;
+
+    Future<void> completeTransferSession() async {
+      if (isCompleted) return;
+      isCompleted = true;
+
+      await safeCloseFile();
+
+      // Trigger MediaScanner for all received files to show in Gallery
+      for (final path in completedFilePaths) {
+        await MediaStoreService.scanFile(path);
+      }
+
+      await AndroidForegroundService.stopService();
+
+      // Full-file SHA-256 verification
+      bool allVerified = true;
+      for (final entry in manifestFiles.entries) {
+        final item = entry.value;
+        final targetFile = PathSanitizer.resolveSafePath(
+          destinationBaseDir: activeDownloadDir ?? Directory.systemTemp,
+          filename: item.name,
+          relativePath: item.relativePath,
+        );
+        if (await targetFile.exists() &&
+            item.sha256Hash != null &&
+            item.sha256Hash!.isNotEmpty) {
+          try {
+            final fileBytes = await targetFile.readAsBytes();
+            final actualSha = sha256.convert(fileBytes).toString();
+            if (actualSha.toLowerCase() != item.sha256Hash!.toLowerCase()) {
+              allVerified = false;
+            }
+          } catch (_) {}
+        }
+      }
+
+      // Send TransferCompleteAck to sender
+      try {
+        socket.add(
+          encodeFrame({
+            'type': 'TransferCompleteAck',
+            'payload': {
+              'transfer_id': activeTransferId,
+              'verified': allVerified,
+            },
+          }),
+        );
+        await socket.flush();
+      } catch (_) {}
+
+      // Update SQLite state
+      try {
+        if (activeTransferId != null) {
+          await DatabaseService.instance.updateTransferProgress(
+            activeTransferId!,
+            totalBytes,
+            TransferState.completed,
+          );
+          await DatabaseService.instance.clearResumeCheckpoints(
+            activeTransferId!,
+          );
+        }
+      } catch (_) {}
+
+      final completed = NexoraTransfer(
+        transferId: activeTransferId ?? 'incoming',
+        direction: TransferDirection.receive,
+        remoteDeviceId: 'peer',
+        remoteDeviceName: remoteDeviceName,
+        totalFiles: totalFiles,
+        totalBytes: totalBytes,
+        bytesTransferred: totalBytes,
+        speedBytesPerSec: 0.0,
+        etaSeconds: 0,
+        currentFile: currentFileName ?? 'Files',
+        state: TransferState.completed,
+        createdAt: startTime,
+        completedAt: DateTime.now(),
+      );
+
+      onTransferCompleted(completed);
+
+      if (activeTransferId != null) {
+        _activeSockets.remove(activeTransferId);
+      }
+      try {
+        await socket.flush();
+        await socket.close();
+      } catch (_) {
+        socket.destroy();
       }
     }
 
@@ -551,50 +646,7 @@ class TransferServer {
                 onTransferProgress(currentTransfer);
               }
             } else if (type == 'TransferComplete') {
-              await safeCloseFile();
-
-              // Trigger MediaScanner for all received files to show in Gallery
-              for (final path in completedFilePaths) {
-                await MediaStoreService.scanFile(path);
-              }
-
-              await AndroidForegroundService.stopService();
-
-              // Update SQLite state
-              try {
-                if (activeTransferId != null) {
-                  await DatabaseService.instance.updateTransferProgress(
-                    activeTransferId!,
-                    totalBytes,
-                    TransferState.completed,
-                  );
-                  await DatabaseService.instance.clearResumeCheckpoints(
-                    activeTransferId!,
-                  );
-                }
-              } catch (_) {}
-
-              final completed = NexoraTransfer(
-                transferId: activeTransferId ?? 'incoming',
-                direction: TransferDirection.receive,
-                remoteDeviceId: 'peer',
-                remoteDeviceName: remoteDeviceName,
-                totalFiles: totalFiles,
-                totalBytes: totalBytes,
-                bytesTransferred: totalBytes,
-                speedBytesPerSec: 0.0,
-                etaSeconds: 0,
-                currentFile: currentFileName ?? 'Files',
-                state: TransferState.completed,
-                createdAt: startTime,
-                completedAt: DateTime.now(),
-              );
-
-              onTransferCompleted(completed);
-              if (activeTransferId != null) {
-                _activeSockets.remove(activeTransferId);
-              }
-              socket.destroy();
+              await completeTransferSession();
             }
           } catch (_) {
             if (activeTransferId != null) {
@@ -605,18 +657,26 @@ class TransferServer {
         }
       },
       onDone: () async {
-        await safeCloseFile();
-        if (activeTransferId != null) {
-          _activeSockets.remove(activeTransferId);
+        if (!isCompleted && receivedBytes >= totalBytes && totalBytes > 0) {
+          await completeTransferSession();
+        } else {
+          await safeCloseFile();
+          if (activeTransferId != null) {
+            _activeSockets.remove(activeTransferId);
+          }
+          await AndroidForegroundService.stopService();
         }
-        await AndroidForegroundService.stopService();
       },
       onError: (_) async {
-        await safeCloseFile();
-        if (activeTransferId != null) {
-          _activeSockets.remove(activeTransferId);
+        if (!isCompleted && receivedBytes >= totalBytes && totalBytes > 0) {
+          await completeTransferSession();
+        } else {
+          await safeCloseFile();
+          if (activeTransferId != null) {
+            _activeSockets.remove(activeTransferId);
+          }
+          await AndroidForegroundService.stopService();
         }
-        await AndroidForegroundService.stopService();
       },
     );
   }

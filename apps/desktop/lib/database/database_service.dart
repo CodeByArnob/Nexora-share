@@ -390,6 +390,17 @@ class DatabaseService {
     return null;
   }
 
+  /// Removes a trusted device from local database.
+  Future<void> removeDevice(String deviceId) async {
+    await db.delete('devices', where: 'device_id = ?', whereArgs: [deviceId]);
+  }
+
+  /// Clears all past transfer records and checkpoints.
+  Future<void> clearHistory() async {
+    await db.delete('transfers');
+    await db.delete('resume_chunks');
+  }
+
   Future<void> close() async {
     await _db?.close();
     _db = null;

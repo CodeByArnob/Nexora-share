@@ -1,3 +1,5 @@
+import '../services/pairing_security_service.dart';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -45,8 +47,12 @@ class ReceiveView extends ConsumerWidget {
         : (Platform.environment['HOME'] != null
               ? '${Platform.environment['HOME']}/Downloads/NEXORA'
               : 'Downloads/NEXORA');
-    final qrData =
-        'nexora://${localDevice.deviceId}?fp=${localDevice.fingerprint}&p=${controller.tcpPort}';
+    final payload = PairingSecurityService.createPayload(
+      localDevice: localDevice,
+      port: controller.tcpPort,
+    );
+    final qrData = jsonEncode(payload.toJson());
+    final dynamicSasCode = payload.sasCode;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -209,13 +215,13 @@ class ReceiveView extends ConsumerWidget {
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text(
-                            '749-183',
-                            style: TextStyle(
+                          child: Text(
+                            dynamicSasCode,
+                            style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
                               letterSpacing: 4.0,
-                              color: NexoraColors.midnightNavy,
+                              color: NexoraColors.signalTeal,
                               fontFamily: 'monospace',
                             ),
                           ),

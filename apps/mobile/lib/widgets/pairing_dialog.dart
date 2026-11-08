@@ -24,12 +24,14 @@ class PairingDialog extends StatelessWidget {
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       backgroundColor: isDark ? NexoraColors.darkSurface : Colors.white,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(22),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Header
               Row(
                 children: [
                   Container(
@@ -46,13 +48,22 @@ class PairingDialog extends StatelessWidget {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      'Pair Device',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 18,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Pair Device',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                        const Text(
+                          'Scan this QR code from the sender device',
+                          style: TextStyle(fontSize: 11, color: Colors.grey),
+                        ),
+                      ],
                     ),
                   ),
                   IconButton(
@@ -61,7 +72,9 @@ class PairingDialog extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
+
+              // Device IP pill
               if (localDevice.address != null) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(
@@ -70,26 +83,48 @@ class PairingDialog extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: NexoraColors.electricBlue.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    'Device IP: ${localDevice.address}',
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: NexoraColors.electricBlue,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: NexoraColors.electricBlue.withValues(alpha: 0.3),
                     ),
                   ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.wifi,
+                        size: 14,
+                        color: NexoraColors.electricBlue,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'Device IP: ${localDevice.address}',
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: NexoraColors.electricBlue,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 14),
               ],
+
+              // QR Code Container
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: SizedBox(
                   width: 180,
@@ -100,78 +135,126 @@ class PairingDialog extends StatelessWidget {
                     size: 180.0,
                     eyeStyle: const QrEyeStyle(
                       eyeShape: QrEyeShape.square,
-                      color: NexoraColors.midnightNavy,
+                      color: Color(0xFF0F172A),
                     ),
                     dataModuleStyle: const QrDataModuleStyle(
                       dataModuleShape: QrDataModuleShape.square,
-                      color: NexoraColors.midnightNavy,
+                      color: Color(0xFF0F172A),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 14),
-              const Text(
-                'Short Authentication Code (SAS)',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              const SizedBox(height: 6),
+
+              const SizedBox(height: 16),
+
+              // SAS Code Comparison Box
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  color: NexoraColors.signalTeal.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  sasCode,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 4.0,
-                    color: Theme.of(context).colorScheme.primary,
-                    fontFamily: 'monospace',
+                  color: isDark
+                      ? NexoraColors.darkSurfaceVariant
+                      : NexoraColors.lightSurfaceElevated,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: NexoraColors.signalTeal.withValues(alpha: 0.35),
                   ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              Text(
-                'Scan or connect directly on the same Wi-Fi or mobile hotspot',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-              ),
-              const SizedBox(height: 14),
-              if (onManualConnect != null) ...[
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    icon: const Icon(Icons.wifi_find, size: 18),
-                    label: const Text('Connect by IP Address'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: NexoraColors.signalTeal,
-                      side: const BorderSide(color: NexoraColors.signalTeal),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Short Authentication Code (SAS)',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
+                        color: Colors.grey,
                       ),
                     ),
-                    onPressed: onManualConnect,
-                  ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${sasCode.substring(0, 3)} - ${sasCode.substring(3)}',
+                      style: const TextStyle(
+                        fontFamily: 'monospace',
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 2.0,
+                        color: NexoraColors.signalTeal,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-              ],
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: NexoraColors.electricBlue,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Security notice
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.timer_outlined,
+                    size: 12,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    'Session token expires in 10 minutes • Replay Protected',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: isDark
+                          ? Colors.grey.shade400
+                          : Colors.grey.shade600,
                     ),
                   ),
-                  child: const Text('Done'),
-                ),
+                ],
+              ),
+
+              const SizedBox(height: 16),
+
+              // Action buttons
+              Row(
+                children: [
+                  if (onManualConnect != null)
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: onManualConnect,
+                        child: const Text(
+                          'Add by IP',
+                          style: TextStyle(fontSize: 13),
+                        ),
+                      ),
+                    ),
+                  if (onManualConnect != null) const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: NexoraColors.electricBlue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text(
+                        'Done',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

@@ -79,6 +79,11 @@ class DesktopNetworkController {
   }
 
   void _updateActiveTransfer(NexoraTransfer transfer) {
+    if (transfer.state == TransferState.cancelled ||
+        transfer.state == TransferState.completed) {
+      _completeTransfer(transfer);
+      return;
+    }
     final list = List<NexoraTransfer>.from(_ref.read(activeTransfersProvider));
     final idx = list.indexWhere((t) => t.transferId == transfer.transferId);
     if (idx >= 0) {
@@ -90,17 +95,27 @@ class DesktopNetworkController {
   }
 
   void _completeTransfer(NexoraTransfer transfer) {
-    // Remove from active
+    // 1. Remove from active
     final active = List<NexoraTransfer>.from(_ref.read(activeTransfersProvider))
       ..removeWhere((t) => t.transferId == transfer.transferId);
     _ref.read(activeTransfersProvider.notifier).state = active;
 
-    // Add to history
-    final history = <NexoraTransfer>[
-      transfer,
-      ..._ref.read(transferHistoryProvider),
-    ];
-    _ref.read(transferHistoryProvider.notifier).state = history;
+    // 2. Add to history without duplicates
+    final history = _ref.read(transferHistoryProvider);
+    final alreadyCompleted = history.any(
+      (t) => t.transferId == transfer.transferId && t.state == transfer.state,
+    );
+    if (!alreadyCompleted) {
+      final finalized = transfer.copyWith(
+        speedBytesPerSec: 0,
+        etaSeconds: 0,
+        completedAt: transfer.completedAt ?? DateTime.now(),
+      );
+      _ref.read(transferHistoryProvider.notifier).state = [
+        finalized,
+        ...history.where((t) => t.transferId != transfer.transferId),
+      ];
+    }
   }
 
   /// Sends a specific file to a peer (e.g. from file picker or drag-and-drop).

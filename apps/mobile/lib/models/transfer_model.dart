@@ -7,7 +7,9 @@ class NexoraTransfer {
   final TransferDirection direction;
   final String remoteDeviceId;
   final String remoteDeviceName;
+  final String? remotePlatform;
   final int totalFiles;
+  final int completedFiles;
   final int totalBytes;
   final int bytesTransferred;
   final double speedBytesPerSec;
@@ -22,7 +24,9 @@ class NexoraTransfer {
     required this.direction,
     required this.remoteDeviceId,
     required this.remoteDeviceName,
+    this.remotePlatform,
     required this.totalFiles,
+    this.completedFiles = 0,
     required this.totalBytes,
     this.bytesTransferred = 0,
     this.speedBytesPerSec = 0.0,
@@ -52,7 +56,9 @@ class NexoraTransfer {
     TransferDirection? direction,
     String? remoteDeviceId,
     String? remoteDeviceName,
+    String? remotePlatform,
     int? totalFiles,
+    int? completedFiles,
     int? totalBytes,
     int? bytesTransferred,
     double? speedBytesPerSec,
@@ -67,7 +73,9 @@ class NexoraTransfer {
       direction: direction ?? this.direction,
       remoteDeviceId: remoteDeviceId ?? this.remoteDeviceId,
       remoteDeviceName: remoteDeviceName ?? this.remoteDeviceName,
+      remotePlatform: remotePlatform ?? this.remotePlatform,
       totalFiles: totalFiles ?? this.totalFiles,
+      completedFiles: completedFiles ?? this.completedFiles,
       totalBytes: totalBytes ?? this.totalBytes,
       bytesTransferred: bytesTransferred ?? this.bytesTransferred,
       speedBytesPerSec: speedBytesPerSec ?? this.speedBytesPerSec,

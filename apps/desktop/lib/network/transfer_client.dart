@@ -364,6 +364,11 @@ class TransferClient {
         await raf.close();
       }
 
+      // Setup TransferCompleteAck future before dispatching TransferComplete
+      final completeAckFuture = frameStream
+          .firstWhere((m) => m['type'] == 'TransferCompleteAck')
+          .timeout(const Duration(seconds: 10), onTimeout: () => {});
+
       // 4. Send TransferComplete
       socket.add(
         encodeFrame({
@@ -374,6 +379,12 @@ class TransferClient {
           },
         }),
       );
+      try {
+        await socket.flush();
+      } catch (_) {}
+
+      // Await confirmation that receiver has flushed and verified files
+      await completeAckFuture;
 
       // Update SQLite state
       try {
@@ -406,7 +417,12 @@ class TransferClient {
       onCompleted(completedTransfer);
 
       await subscription.cancel();
-      socket.destroy();
+      try {
+        await socket.flush();
+        await socket.close();
+      } catch (_) {
+        socket.destroy();
+      }
     } catch (e) {
       onError('Transfer failed: $e');
       socket.destroy();
