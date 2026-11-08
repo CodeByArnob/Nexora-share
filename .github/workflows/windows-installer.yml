@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to build and publish (for example v1.0.2)"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -32,7 +38,12 @@ jobs:
       - name: Build Flutter Windows release
         shell: pwsh
         run: |
-          $version = $env:GITHUB_REF_NAME.TrimStart("v")
+          if ("${{ inputs.tag }}" -ne "") {
+            $tag = "${{ inputs.tag }}"
+          } else {
+            $tag = $env:GITHUB_REF_NAME
+          }
+          $version = $tag.TrimStart("v")
           Push-Location apps/desktop
           flutter pub get
           flutter build windows --release --build-name $version --build-number 100
@@ -64,6 +75,8 @@ jobs:
       - name: Attach installer to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          target_commitish: main
           files: |
             dist/windows/NEXORA-Setup-x64.exe
             dist/windows/NEXORA-Setup-x64.exe.sha256
