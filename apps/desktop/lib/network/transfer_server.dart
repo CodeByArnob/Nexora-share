@@ -58,7 +58,14 @@ class TransferServer {
       _serverSocket = await ServerSocket.bind(InternetAddress.anyIPv4, 0);
     }
     port = _serverSocket!.port;
-    _serverSocket!.listen(_handleClientConnection);
+    _serverSocket!.listen(
+      _handleClientConnection,
+      onError: (Object error, StackTrace stackTrace) {
+        // Listener-level socket errors must not escape as uncaught async failures.
+        onError?.call('Transfer listener error: $error');
+      },
+      cancelOnError: false,
+    );
     return port;
   }
 
