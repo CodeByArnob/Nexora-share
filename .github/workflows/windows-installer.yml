@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: windows-installer-${{ github.ref }}
+  group: release-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
