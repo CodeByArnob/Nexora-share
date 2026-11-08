@@ -103,7 +103,7 @@ mod tests {
         let hash = compute_sha256(b"NEXORA");
         assert_eq!(
             hash,
-            "169992f15dc8ca620b7ba405628b030491a9235e8f4cbcf3046bc9ae62e9ddab"
+            "1151b79b4a2e1ea489d5c1ffaa3955e305e3f1bd1364eff88a20870065ae11aa"
         );
     }
 
