@@ -21,7 +21,7 @@ ArchitecturesInstallIn64BitMode=x64
 PrivilegesRequired=lowest
 OutputDir=..\..\dist\windows
 OutputBaseFilename=NEXORA-Setup-x64
-SetupIconFile=..\apps\desktop\windows\runner\resources\app_icon.ico
+SetupIconFile=..\..\apps\desktop\windows\runner\resources\app_icon.ico
 UninstallDisplayIcon={app}\{#AppExeName}
 Compression=lzma2
 SolidCompression=yes
@@ -38,7 +38,7 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"; Flags: unchecked
 
 [Files]
-Source: "..\apps\desktop\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\..\apps\desktop\build\windows\x64\runner\Release\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{group}\NEXORA"; Filename: "{app}\{#AppExeName}"
