@@ -61,12 +61,15 @@ impl PeerRegistry {
             last_seen: Utc::now(),
         };
 
-        if map.contains_key(&device_id) {
-            map.insert(device_id, peer.clone());
-            DiscoveryEvent::PeerUpdated(peer)
-        } else {
-            map.insert(device_id, peer.clone());
-            DiscoveryEvent::PeerDiscovered(peer)
+        match map.entry(device_id) {
+            std::collections::hash_map::Entry::Occupied(mut entry) => {
+                entry.insert(peer.clone());
+                DiscoveryEvent::PeerUpdated(peer)
+            }
+            std::collections::hash_map::Entry::Vacant(entry) => {
+                entry.insert(peer.clone());
+                DiscoveryEvent::PeerDiscovered(peer)
+            }
         }
     }
 
