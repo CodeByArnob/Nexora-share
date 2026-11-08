@@ -38,7 +38,8 @@ void main() {
     // Tap on Devices tab
     await tester.tap(find.text('Devices'));
     await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('No trusted devices'), findsOneWidget);
+    expect(find.text('Devices & Trust Hub'), findsOneWidget);
+    expect(find.text('Nearby Discoverable Peers'), findsOneWidget);
 
     // Tap on Settings tab
     await tester.tap(find.text('Settings'));

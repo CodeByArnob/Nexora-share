@@ -82,6 +82,11 @@ class NetworkController {
     _discovery?.updateLocalDevice(updatedDevice);
   }
 
+  /// Manually triggers a network discovery rescan beacon
+  Future<void> rescan() async {
+    await _discovery?.rescan();
+  }
+
   /// Manually pings and discovers a peer by IP address
   Future<bool> manualConnect(String targetIp, {int targetPort = 48842}) async {
     if (_discovery == null) return false;
