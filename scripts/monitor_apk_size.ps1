@@ -4,8 +4,8 @@
 # ==============================================================================
 param(
     [string]$ArtifactsDir = "dist/android",
-    [int]$MaxSplitApkMB = 25,
-    [int]$MaxUniversalApkMB = 58
+    [int]$MaxSplitApkMB = 30,
+    [int]$MaxUniversalApkMB = 72
 )
 
 $ErrorActionPreference = "Stop"

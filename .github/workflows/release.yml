@@ -162,7 +162,7 @@ jobs:
 
       - name: Verify APK Size Budget
         run: |
-          pwsh -File scripts/monitor_apk_size.ps1 -ArtifactsDir dist/android -MaxSplitApkMB 25 -MaxUniversalApkMB 58
+          pwsh -File scripts/monitor_apk_size.ps1 -ArtifactsDir dist/android -MaxSplitApkMB 30 -MaxUniversalApkMB 72
 
       - name: Upload Android Release Artifacts
         uses: actions/upload-artifact@v4

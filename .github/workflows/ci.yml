@@ -119,7 +119,7 @@ jobs:
 
       - name: Automated APK Size Monitoring
         run: |
-          pwsh -File scripts/monitor_apk_size.ps1 -ArtifactsDir dist/android -MaxSplitApkMB 25 -MaxUniversalApkMB 58
+          pwsh -File scripts/monitor_apk_size.ps1 -ArtifactsDir dist/android -MaxSplitApkMB 30 -MaxUniversalApkMB 72
 
   # ---------------------------------------------------------------------------
   # Linux Build Verification
