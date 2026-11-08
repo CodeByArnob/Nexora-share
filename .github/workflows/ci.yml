@@ -162,7 +162,7 @@ jobs:
   # Windows Desktop Build & Inno Setup Installer Packaging
   # ---------------------------------------------------------------------------
   windows-build:
-    name: Windows PC Executable & Installer Build (.exe)
+    name: Windows PC Executable Build (.exe)
     runs-on: windows-latest
     needs: [rust-check, flutter-check]
     steps:
