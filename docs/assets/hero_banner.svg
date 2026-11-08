@@ -1,0 +1,187 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090E17" />
+      <stop offset="50%" stop-color="#101B2B" />
+      <stop offset="100%" stop-color="#0D1420" />
+    </linearGradient>
+
+    <!-- Brand Flow Gradient -->
+    <linearGradient id="brandFlow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3978F6" />
+      <stop offset="50%" stop-color="#39A0F6" />
+      <stop offset="100%" stop-color="#39C6B0" />
+    </linearGradient>
+
+    <!-- Text Header Gradient -->
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="60%" stop-color="#E2F0FE" />
+      <stop offset="100%" stop-color="#39C6B0" />
+    </linearGradient>
+
+    <!-- Glow Filter -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <!-- Grid Pattern -->
+    <pattern id="cyberGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#172A45" stroke-width="0.8" opacity="0.4" />
+      <circle cx="40" cy="40" r="1.5" fill="#3978F6" opacity="0.25" />
+    </pattern>
+
+    <style>
+      .radar-pulse-1 {
+        animation: radarSweep 4s ease-out infinite;
+        transform-origin: 210px 210px;
+      }
+      .radar-pulse-2 {
+        animation: radarSweep 4s ease-out infinite 2s;
+        transform-origin: 210px 210px;
+      }
+      .data-packet {
+        animation: packetFlow 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      }
+      .pulse-beacon {
+        animation: beaconGlow 2s ease-in-out infinite alternate;
+      }
+      @keyframes radarSweep {
+        0% { r: 60px; opacity: 0.6; }
+        100% { r: 180px; opacity: 0; }
+      }
+      @keyframes packetFlow {
+        0% { cx: 135px; cy: 135px; opacity: 0; }
+        20% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { cx: 285px; cy: 285px; opacity: 0; }
+      }
+      @keyframes beaconGlow {
+        0% { opacity: 0.4; filter: drop-shadow(0 0 2px #3978F6); }
+        100% { opacity: 1; filter: drop-shadow(0 0 12px #39C6B0); }
+      }
+      .heading-text {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Display', Roboto, sans-serif;
+        font-weight: 900;
+        letter-spacing: 5px;
+      }
+      .tagline-text {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Text', Roboto, sans-serif;
+        font-weight: 700;
+        letter-spacing: 2.5px;
+      }
+      .body-text {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-weight: 400;
+      }
+    </style>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1200" height="420" rx="20" fill="url(#bgGrad)" />
+
+  <!-- Cyber Grid Matrix -->
+  <rect width="1200" height="420" rx="20" fill="url(#cyberGrid)" />
+
+  <!-- Ambient Glow Cones -->
+  <circle cx="210" cy="210" r="220" fill="#3978F6" opacity="0.08" filter="url(#neonGlow)" />
+  <circle cx="950" cy="180" r="250" fill="#39C6B0" opacity="0.05" filter="url(#neonGlow)" />
+
+  <!-- ==================== LEFT: LOGO & ORBITS ==================== -->
+  <g id="logo-emblem">
+    <!-- Concentric Discovery Radar Rings -->
+    <circle cx="210" cy="210" r="160" fill="none" stroke="#3978F6" stroke-width="1.5" stroke-dasharray="6 8" opacity="0.25" />
+    <circle cx="210" cy="210" r="115" fill="none" stroke="#39C6B0" stroke-width="1.5" stroke-dasharray="4 6" opacity="0.3" />
+    
+    <!-- Animated Radar Wave Pulses -->
+    <circle class="radar-pulse-1" cx="210" cy="210" r="60" fill="none" stroke="#3978F6" stroke-width="2" />
+    <circle class="radar-pulse-2" cx="210" cy="210" r="60" fill="none" stroke="#39C6B0" stroke-width="2" />
+
+    <!-- Geometric Squircle Icon Backplate -->
+    <rect x="90" y="90" width="240" height="240" rx="56" fill="#14243B" stroke="#253E61" stroke-width="2" />
+
+    <!-- Inner Orbit Boundary -->
+    <circle cx="210" cy="210" r="95" fill="none" stroke="#3978F6" stroke-width="2" stroke-dasharray="5 7" opacity="0.35" />
+
+    <!-- Connected Geometric N Structure -->
+    <!-- Diagonal Dynamic Accelerated Path -->
+    <path d="M 150 150 L 270 270" stroke="url(#brandFlow)" stroke-width="30" stroke-linecap="round" filter="url(#softGlow)" />
+
+    <!-- Left Sender Column -->
+    <line x1="150" y1="150" x2="150" y2="270" stroke="#3978F6" stroke-width="30" stroke-linecap="round" />
+
+    <!-- Right Receiver Column -->
+    <line x1="270" y1="150" x2="270" y2="270" stroke="#39C6B0" stroke-width="30" stroke-linecap="round" />
+
+    <!-- Sender Node (Upper Left) -->
+    <circle cx="150" cy="150" r="22" fill="#14243B" stroke="#3978F6" stroke-width="8" />
+    <circle cx="150" cy="150" r="8" fill="#3978F6" />
+
+    <!-- Receiver Node (Lower Right) -->
+    <circle cx="270" cy="270" r="22" fill="#14243B" stroke="#39C6B0" stroke-width="8" />
+    <circle cx="270" cy="270" r="8" fill="#39C6B0" />
+
+    <!-- Animated Data Stream Particle Packet -->
+    <circle class="data-packet" cx="150" cy="150" r="8" fill="#FFFFFF" filter="url(#neonGlow)" />
+  </g>
+
+  <!-- ==================== RIGHT: BRANDING & HEADLINE ==================== -->
+  <g transform="translate(420, 0)">
+    <!-- Top Pill: Status & Version -->
+    <g transform="translate(0, 75)">
+      <rect width="280" height="30" rx="15" fill="#17273F" stroke="#2E4A73" stroke-width="1.2" />
+      <circle class="pulse-beacon" cx="18" cy="15" r="5" fill="#39C6B0" />
+      <text x="32" y="20" fill="#A8C7F0" font-size="12" font-family="-apple-system, Roboto, sans-serif" font-weight="700" letter-spacing="1.2">NEXORA v1.1.0 · PRODUCTION READY</text>
+    </g>
+
+    <!-- Main Project Name -->
+    <text x="0" y="170" fill="url(#textGrad)" class="heading-text" font-size="74">NEXORA</text>
+
+    <!-- Tagline -->
+    <text x="2" y="210" fill="#39C6B0" class="tagline-text" font-size="16">CONNECT. SHARE. ANYWHERE.</text>
+    <text x="315" y="210" fill="#607B9E" font-family="-apple-system, Roboto, sans-serif" font-size="16">|</text>
+    <text x="332" y="210" fill="#8AA8CF" class="tagline-text" font-size="16">PRIVATE BY DESIGN. OPEN BY NATURE.</text>
+
+    <!-- Concise Description -->
+    <text x="2" y="250" fill="#9FB5D4" class="body-text" font-size="16">
+      Ultra-fast, zero-cloud peer-to-peer file transfer engine with bounded memory streaming,
+    </text>
+    <text x="2" y="275" fill="#9FB5D4" class="body-text" font-size="16">
+      streaming SHA-256 verification, and native support for Android, Windows, and Linux.
+    </text>
+
+    <!-- Feature Attribute Cards / Pills -->
+    <g transform="translate(0, 312)">
+      <!-- Pill 1: Zero Cloud -->
+      <g transform="translate(0, 0)">
+        <rect width="160" height="36" rx="8" fill="#121D2D" stroke="#23354E" stroke-width="1" />
+        <text x="14" y="23" fill="#39C6B0" font-size="13" font-family="-apple-system, sans-serif" font-weight="700">🔒 Zero Cloud / LAN</text>
+      </g>
+      <!-- Pill 2: 18ms Latency -->
+      <g transform="translate(172, 0)">
+        <rect width="175" height="36" rx="8" fill="#121D2D" stroke="#23354E" stroke-width="1" />
+        <text x="14" y="23" fill="#3978F6" font-size="13" font-family="-apple-system, sans-serif" font-weight="700">⚡ 18ms Prompt SLA</text>
+      </g>
+      <!-- Pill 3: Bounded Memory -->
+      <g transform="translate(359, 0)">
+        <rect width="180" height="36" rx="8" fill="#121D2D" stroke="#23354E" stroke-width="1" />
+        <text x="14" y="23" fill="#A8C7F0" font-size="13" font-family="-apple-system, sans-serif" font-weight="700">💾 1MB Fixed Buffer</text>
+      </g>
+      <!-- Pill 4: Split APK -->
+      <g transform="translate(551, 0)">
+        <rect width="165" height="36" rx="8" fill="#121D2D" stroke="#23354E" stroke-width="1" />
+        <text x="14" y="23" fill="#39C6B0" font-size="13" font-family="-apple-system, sans-serif" font-weight="700">📱 25MB Split APK</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Subtle Bottom Ambient Accent Border -->
+  <line x1="0" y1="419" x2="1200" y2="419" stroke="url(#brandFlow)" stroke-width="2" opacity="0.6" />
+</svg>
