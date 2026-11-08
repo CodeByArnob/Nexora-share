@@ -1,0 +1,74 @@
+name: NEXORA Windows Installer
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-windows-installer:
+    name: Build Windows x64 installer
+    runs-on: windows-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.4"
+          channel: stable
+          cache: true
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+      - name: Install Inno Setup 6
+        run: choco install innosetup --no-progress -y
+      - name: Build Flutter Windows release
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME.TrimStart("v")
+          Push-Location apps/desktop
+          flutter pub get
+          flutter build windows --release --build-name $version --build-number 100
+          Pop-Location
+          if (!(Test-Path "apps/desktop/build/windows/x64/runner/Release/nexora.exe")) { throw "Windows executable missing." }
+      - name: Compile NEXORA installer
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path dist/windows | Out-Null
+          $version = $env:GITHUB_REF_NAME.TrimStart("v")
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DAppVersion=$version" packaging/windows/nexora.iss
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed." }
+          if (!(Test-Path "dist/windows/NEXORA-Setup-x64.exe")) { throw "Installer output missing." }
+      - name: Generate SHA-256 checksum
+        shell: pwsh
+        run: |
+          $hash = (Get-FileHash "dist/windows/NEXORA-Setup-x64.exe" -Algorithm SHA256).Hash.ToLower()
+          "$hash  NEXORA-Setup-x64.exe" | Out-File "dist/windows/NEXORA-Setup-x64.exe.sha256" -Encoding ascii
+          Write-Host "Installer SHA-256: $hash"
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NEXORA-Windows-x64-Installer
+          path: |
+            dist/windows/NEXORA-Setup-x64.exe
+            dist/windows/NEXORA-Setup-x64.exe.sha256
+          if-no-files-found: error
+          retention-days: 14
+      - name: Attach installer to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/windows/NEXORA-Setup-x64.exe
+            dist/windows/NEXORA-Setup-x64.exe.sha256
+          fail_on_unmatched_files: true
+          append_body: true
+          body: |
+            ## Windows desktop
+            Download **NEXORA-Setup-x64.exe** to install NEXORA on Windows 10/11 x64. The installer is not code-signed; verify the accompanying SHA-256 checksum. Windows SmartScreen may show an unknown-publisher warning.

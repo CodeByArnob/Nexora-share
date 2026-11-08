@@ -89,8 +89,19 @@ impl ProgressEstimator {
         }
 
         let remaining_bytes = self.total_bytes.saturating_sub(bytes_transferred);
-        let eta_seconds = if self.current_speed_bps > 0.0 {
-            (remaining_bytes as f64 / self.current_speed_bps) as u64
+        let elapsed_total = now.duration_since(self.start_time).as_secs_f64();
+        let average_speed_bps = if elapsed_total > 0.0 {
+            bytes_transferred as f64 / elapsed_total
+        } else {
+            0.0
+        };
+        let effective_speed_bps = if self.current_speed_bps > 0.0 {
+            self.current_speed_bps
+        } else {
+            average_speed_bps
+        };
+        let eta_seconds = if effective_speed_bps > 0.0 {
+            (remaining_bytes as f64 / effective_speed_bps) as u64
         } else {
             0
         };
@@ -147,6 +158,7 @@ pub fn write_file_chunk(path: &Path, offset: u64, data: &[u8]) -> Result<(), Tra
     let mut file = std::fs::OpenOptions::new()
         .write(true)
         .create(true)
+        .truncate(false)
         .open(path)?;
 
     file.seek(SeekFrom::Start(offset))?;

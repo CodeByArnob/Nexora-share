@@ -165,7 +165,7 @@ mod tests {
         let sas = generate_sas_code();
         assert_eq!(sas.len(), 6);
         let num: u32 = sas.parse().expect("SAS must parse to integer");
-        assert!(num >= 100_000 && num <= 999_999);
+        assert!((100_000..=999_999).contains(&num));
     }
 
     #[test]
@@ -182,7 +182,7 @@ mod tests {
 
     #[test]
     fn test_challenge_response_verification() {
-        let receiver = DeviceIdentity::generate("Windows PC".into(), "windows".into());
+        let _receiver = DeviceIdentity::generate("Windows PC".into(), "windows".into());
         let sender = DeviceIdentity::generate("Pixel 9".into(), "android".into());
 
         let challenge = generate_nonce(16);

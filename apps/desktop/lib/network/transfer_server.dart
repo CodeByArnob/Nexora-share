@@ -42,6 +42,7 @@ class TransferServer {
   final void Function(String error)? onError;
 
   TransferServer({
+    this.port = 48842,
     this.customDestinationDirectory,
     required this.onRequestApproval,
     required this.onTransferProgress,
@@ -57,7 +58,14 @@ class TransferServer {
       _serverSocket = await ServerSocket.bind(InternetAddress.anyIPv4, 0);
     }
     port = _serverSocket!.port;
-    _serverSocket!.listen(_handleClientConnection);
+    _serverSocket!.listen(
+      _handleClientConnection,
+      onError: (Object error, StackTrace stackTrace) {
+        // Listener-level socket errors must not escape as uncaught async failures.
+        onError?.call('Transfer listener error: $error');
+      },
+      cancelOnError: false,
+    );
     return port;
   }
 
@@ -283,6 +291,13 @@ class TransferServer {
                 }),
               );
             } else if (type == 'ChunkData') {
+              // No payload is accepted until a transfer offer has been approved
+              // and a destination directory has been established.
+              if (activeTransferId == null || activeDownloadDir == null) {
+                socket.destroy();
+                return;
+              }
+
               final fileId = payload['file_id'] as String? ?? 'f-0';
               final dynamic rawData = payload['data'];
               final Uint8List chunkBytes = rawData is String

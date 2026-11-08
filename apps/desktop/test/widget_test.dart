@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -63,6 +65,13 @@ void main() {
     await tester.tap(find.text('Settings'));
     await tester.pump(const Duration(milliseconds: 100));
     expect(find.text('Device Display Name'), findsOneWidget);
-    expect(find.text('Windows Firewall Troubleshooter'), findsOneWidget);
+    expect(
+      find.text(
+        Platform.isWindows
+            ? 'Windows Firewall Troubleshooter'
+            : 'Linux Network & Firewall Diagnostics',
+      ),
+      findsOneWidget,
+    );
   });
 }

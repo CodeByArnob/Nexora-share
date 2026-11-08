@@ -295,6 +295,7 @@ void main() {
       'Fuzz 6: Unauthorized transfer rejection: chunks received before offer are discarded',
       () async {
         final server = TransferServer(
+          port: 0,
           customDestinationDirectory: tempDir,
           onRequestApproval: (_) async => true,
           onTransferProgress: (_) {},
