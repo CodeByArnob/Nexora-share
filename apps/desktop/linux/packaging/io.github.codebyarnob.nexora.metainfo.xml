@@ -28,6 +28,11 @@
     <binary>nexora</binary>
   </provides>
   <releases>
+    <release version="1.1.0" date="2026-11-08">
+      <description>
+        <p>Production release with optimized Android split APKs, instant large-file initiation, streaming SHA-256 verification, and branded Windows installer.</p>
+      </description>
+    </release>
     <release version="1.0.0" date="2026-11-07">
       <description>
         <p>Initial production release of NEXORA supporting Android, Windows, and Linux.</p>

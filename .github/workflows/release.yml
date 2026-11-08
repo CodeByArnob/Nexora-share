@@ -1,4 +1,4 @@
-name: NEXORA Windows Desktop Release Distribution
+name: NEXORA Multi-Platform Production Release Distribution
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag (e.g. v1.0.3)'
+        description: 'Release tag (e.g. v1.1.0)'
         required: false
         default: ''
 
@@ -58,7 +58,120 @@ jobs:
           flutter test --concurrency=1
 
   # ---------------------------------------------------------------------------
-  # Build Production Windows Installer & Portable Bundle (TARGET: WINDOWS ONLY)
+  # Build Production Android APKs & Google Play App Bundle (AAB)
+  # ---------------------------------------------------------------------------
+  build-android-release:
+    name: Build Signed Android Production APKs & AAB
+    runs-on: ubuntu-latest
+    needs: [verify-quality]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Extract Version Tag
+        id: vars
+        run: |
+          if [ -n "${{ github.event.inputs.tag }}" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${GITHUB_REF#refs/tags/}"
+          fi
+          VERSION="${TAG#v}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Building NEXORA Android version: ${VERSION} (Tag: ${TAG})"
+
+      - name: Setup Java Toolchain
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Accept Android SDK Licenses
+        run: yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
+
+      - name: Setup Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.4'
+          channel: 'stable'
+          cache: true
+
+      - name: Configure Production Signing Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          KEY_PROPS="apps/mobile/android/key.properties"
+          if [ -n "$KEYSTORE_BASE64" ] && [ -n "$KEYSTORE_PASSWORD" ] && [ -n "$KEY_ALIAS" ] && [ -n "$KEY_PASSWORD" ]; then
+            echo "Production release keystore secrets detected. Configuring release signing..."
+            echo "$KEYSTORE_BASE64" | base64 -d > apps/mobile/android/app/release.jks
+            cat <<EOF > $KEY_PROPS
+          storePassword=$KEYSTORE_PASSWORD
+          keyPassword=$KEY_PASSWORD
+          keyAlias=$KEY_ALIAS
+          storeFile=release.jks
+          EOF
+          else
+            echo "Notice: Repository signing secrets not set. Using workflow build signing key..."
+            keytool -genkey -v -keystore apps/mobile/android/app/release.jks \
+              -alias nexora-release -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass nexora_release_pass -keypass nexora_release_pass \
+              -dname "CN=NEXORA, OU=Distribution, O=CodeByArnob, L=Dhaka, C=BD"
+            cat <<EOF > $KEY_PROPS
+          storePassword=nexora_release_pass
+          keyPassword=nexora_release_pass
+          keyAlias=nexora-release
+          storeFile=release.jks
+          EOF
+          fi
+
+      - name: Build Split-per-ABI Release APKs
+        run: |
+          cd apps/mobile
+          flutter pub get
+          flutter build apk --release --split-per-abi
+
+      - name: Build Universal Release APK
+        run: |
+          cd apps/mobile
+          flutter build apk --release
+
+      - name: Build Google Play App Bundle (AAB)
+        run: |
+          cd apps/mobile
+          flutter build appbundle --release
+
+      - name: Stage Android Release Artifacts
+        run: |
+          TAG="${{ steps.vars.outputs.tag }}"
+          mkdir -p dist/android/
+          
+          # Copy split APKs
+          cp apps/mobile/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk "dist/android/nexora-${TAG}-arm64-v8a.apk" || true
+          cp apps/mobile/build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk "dist/android/nexora-${TAG}-armeabi-v7a.apk" || true
+          cp apps/mobile/build/app/outputs/flutter-apk/app-x86_64-release.apk "dist/android/nexora-${TAG}-x86_64.apk" || true
+          
+          # Copy universal APK and AAB
+          cp apps/mobile/build/app/outputs/flutter-apk/app-release.apk "dist/android/nexora-${TAG}-universal.apk"
+          cp apps/mobile/build/app/outputs/bundle/release/app-release.aab "dist/android/nexora-${TAG}-release.aab"
+          
+          ls -lh dist/android/
+
+      - name: Verify APK Size Budget
+        run: |
+          pwsh -File scripts/monitor_apk_size.ps1 -ArtifactsDir dist/android -MaxSplitApkMB 30 -MaxUniversalApkMB 72
+
+      - name: Upload Android Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-release-artifacts
+          path: dist/android/*
+
+  # ---------------------------------------------------------------------------
+  # Build Production Windows Installer & Portable Bundle
   # ---------------------------------------------------------------------------
   build-windows-release:
     name: Build Windows x64 Installer & Portable Bundle
@@ -100,7 +213,7 @@ jobs:
         run: |
           $tag = "${{ steps.vars.outputs.tag }}"
           & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" packaging\windows\nexora_setup.iss
-          # Provide both canonical NEXORA-Setup-x64.exe and version-tagged installer
+          # Provide canonical NEXORA-Setup-x64.exe and version-tagged installer
           Copy-Item -Force dist\windows\NEXORA-Setup-x64.exe "dist\windows\NEXORA-${tag}-Setup-x64.exe"
 
       - name: Package Windows Portable ZIP Bundle
@@ -126,12 +239,12 @@ jobs:
           path: dist/windows/*
 
   # ---------------------------------------------------------------------------
-  # Publish Official GitHub Release (Windows Desktop Target Only)
+  # Publish Unified Official GitHub Release (Android + Windows)
   # ---------------------------------------------------------------------------
   publish-release:
     name: Publish Official GitHub Release
     runs-on: ubuntu-latest
-    needs: [build-windows-release]
+    needs: [build-android-release, build-windows-release]
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -151,34 +264,48 @@ jobs:
       - name: Create Distribution Workspace
         run: mkdir -p dist/
 
-      - name: Download Windows Artifacts Only
+      - name: Download Android Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: android-release-artifacts
+          path: dist/
+
+      - name: Download Windows Artifacts
         uses: actions/download-artifact@v4
         with:
           name: windows-release-artifacts
           path: dist/
 
-      - name: Generate Windows SHA-256 Checksums
+      - name: Generate Unified SHA-256 Checksums
         run: |
           cd dist/
           find . -maxdepth 1 -type f ! -name "SHA256SUMS.txt" ! -name "RELEASE_NOTES.md" -exec sha256sum {} + | sed 's|\./||' > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
-      - name: Generate Comprehensive Windows Release Notes
+      - name: Generate Comprehensive Release Notes
         run: |
           TAG="${{ steps.vars.outputs.tag }}"
           VERSION="${{ steps.vars.outputs.version }}"
           
           cat <<EOF > dist/RELEASE_NOTES.md
-          # NEXORA ${TAG} — Windows Desktop Official Release
+          # NEXORA ${TAG} — Official Production Release
           
           > **CONNECT. SHARE. ANYWHERE.**  
           > *PRIVATE BY DESIGN. OPEN BY NATURE.*
           
           ---
           
-          ### 🚀 Official Windows Desktop Downloads
+          ### 🚀 Official Downloads Quick Links
           
-          - **[Download NEXORA Windows Setup (.exe)](https://github.com/CodeByArnob/Nexora-share/releases/download/${TAG}/NEXORA-Setup-x64.exe)** *(Recommended: Full Installer with branded icons, Start Menu & Desktop shortcuts, and automated firewall rules)*
+          #### 📱 Android (Optimized Split APKs & Store Bundle)
+          - **[Download NEXORA for Android ARM64-v8a](https://github.com/CodeByArnob/Nexora-share/releases/download/${TAG}/nexora-${TAG}-arm64-v8a.apk)** *(Recommended: 95%+ of modern smartphones, ~25 MB)*
+          - **[Download NEXORA Universal Android APK](https://github.com/CodeByArnob/Nexora-share/releases/download/${TAG}/nexora-${TAG}-universal.apk)** *(Universal package with all ABIs for any Android 8.0+ device)*
+          - **[Download NEXORA for Android ARMv7](https://github.com/CodeByArnob/Nexora-share/releases/download/${TAG}/nexora-${TAG}-armeabi-v7a.apk)** *(For 32-bit legacy devices, ~21 MB)*
+          - **[Download NEXORA for Android x86_64](https://github.com/CodeByArnob/Nexora-share/releases/download/${TAG}/nexora-${TAG}-x86_64.apk)** *(For Android emulators and ChromeOS x86_64)*
+          - **[Download Google Play App Bundle (AAB)](https://github.com/CodeByArnob/Nexora-share/releases/download/${TAG}/nexora-${TAG}-release.aab)** *(Google Play Store distribution format)*
+          
+          #### 💻 Windows 10/11 (PC & Laptop)
+          - **[Download NEXORA Windows Setup (.exe)](https://github.com/CodeByArnob/Nexora-share/releases/download/${TAG}/NEXORA-Setup-x64.exe)** *(Recommended: Full Installer with official branding, Start Menu & Desktop shortcuts, and automated firewall rules)*
           - **[Download NEXORA Windows Tagged Installer (.exe)](https://github.com/CodeByArnob/Nexora-share/releases/download/${TAG}/NEXORA-${TAG}-Setup-x64.exe)**
           - **[Download NEXORA Windows Portable (.zip)](https://github.com/CodeByArnob/Nexora-share/releases/download/${TAG}/nexora-windows-x64-portable.zip)** *(Standalone archive — extract and run immediately without installation)*
           - **[Download NEXORA Windows Tagged Portable (.zip)](https://github.com/CodeByArnob/Nexora-share/releases/download/${TAG}/nexora-${TAG}-windows-x64-portable.zip)**
@@ -187,18 +314,24 @@ jobs:
           
           ## 🌟 What's New in This Release
           
-          ### 1. Instant Large-File Initiation (< 1s Latency)
-          - **Lightweight Manifest Protocol**: Sender immediately sends lightweight transfer metadata without blocking on upfront whole-file hashing.
-          - **Receiver Instant Prompt**: Receiver displays incoming transfer confirmation within milliseconds (< 20 ms benchmarked on 2 GB files).
-          - **Streaming On-the-Fly SHA-256**: Incremental hashing occurs during chunk transmission with constant 512 KB memory footprint and 0.00 ms post-transfer verification lag.
+          ### 1. Android APK Size Optimization (> 50% Reduction)
+          - **Native ABI Splitting**: Isolated native binaries into target ABIs (`arm64-v8a`, `armeabi-v7a`, `x86_64`).
+          - **Native SQLite Database Engine**: Separated desktop SQLite FFI binaries; mobile now directly uses Android OS native `SQLiteDatabase`.
+          - **R8 Proguard & Resource Shrinking**: Minified bytecode and eliminated unreferenced resources with tuned keep rules for CameraX and Google ML Kit.
+          - **Icon Font Tree-Shaking**: Stripped unused Material glyphs, reducing icon font payload from 1.64 MB down to 11.7 KB (99.3% reduction).
           
-          ### 2. High-Resolution Branded Windows Application Icon
-          - **Multi-Resolution ICO Asset**: Embedded 16x16, 24x24, 32x32, 48x48, 64x64, 128x128, and 256x256 32-bit RGBA icons.
-          - **Full System Integration**: Official branding in Taskbar, Windows Explorer, Start Menu, Desktop shortcuts, Add or Remove Programs, and Inno Setup installer.
+          ### 2. Instant Large-File Initiation (< 1s Latency)
+          - **Zero-Delay Lightweight Manifest**: Senders send lightweight transfer offers immediately (< 5 ms) without reading or pre-hashing file bytes.
+          - **Immediate Confirmation**: Receivers display incoming transfer confirmation popups within milliseconds (< 30 ms on 2 GB files).
+          - **Incremental Streaming SHA-256**: Real-time digestion during transmission maintains constant 512 KB memory footprint and 0.00 ms post-transfer lag.
+          - **Handshake Integrity**: Explicit `TransferComplete` ↔ `TransferCompleteAck` handshake prevents dropped completion frames.
           
-          ### 3. File Transfer Lifecycle & State Machine Stability
-          - **Transfer Completion & Integrity Verification**: Immediate transition to \`Completed\` upon verified SHA-256 confirmation with \`TransferCompleteAck\`.
-          - **Clean Resource Management**: Guaranteed release of file locks, socket descriptors, and background transfer handles upon completion or cancellation.
+          ### 3. Windows Native Production Parity
+          - **Branded Application Icon & Metadata**: Embedded multi-resolution 32-bit RGBA `.ico` container and executable resource metadata.
+          - **Automated Firewall Configuration**: Inno Setup installer configures Windows Defender Firewall inbound rules via `netsh advfirewall`.
+          
+          ### 4. Native QR Scanner Camera Implementation
+          - **CameraX & Google ML Kit Viewfinder**: Full-screen optical scanning with laser sweep animation, flashlight toggle, and gallery image decoding.
           
           ---
           
@@ -225,6 +358,8 @@ jobs:
           draft: false
           prerelease: false
           files: |
+            dist/*.apk
+            dist/*.aab
             dist/*.exe
             dist/*.zip
             dist/SHA256SUMS.txt

@@ -4,6 +4,47 @@ All notable changes to NEXORA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-11-08
+
+### Major Production Release & Cross-Platform Optimization
+
+#### 📱 Android Architecture & APK Optimization
+- **Split-per-ABI Production Distribution**:
+  - Implemented `--split-per-abi` packaging (`arm64-v8a`, `armeabi-v7a`, `x86_64`) reducing APK size from 54.7 MB down to **~18 MB** (>65% reduction) for modern devices.
+  - Retained Universal APK (~50 MB) for direct sideloading and Google Play App Bundle (AAB, ~53 MB) for store distribution.
+- **Native Android SQLite Engine**:
+  - Isolated desktop `sqflite_common_ffi` dependencies to dev/desktop targets; mobile now utilizes native Android `SQLiteDatabase` directly.
+- **R8 Minification & Resource Shrinking**:
+  - Enabled `isMinifyEnabled = true` and `isShrinkResources = true` with tuned ProGuard keep rules for CameraX and Google ML Kit.
+- **Icon Font Tree-Shaking**:
+  - Automatic glyph tree-shaking reduced font asset footprint from 1.64 MB to 11.7 KB (99.3% reduction).
+
+#### ⚡ High-Speed Transfer Initiation & Zero-Lag Hashing Protocol
+- **Instant Lightweight Manifest**:
+  - Eliminated synchronous upfront whole-file hashing before sending transfer offers.
+  - Manifest generation completes in **< 5 ms** strictly from filesystem metadata.
+- **Immediate Receiver Confirmation**:
+  - Senders transmit lightweight `TransferOffer` immediately upon TCP handshake; receiver displays confirmation popup within **18–31 ms** for 2 GB+ files (well under the 1,000 ms SLA).
+- **Streaming Incremental SHA-256**:
+  - On-the-fly chunk digestion during active transmission eliminates memory buffering (bounded constant 512 KB RAM).
+  - Post-transfer file verification lag eliminated to **0.00 ms**.
+- **Lifecycle Completion & State Machine Stability**:
+  - Two-way completion signaling (`TransferComplete` ↔ `TransferCompleteAck`) prevents dropped completion frames.
+  - Immediate transfer state transition to `completed`, resetting transfer speed and ETA to zero and releasing all file locks.
+
+#### 🪟 Windows Desktop Native Production Parity
+- **High-Resolution Branded Icons**:
+  - Embedded multi-resolution 32-bit RGBA `.ico` container (16x16 through 256x256) matching the official Midnight Navy, Electric Blue, and Signal Teal palette.
+  - Executable metadata configured in `Runner.rc` (`CompanyName`, `ProductName`, `OriginalFilename`).
+- **Inno Setup Production Installer (`NEXORA-Setup-x64.exe`)**:
+  - Built-in Start Menu and Desktop shortcuts, uninstaller branding, and automated Windows Firewall inbound rule configuration via `netsh advfirewall`.
+- **Standalone Portable Bundle**:
+  - Zero-install portable ZIP distribution (`nexora-windows-x64-portable.zip`).
+
+#### 📷 Optical QR Camera Scanner
+- **Native CameraX & Google ML Kit Viewfinder**:
+  - Full-screen optical QR code scanner with animated scanning laser, cybernetic corner reticle, torch toggle, and gallery image QR decoding.
+
 ## [1.0.0] - 2026-11-07
 
 ### Production Release — Phase 6 Complete

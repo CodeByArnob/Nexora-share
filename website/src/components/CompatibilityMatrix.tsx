@@ -55,7 +55,7 @@ export const CompatibilityMatrix: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-[#39C6B0] shrink-0" />
-                  <span><strong>Package Size:</strong> Exactly 54.4 MB (Universal)</span>
+                  <span><strong>Package Size:</strong> Split ABI: ~21-25 MB (ARM64) / ~50 MB (Universal)</span>
                 </div>
               </div>
             </div>
@@ -66,7 +66,7 @@ export const CompatibilityMatrix: React.FC = () => {
                 className="w-full flex items-center justify-center gap-2 py-3 text-xs font-bold text-white bg-[#3978F6] hover:bg-[#2563EB] rounded-xl shadow-lg transition-all"
               >
                 <Download className="w-4 h-4" />
-                <span>Download Android APK (v1.0.0)</span>
+                <span>Download Android APK ({RELEASE_INFO.tag})</span>
               </a>
             </div>
           </div>
@@ -106,13 +106,11 @@ export const CompatibilityMatrix: React.FC = () => {
 
             <div className="mt-8 pt-6 border-t border-slate-700/60">
               <a
-                href={RELEASE_INFO.repoUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 py-3 text-xs font-semibold text-slate-300 bg-[#0D1420] hover:bg-slate-800 border border-slate-700 rounded-xl transition-all"
+                href={RELEASE_INFO.downloadWindowsSetupUrl}
+                className="w-full flex items-center justify-center gap-2 py-3 text-xs font-bold text-white bg-[#3978F6] hover:bg-[#2563EB] rounded-xl shadow-lg transition-all"
               >
-                <span>Build from Source / CI Artifacts</span>
-                <ExternalLink className="w-3.5 h-3.5" />
+                <Download className="w-4 h-4" />
+                <span>Download Windows Setup ({RELEASE_INFO.tag})</span>
               </a>
             </div>
           </div>
