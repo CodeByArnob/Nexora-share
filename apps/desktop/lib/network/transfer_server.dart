@@ -42,6 +42,7 @@ class TransferServer {
   final void Function(String error)? onError;
 
   TransferServer({
+    this.port = 48842,
     this.customDestinationDirectory,
     required this.onRequestApproval,
     required this.onTransferProgress,
