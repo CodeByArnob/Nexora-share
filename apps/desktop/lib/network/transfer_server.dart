@@ -291,6 +291,13 @@ class TransferServer {
                 }),
               );
             } else if (type == 'ChunkData') {
+              // No payload is accepted until a transfer offer has been approved
+              // and a destination directory has been established.
+              if (activeTransferId == null || activeDownloadDir == null) {
+                socket.destroy();
+                return;
+              }
+
               final fileId = payload['file_id'] as String? ?? 'f-0';
               final dynamic rawData = payload['data'];
               final Uint8List chunkBytes = rawData is String
