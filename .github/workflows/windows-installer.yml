@@ -35,26 +35,38 @@ jobs:
         run: flutter config --enable-windows-desktop
       - name: Install Inno Setup 6
         run: choco install innosetup --no-progress -y
-      - name: Build Flutter Windows release
+      - name: Resolve and validate release version
         shell: pwsh
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
         run: |
-          if ("${{ inputs.tag }}" -ne "") {
-            $tag = "${{ inputs.tag }}"
+          if ($env:GITHUB_EVENT_NAME -eq "workflow_dispatch") {
+            $tag = $env:INPUT_TAG
           } else {
             $tag = $env:GITHUB_REF_NAME
           }
+          if ([string]::IsNullOrWhiteSpace($tag)) {
+            throw "A release tag is required. For manual runs, enter a tag such as v1.0.2."
+          }
+          if ($tag -notmatch '^v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)\z') {
+            throw "Invalid release tag '$tag'. Expected vMAJOR.MINOR.PATCH, for example v1.0.2."
+          }
           $version = $tag.TrimStart("v")
+          "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          "RELEASE_TAG=$tag" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      - name: Build Flutter Windows release
+        shell: pwsh
+        run: |
           Push-Location apps/desktop
           flutter pub get
-          flutter build windows --release --build-name $version --build-number 100
+          flutter build windows --release --build-name $env:APP_VERSION --build-number 100
           Pop-Location
           if (!(Test-Path "apps/desktop/build/windows/x64/runner/Release/nexora.exe")) { throw "Windows executable missing." }
       - name: Compile NEXORA installer
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path dist/windows | Out-Null
-          $version = $env:GITHUB_REF_NAME.TrimStart("v")
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DAppVersion=$version" packaging/windows/nexora.iss
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DAppVersion=$env:APP_VERSION" packaging/windows/nexora.iss
           if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed." }
           if (!(Test-Path "dist/windows/NEXORA-Setup-x64.exe")) { throw "Installer output missing." }
       - name: Generate SHA-256 checksum
