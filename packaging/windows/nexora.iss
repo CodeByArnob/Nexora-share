@@ -1,6 +1,6 @@
 #define AppName "NEXORA"
 #ifndef AppVersion
-  #define AppVersion "1.0.0"
+  #define AppVersion "1.1.0"
 #endif
 #define AppPublisher "CodeByArnob"
 #define AppExeName "nexora.exe"

@@ -1,20 +1,44 @@
 export const RELEASE_INFO = {
-  version: '1.0.1',
-  buildNumber: 101,
-  tag: 'v1.0.1',
+  version: '1.1.0',
+  buildNumber: 110,
+  tag: 'v1.1.0',
   releaseDate: 'November 8, 2026',
-  apkFileName: 'nexora-v1.0.1-release.apk',
-  apkSize: '54.7 MB',
-  apkSizeBytes: 57355992,
-  apkSha256: '097e5a764e34843007dddac4991dd5d99bd2761d1b0267d58b137eb2e6537e50',
-  aabFileName: 'nexora-v1.0.1-release.aab',
+
+  // Android Packages
+  apkFileName: 'nexora-v1.1.0-arm64-v8a.apk',
+  apkSize: '25.0 MB',
+  apkArm64FileName: 'nexora-v1.1.0-arm64-v8a.apk',
+  apkArm64Size: '25.0 MB',
+  apkArmv7FileName: 'nexora-v1.1.0-armeabi-v7a.apk',
+  apkArmv7Size: '20.9 MB',
+  apkX86FileName: 'nexora-v1.1.0-x86_64.apk',
+  apkX86Size: '27.4 MB',
+  apkUniversalFileName: 'nexora-v1.1.0-universal.apk',
+  apkUniversalSize: '50.6 MB',
+  aabFileName: 'nexora-v1.1.0-release.aab',
   aabSize: '53.9 MB',
-  aabSha256: 'c52eb46677eeb74af44813a17fc5cb861176ff1aa6576f5d6c23f98f5c9723ea',
+
+  // Windows Packages
+  windowsSetupFileName: 'NEXORA-Setup-x64.exe',
+  windowsSetupSize: '17.5 MB',
+  windowsPortableFileName: 'nexora-windows-x64-portable.zip',
+  windowsPortableSize: '19.3 MB',
+
+  // Repositories & URLs
   repoUrl: 'https://github.com/CodeByArnob/Nexora-share',
   maintainer: 'CodeByArnob',
   maintainerUrl: 'https://github.com/CodeByArnob',
-  downloadLatestApkUrl: 'https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.1-release.apk',
-  downloadReleaseTagApkUrl: 'https://github.com/CodeByArnob/Nexora-share/releases/download/v1.0.1/nexora-v1.0.1-release.apk',
+
+  // Direct Download URLs
+  downloadLatestApkUrl: 'https://github.com/CodeByArnob/Nexora-share/releases/download/v1.1.0/nexora-v1.1.0-arm64-v8a.apk',
+  downloadArm64ApkUrl: 'https://github.com/CodeByArnob/Nexora-share/releases/download/v1.1.0/nexora-v1.1.0-arm64-v8a.apk',
+  downloadUniversalApkUrl: 'https://github.com/CodeByArnob/Nexora-share/releases/download/v1.1.0/nexora-v1.1.0-universal.apk',
+  downloadArmv7ApkUrl: 'https://github.com/CodeByArnob/Nexora-share/releases/download/v1.1.0/nexora-v1.1.0-armeabi-v7a.apk',
+  downloadX86ApkUrl: 'https://github.com/CodeByArnob/Nexora-share/releases/download/v1.1.0/nexora-v1.1.0-x86_64.apk',
+  downloadAabUrl: 'https://github.com/CodeByArnob/Nexora-share/releases/download/v1.1.0/nexora-v1.1.0-release.aab',
+  downloadWindowsSetupUrl: 'https://github.com/CodeByArnob/Nexora-share/releases/download/v1.1.0/NEXORA-Setup-x64.exe',
+  downloadWindowsPortableUrl: 'https://github.com/CodeByArnob/Nexora-share/releases/download/v1.1.0/nexora-windows-x64-portable.zip',
+
   latestReleasePageUrl: 'https://github.com/CodeByArnob/Nexora-share/releases/latest',
   releasesArchiveUrl: 'https://github.com/CodeByArnob/Nexora-share/releases',
   issuesUrl: 'https://github.com/CodeByArnob/Nexora-share/issues',

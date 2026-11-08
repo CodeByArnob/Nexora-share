@@ -27,7 +27,7 @@ export const Footer = () => {
 
             <div className="pt-2 flex items-center gap-2 text-xs text-slate-400 font-mono">
               <span className="w-2 h-2 rounded-full bg-[#39C6B0]" />
-              <span>Release v1.0.0 (Build 100) • Apache 2.0</span>
+              <span>Release {RELEASE_INFO.tag} (Build {RELEASE_INFO.buildNumber}) • Apache 2.0</span>
             </div>
           </div>
 

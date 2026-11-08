@@ -56,7 +56,7 @@ export const Navbar = () => {
           >
             <Download className="w-4 h-4 animate-bounce" />
             <span>Download APK</span>
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-mono">v1.0.0</span>
+            <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-mono">{RELEASE_INFO.tag}</span>
           </a>
         </div>
 

@@ -10,7 +10,7 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 DESKTOP_DIR="${ROOT_DIR}/apps/desktop"
 BUILD_DIR="${DESKTOP_DIR}/build/linux/x64/release/bundle"
 DIST_DIR="${ROOT_DIR}/dist"
-PKG_VERSION="1.0.0"
+PKG_VERSION="1.1.0"
 DEB_DIR="${DIST_DIR}/nexora_${PKG_VERSION}_amd64"
 
 echo "=== [NEXORA] Building Linux Desktop Release Bundle ==="
