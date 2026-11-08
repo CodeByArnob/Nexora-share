@@ -9,6 +9,7 @@ import '../services/android_foreground_service.dart';
 import '../services/media_store_service.dart';
 import 'file_transfer_manifest.dart';
 import 'protocol_messages.dart';
+import 'transfer_metrics.dart';
 
 class IncomingTransferOffer {
   final String transferId;
@@ -142,6 +143,9 @@ class TransferServer {
     final List<String> completedFilePaths = [];
     Directory? activeDownloadDir;
     final Map<String, ManifestItem> manifestFiles = {};
+    final Map<String, DigestSink> incomingFileSinks = {};
+    final Map<String, ByteConversionSink> incomingFileHashers = {};
+    Map<String, String> declaredFileHashes = {};
 
     DateTime startTime = DateTime.now();
     DateTime lastProgressUpdate = DateTime.now();
@@ -180,25 +184,24 @@ class TransferServer {
 
       await AndroidForegroundService.stopService();
 
-      // Full-file SHA-256 verification
+      // Close streaming hashers and perform zero-memory verification
+      for (final hasher in incomingFileHashers.values) {
+        try {
+          hasher.close();
+        } catch (_) {}
+      }
+
       bool allVerified = true;
-      for (final entry in manifestFiles.entries) {
-        final item = entry.value;
-        final targetFile = PathSanitizer.resolveSafePath(
-          destinationBaseDir: activeDownloadDir ?? Directory.systemTemp,
-          filename: item.name,
-          relativePath: item.relativePath,
-        );
-        if (await targetFile.exists() &&
-            item.sha256Hash != null &&
-            item.sha256Hash!.isNotEmpty) {
-          try {
-            final fileBytes = await targetFile.readAsBytes();
-            final actualSha = sha256.convert(fileBytes).toString();
-            if (actualSha.toLowerCase() != item.sha256Hash!.toLowerCase()) {
-              allVerified = false;
-            }
-          } catch (_) {}
+      for (final entry in incomingFileSinks.entries) {
+        final fileId = entry.key;
+        final actualSha = entry.value.value?.toString().toLowerCase();
+        final expectedSha =
+            declaredFileHashes[fileId]?.toLowerCase() ??
+            manifestFiles[fileId]?.sha256Hash?.toLowerCase();
+        if (expectedSha != null && expectedSha.isNotEmpty) {
+          if (actualSha != expectedSha) {
+            allVerified = false;
+          }
         }
       }
 
@@ -386,6 +389,9 @@ class TransferServer {
               totalFiles = manifest.totalFiles;
 
               manifestFiles.clear();
+              incomingFileSinks.clear();
+              incomingFileHashers.clear();
+              declaredFileHashes.clear();
               for (final f in manifest.files) {
                 manifestFiles[f.fileId] = f;
               }
@@ -557,6 +563,15 @@ class TransferServer {
                 );
               }
 
+              if (!incomingFileHashers.containsKey(fileId)) {
+                final sink = DigestSink();
+                incomingFileSinks[fileId] = sink;
+                incomingFileHashers[fileId] = sha256.startChunkedConversion(
+                  sink,
+                );
+              }
+              incomingFileHashers[fileId]!.add(chunkBytes);
+
               if (destinationFile != null) {
                 destinationFile!.setPositionSync(offset);
                 destinationFile!.writeFromSync(chunkBytes);
@@ -646,6 +661,11 @@ class TransferServer {
                 onTransferProgress(currentTransfer);
               }
             } else if (type == 'TransferComplete') {
+              final incomingHashes =
+                  (payload['file_hashes'] as Map<String, dynamic>?)
+                      ?.cast<String, String>() ??
+                  {};
+              declaredFileHashes = incomingHashes;
               await completeTransferSession();
             }
           } catch (_) {

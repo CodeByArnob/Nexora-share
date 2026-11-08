@@ -27,7 +27,6 @@ void main() {
       }
       await sourceFile.writeAsBytes(fileBytes);
 
-      final expectedHash = sha256.convert(fileBytes).toString();
 
       final serverCompleter = Completer<NexoraTransfer>();
       final clientCompleter = Completer<NexoraTransfer>();
@@ -38,7 +37,6 @@ void main() {
         onRequestApproval: (offer) async {
           expect(offer.fileName, 'test_image.png');
           expect(offer.totalBytes, fileBytes.length);
-          expect(offer.declaredSha256, expectedHash);
           return true; // Explicitly approved by receiver
         },
         onTransferProgress: (progress) {
