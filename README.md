@@ -7,7 +7,7 @@
   <p>
     <a href="https://codebyarnob.github.io/Nexora-share/"><img src="https://img.shields.io/badge/Website-Live%20on%20GitHub%20Pages-39C6B0?style=flat-square&logo=githubpages&logoColor=white" alt="Website" /></a>
     <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest"><img src="https://img.shields.io/github/v/release/CodeByArnob/Nexora-share?color=3978F6&label=Latest%20Release&style=flat-square" alt="Latest Version" /></a>
-    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.1-release.apk"><img src="https://img.shields.io/badge/Download-Android%20APK%20(54MB)-3978F6?style=flat-square&logo=android&logoColor=white" alt="Download APK" /></a>
+    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/NEXORA-Setup-x64.exe"><img src="https://img.shields.io/badge/Download-Windows%20Installer-3978F6?style=flat-square&logo=windows&logoColor=white" alt="Download Windows Installer" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-14243B.svg?style=flat-square" alt="License" /></a>
     <img src="https://img.shields.io/badge/platforms-Android%20%7C%20Windows%20%7C%20Linux-17243A.svg?style=flat-square" alt="Platforms" />
   </p>
@@ -17,8 +17,8 @@
       <img src="https://img.shields.io/badge/🌐%20OFFICIAL%20WEBSITE-39C6B0?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Official Website" height="38" />
     </a>
     &nbsp;&nbsp;
-    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.1-release.apk">
-      <img src="https://img.shields.io/badge/⚡%20DOWNLOAD%20APK%20(v1.0.1)-3978F6?style=for-the-badge&logo=android&logoColor=white" alt="Download Latest APK" height="38" />
+    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/NEXORA-Setup-x64.exe">
+      <img src="https://img.shields.io/badge/⬇%20DOWNLOAD%20WINDOWS%20INSTALLER-3978F6?style=for-the-badge&logo=windows&logoColor=white" alt="Download NEXORA for Windows" height="38" />
     </a>
     &nbsp;&nbsp;
     <a href="https://github.com/CodeByArnob/Nexora-share/releases">
@@ -32,29 +32,41 @@
 ## 🌐 Official Project Links
 
 - 🚀 **Live Website**: [https://codebyarnob.github.io/Nexora-share/](https://codebyarnob.github.io/Nexora-share/)
-- 📱 **Direct APK Download**: [nexora-v1.0.1-release.apk](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.1-release.apk)
+- 🪟 **Windows Installer**: [NEXORA-Setup-x64.exe](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/NEXORA-Setup-x64.exe)
 - 🔒 **Privacy Policy**: [https://codebyarnob.github.io/Nexora-share/privacy](https://codebyarnob.github.io/Nexora-share/privacy)
 - 🛡️ **Security Policy**: [https://codebyarnob.github.io/Nexora-share/security](https://codebyarnob.github.io/Nexora-share/security)
 - 📦 **Latest Release Notes**: [https://github.com/CodeByArnob/Nexora-share/releases/latest](https://github.com/CodeByArnob/Nexora-share/releases/latest)
 
 ---
 
-## 📲 Download Latest APK
+## 🪟 Download NEXORA for Windows
 
-The latest tested, production-signed Android APK is always accessible directly from the **[GitHub Releases](https://github.com/CodeByArnob/Nexora-share/releases/latest)** section or the **[Official Website](https://codebyarnob.github.io/Nexora-share/)**.
+<div align="center">
+  <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/NEXORA-Setup-x64.exe">
+    <img src="https://img.shields.io/badge/DOWNLOAD%20FOR%20WINDOWS-x64%20INSTALLER-3978F6?style=for-the-badge&logo=windows&logoColor=white" alt="Download NEXORA for Windows x64" />
+  </a>
+  <p><strong>Windows 10 / 11 · 64-bit</strong></p>
+  <p>Download the latest stable NEXORA installer directly from GitHub Releases.</p>
+</div>
 
-| Package | Version | Platform | Size | SHA-256 Checksum | Download |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Universal Release APK** | `v1.0.1` (Build 101) | Android 8.0+ (ARM64, ARMv7, x86_64) | 54.7 MB | `097e5a764e34843007dddac4991dd5d99bd2761d1b0267d58b137eb2e6537e50` | [**Download APK**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.1-release.apk) |
-| **Android App Bundle (AAB)** | `v1.0.1` (Build 101) | Google Play Distribution | 53.9 MB | `c52eb46677eeb74af44813a17fc5cb861176ff1aa6576f5d6c23f98f5c9723ea` | [**Download AAB**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.1-release.aab) |
-| **Integrity Ledger** | `v1.0.1` | All Packages | 184 B | Ledger verification | [**SHA256SUMS.txt**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/SHA256SUMS.txt) |
+| Detail | Information |
+| :--- | :--- |
+| Package | `NEXORA-Setup-x64.exe` |
+| Platform | Windows 10 / 11 (x64) |
+| Distribution | Official GitHub Release |
+| Integrity | SHA-256 checksum published alongside the installer |
+| Release history | [View all NEXORA releases](https://github.com/CodeByArnob/Nexora-share/releases) |
 
-### Quick Android Installation Guide
-1. Tap [**Download NEXORA for Android (APK)**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.0.1-release.apk).
-2. Open the downloaded file `nexora-v1.0.1-release.apk` on your phone.
-3. When prompted, tap **Settings** and allow **"Install unknown apps"** for your browser or file manager.
-4. Tap **Install** and launch **NEXORA**.
-5. Connect both devices to the same Wi-Fi or Mobile Hotspot for instant peer discovery!
+### Installation
+
+1. Select **Download for Windows** above.
+2. Run `NEXORA-Setup-x64.exe` after the download completes.
+3. Follow the setup wizard. A desktop shortcut can be selected during installation.
+4. Launch NEXORA from the Start Menu or desktop shortcut.
+
+**Security note:** The installer is currently not code-signed. Windows may show an unknown-publisher or SmartScreen warning. Verify the published SHA-256 checksum and download only from this repository's official Releases page.
+
+> **Release availability:** The direct download link becomes active after the Windows installer is attached to a published GitHub Release. Until then, use the [Releases page](https://github.com/CodeByArnob/Nexora-share/releases) to check availability. Historical Android packages, if present, remain in the release archive and are not the current Windows download.
 
 ---
 
