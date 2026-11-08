@@ -160,7 +160,7 @@ jobs:
       - name: Generate Windows SHA-256 Checksums
         run: |
           cd dist/
-          sha256sum * > SHA256SUMS.txt
+          find . -maxdepth 1 -type f ! -name "SHA256SUMS.txt" ! -name "RELEASE_NOTES.md" -exec sha256sum {} + | sed 's|\./||' > SHA256SUMS.txt
           cat SHA256SUMS.txt
 
       - name: Generate Comprehensive Windows Release Notes
@@ -224,6 +224,9 @@ jobs:
           body_path: dist/RELEASE_NOTES.md
           draft: false
           prerelease: false
-          files: dist/*
+          files: |
+            dist/*.exe
+            dist/*.zip
+            dist/SHA256SUMS.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
