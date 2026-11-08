@@ -8,17 +8,55 @@ import '../models/transfer_model.dart';
 import 'file_transfer_manifest.dart';
 import 'protocol_messages.dart';
 import 'retry_policy.dart';
+import 'transfer_metrics.dart';
+
+class TransferCancelledException implements Exception {
+  final String message;
+  TransferCancelledException(this.message);
+  @override
+  String toString() => message;
+}
 
 class TransferClient {
   final void Function(NexoraTransfer progress) onProgress;
   final void Function(NexoraTransfer completed) onCompleted;
   final void Function(String error) onError;
+  final void Function(TransferPerformanceMetrics metrics)? onMetrics;
+
+  final Map<String, Socket> _activeSockets = {};
+  final Set<String> _cancelledTransferIds = {};
 
   TransferClient({
     required this.onProgress,
     required this.onCompleted,
     required this.onError,
+    this.onMetrics,
   });
+
+  /// Cancels an in-flight transfer immediately from the sender side.
+  void cancel(String transferId) {
+    _cancelledTransferIds.add(transferId);
+    final socket = _activeSockets[transferId];
+    if (socket != null) {
+      try {
+        socket.add(
+          encodeFrame({
+            'type': 'TransferCancel',
+            'payload': {
+              'transfer_id': transferId,
+              'reason': 'Cancelled by user',
+            },
+          }),
+        );
+      } catch (_) {}
+      try {
+        socket.destroy();
+      } catch (_) {}
+    }
+  }
+
+  bool isCancelled(String transferId) =>
+      _cancelledTransferIds.contains(transferId);
 
   /// Sends a single file to a target peer device.
   Future<void> sendFile({
@@ -89,8 +127,12 @@ class TransferClient {
       return;
     }
 
+    final transferId = manifest.transferId;
+    _cancelledTransferIds.remove(transferId);
+    _activeSockets[transferId] = socket;
+
+    RandomAccessFile? activeRaf;
     try {
-      final transferId = manifest.transferId;
       final startTime = DateTime.now();
 
       // 1. Send Hello
@@ -154,38 +196,12 @@ class TransferClient {
         throw Exception('Peer handshake failed');
       }
 
-      // Compute SHA-256 hashes for all manifest files if not present
-      final verifiedItems = <ManifestItem>[];
-      for (final item in manifest.files) {
-        String sha = item.sha256Hash ?? '';
-        if (sha.isEmpty && item.localPath != null) {
-          final f = File(item.localPath!);
-          if (await f.exists()) {
-            Digest? d;
-            await for (final digest in sha256.bind(f.openRead())) {
-              d = digest;
-            }
-            sha = (d ?? sha256.convert(const [])).toString();
-          }
-        }
-        verifiedItems.add(
-          ManifestItem(
-            fileId: item.fileId,
-            name: item.name,
-            relativePath: item.relativePath,
-            sizeBytes: item.sizeBytes,
-            sha256Hash: sha,
-            localPath: item.localPath,
-          ),
-        );
-      }
-
-      final verifiedManifest = TransferManifest(
+      final tracker = TransferPerformanceTracker(
         transferId: transferId,
-        files: verifiedItems,
-        totalFiles: manifest.totalFiles,
         totalBytes: manifest.totalBytes,
+        totalFiles: manifest.totalFiles,
       );
+      tracker.markCreationEnd();
 
       // Log in SQLite
       try {
@@ -206,7 +222,8 @@ class TransferClient {
         );
       } catch (_) {}
 
-      // 2. Send TransferOffer
+      // 2. Send Lightweight TransferOffer IMMEDIATELY without waiting for whole-file hashing
+      tracker.markOfferSent();
       socket.add(
         encodeFrame({
           'type': 'TransferOffer',
@@ -217,7 +234,7 @@ class TransferClient {
               'display_name': localDevice.displayName,
               'platform': localDevice.platform,
             },
-            'manifest': verifiedManifest.toJson(),
+            'manifest': manifest.toJson(),
           },
         }),
       );
@@ -243,13 +260,13 @@ class TransferClient {
 
       // If resuming, send TransferResume query and negotiate starting offset
       int currentFileResumeOffset = resumeOffset;
-      if (resumeOffset > 0 && verifiedItems.isNotEmpty) {
+      if (resumeOffset > 0 && manifest.files.isNotEmpty) {
         socket.add(
           encodeFrame({
             'type': 'TransferResume',
             'payload': {
               'transfer_id': transferId,
-              'file_id': verifiedItems.first.fileId,
+              'file_id': manifest.files.first.fileId,
               'resume_offset': resumeOffset,
             },
           }),
@@ -266,8 +283,11 @@ class TransferClient {
       int cumulativeBytesSent = 0;
       DateTime lastUpdate = DateTime.now();
 
-      for (int fileIndex = 0; fileIndex < verifiedItems.length; fileIndex++) {
-        final item = verifiedItems[fileIndex];
+      tracker.markAcceptReceived();
+      final computedFileHashes = <String, String>{};
+
+      for (int fileIndex = 0; fileIndex < manifest.files.length; fileIndex++) {
+        final item = manifest.files[fileIndex];
         if (item.localPath == null) continue;
 
         final localFile = File(item.localPath!);
@@ -282,98 +302,131 @@ class TransferClient {
             : ((fileLength + defaultChunkSize - 1) ~/ defaultChunkSize);
         final startChunk = startOffset ~/ defaultChunkSize;
 
-        final raf = await localFile.open(mode: FileMode.read);
+        activeRaf = await localFile.open(mode: FileMode.read);
+        final digestSink = DigestSink();
+        final fileHasher = sha256.startChunkedConversion(digestSink);
 
-        for (int i = startChunk; i < totalChunks; i++) {
-          final offset = i * defaultChunkSize;
-          final chunkSize = (fileLength - offset).clamp(0, defaultChunkSize);
-          raf.setPositionSync(offset);
-          final chunkBytes = raf.readSync(chunkSize);
-          final chunkHash = sha256.convert(chunkBytes).toString();
+        try {
+          for (int i = startChunk; i < totalChunks; i++) {
+            if (_cancelledTransferIds.contains(transferId)) {
+              throw TransferCancelledException('Transfer cancelled by user');
+            }
+            final offset = i * defaultChunkSize;
+            final chunkSize = (fileLength - offset).clamp(0, defaultChunkSize);
+            activeRaf.setPositionSync(offset);
+            final chunkBytes = activeRaf.readSync(chunkSize);
+            fileHasher.add(chunkBytes);
+            tracker.markFirstByteStreamed();
+            final chunkHash = sha256.convert(chunkBytes).toString();
 
-          socket.add(
-            encodeFrame({
-              'type': 'ChunkData',
-              'payload': {
-                'transfer_id': transferId,
-                'file_id': item.fileId,
-                'chunk_index': i,
-                'total_chunks': totalChunks,
-                'offset': offset,
-                'data': chunkBytes,
-                'chunk_sha256': chunkHash,
-              },
-            }),
-          );
-
-          // Await ChunkAck from receiver for flow control
-          await frameStream
-              .firstWhere(
-                (m) =>
-                    m['type'] == 'ChunkAck' &&
-                    (m['payload']['chunk_index'] as int) == i,
-              )
-              .timeout(const Duration(seconds: 15));
-
-          cumulativeBytesSent += chunkBytes.length;
-
-          // Record verified checkpoint
-          try {
-            await DatabaseService.instance.recordVerifiedChunk(
-              transferId: transferId,
-              fileId: item.fileId,
-              chunkIndex: i,
-              chunkOffset: offset,
-              chunkSize: chunkBytes.length,
-              chunkSha256: chunkHash,
-            );
-          } catch (_) {}
-
-          final now = DateTime.now();
-          if (now.difference(lastUpdate).inMilliseconds >= 250 ||
-              cumulativeBytesSent >= manifest.totalBytes) {
-            lastUpdate = now;
-            final elapsedSeconds =
-                now.difference(startTime).inMilliseconds / 1000.0;
-            final speedBps = elapsedSeconds > 0
-                ? (cumulativeBytesSent / elapsedSeconds)
-                : 0.0;
-            final remainingBytes = (manifest.totalBytes - cumulativeBytesSent)
-                .clamp(0, manifest.totalBytes);
-            final eta = speedBps > 0 ? (remainingBytes / speedBps).round() : 0;
-
-            final progressTransfer = NexoraTransfer(
-              transferId: transferId,
-              direction: TransferDirection.send,
-              remoteDeviceId: peer.deviceId,
-              remoteDeviceName: peer.displayName,
-              totalFiles: manifest.totalFiles,
-              totalBytes: manifest.totalBytes,
-              bytesTransferred: cumulativeBytesSent,
-              speedBytesPerSec: speedBps,
-              etaSeconds: eta,
-              currentFile: item.name,
-              state: TransferState.inProgress,
-              createdAt: startTime,
+            socket.add(
+              encodeFrame({
+                'type': 'ChunkData',
+                'payload': {
+                  'transfer_id': transferId,
+                  'file_id': item.fileId,
+                  'chunk_index': i,
+                  'total_chunks': totalChunks,
+                  'offset': offset,
+                  'data': chunkBytes,
+                  'chunk_sha256': chunkHash,
+                },
+              }),
             );
 
-            onProgress(progressTransfer);
+            // Await ChunkAck from receiver for flow control
+            await frameStream
+                .firstWhere(
+                  (m) =>
+                      m['type'] == 'ChunkAck' &&
+                      (m['payload']['chunk_index'] as int) == i,
+                )
+                .timeout(const Duration(seconds: 15));
+
+            cumulativeBytesSent += chunkBytes.length;
+
+            // Record verified checkpoint
+            try {
+              await DatabaseService.instance.recordVerifiedChunk(
+                transferId: transferId,
+                fileId: item.fileId,
+                chunkIndex: i,
+                chunkOffset: offset,
+                chunkSize: chunkBytes.length,
+                chunkSha256: chunkHash,
+              );
+            } catch (_) {}
+
+            final now = DateTime.now();
+            if (now.difference(lastUpdate).inMilliseconds >= 250 ||
+                cumulativeBytesSent >= manifest.totalBytes) {
+              lastUpdate = now;
+              final elapsedSeconds =
+                  now.difference(startTime).inMilliseconds / 1000.0;
+              final speedBps = elapsedSeconds > 0
+                  ? (cumulativeBytesSent / elapsedSeconds)
+                  : 0.0;
+              final remainingBytes = (manifest.totalBytes - cumulativeBytesSent)
+                  .clamp(0, manifest.totalBytes);
+              final eta = speedBps > 0
+                  ? (remainingBytes / speedBps).round()
+                  : 0;
+
+              final progressTransfer = NexoraTransfer(
+                transferId: transferId,
+                direction: TransferDirection.send,
+                remoteDeviceId: peer.deviceId,
+                remoteDeviceName: peer.displayName,
+                totalFiles: manifest.totalFiles,
+                totalBytes: manifest.totalBytes,
+                bytesTransferred: cumulativeBytesSent,
+                speedBytesPerSec: speedBps,
+                etaSeconds: eta,
+                currentFile: item.name,
+                state: TransferState.inProgress,
+                createdAt: startTime,
+              );
+
+              onProgress(progressTransfer);
+            }
           }
-        }
 
-        await raf.close();
+          fileHasher.close();
+          computedFileHashes[item.fileId] = digestSink.value?.toString() ?? '';
+        } finally {
+          try {
+            await activeRaf.close();
+          } catch (_) {}
+          activeRaf = null;
+        }
       }
 
-      // 4. Send TransferComplete
+      // Setup TransferCompleteAck future before dispatching TransferComplete
+      final completeAckFuture = frameStream
+          .firstWhere((m) => m['type'] == 'TransferCompleteAck')
+          .timeout(const Duration(seconds: 10), onTimeout: () => {});
+
+      // 4. Send TransferComplete with on-the-fly computed full-file SHA-256 hashes
       socket.add(
         encodeFrame({
           'type': 'TransferComplete',
           'payload': {
             'transfer_id': transferId,
             'verified_files': manifest.totalFiles,
+            'file_hashes': computedFileHashes,
           },
         }),
       );
+      try {
+        await socket.flush();
+      } catch (_) {}
+
+      // Await confirmation that receiver has flushed and verified files
+      await completeAckFuture;
+      tracker.markTransferComplete();
+
+      final metrics = tracker.buildMetrics();
+      onMetrics?.call(metrics);
 
       // Update SQLite state
       try {
@@ -405,10 +458,26 @@ class TransferClient {
 
       onCompleted(completedTransfer);
 
+      _activeSockets.remove(transferId);
       await subscription.cancel();
-      socket.destroy();
+      try {
+        await socket.flush();
+        await socket.close();
+      } catch (_) {
+        socket.destroy();
+      }
     } catch (e) {
-      onError('Transfer failed: $e');
+      if (activeRaf != null) {
+        try {
+          await activeRaf.close();
+        } catch (_) {}
+        activeRaf = null;
+      }
+      _activeSockets.remove(transferId);
+      if (e is! TransferCancelledException &&
+          !_cancelledTransferIds.contains(transferId)) {
+        onError('Transfer failed: $e');
+      }
       socket.destroy();
     }
   }

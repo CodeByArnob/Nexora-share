@@ -27,7 +27,6 @@ void main() {
       }
       await sourceFile.writeAsBytes(fileBytes);
 
-      final expectedHash = sha256.convert(fileBytes).toString();
 
       final serverCompleter = Completer<NexoraTransfer>();
       final clientCompleter = Completer<NexoraTransfer>();
@@ -38,7 +37,6 @@ void main() {
         onRequestApproval: (offer) async {
           expect(offer.fileName, 'test_image.png');
           expect(offer.totalBytes, fileBytes.length);
-          expect(offer.declaredSha256, expectedHash);
           return true; // Explicitly approved by receiver
         },
         onTransferProgress: (progress) {
@@ -107,77 +105,177 @@ void main() {
     },
   );
 
-  test('TransferClient and TransferServer cancellation cleans up active state', () async {
-    final tempDir = await Directory.systemTemp.createTemp(
-      'nexora_cancel_test_',
-    );
+  test(
+    'TransferClient and TransferServer cancellation cleans up active state',
+    () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'nexora_cancel_test_',
+      );
 
-    final sourceFile = File('${tempDir.path}/large_test_file.bin');
-    final fileBytes = Uint8List(512 * 1024);
-    await sourceFile.writeAsBytes(fileBytes);
+      final sourceFile = File('${tempDir.path}/large_test_file.bin');
+      final fileBytes = Uint8List(512 * 1024);
+      await sourceFile.writeAsBytes(fileBytes);
 
-    final cancelCompleter = Completer<void>();
+      final cancelCompleter = Completer<void>();
 
-    final server = TransferServer(
-      customDestinationDirectory: tempDir,
-      onRequestApproval: (offer) async => true,
-      onTransferProgress: (progress) {
-        if (progress.state == TransferState.cancelled) {
+      final server = TransferServer(
+        customDestinationDirectory: tempDir,
+        onRequestApproval: (offer) async => true,
+        onTransferProgress: (progress) {
+          if (progress.state == TransferState.cancelled) {
+            if (!cancelCompleter.isCompleted) cancelCompleter.complete();
+          }
+        },
+        onTransferCompleted: (_) {},
+      );
+
+      final port = await server.start();
+
+      final targetPeer = NexoraDevice(
+        deviceId: 'server-device-cancel',
+        displayName: 'Receiver Device',
+        platform: 'Android',
+        fingerprint: 'dummyfingerprint',
+        address: '127.0.0.1',
+        port: port,
+        lastSeen: DateTime.now(),
+      );
+
+      final localSender = NexoraDevice(
+        deviceId: 'sender-device-cancel',
+        displayName: 'Sender Device',
+        platform: 'Android',
+        fingerprint: 'dummyfingerprint2',
+        lastSeen: DateTime.now(),
+      );
+
+      late final TransferClient client;
+      client = TransferClient(
+        onProgress: (progress) {
+          if (progress.bytesTransferred > 0) {
+            // Cancel while in flight
+            client.cancel(progress.transferId);
+            if (!cancelCompleter.isCompleted) cancelCompleter.complete();
+          }
+        },
+        onCompleted: (_) {},
+        onError: (_) {
           if (!cancelCompleter.isCompleted) cancelCompleter.complete();
-        }
-      },
-      onTransferCompleted: (_) {},
-    );
+        },
+      );
 
-    final port = await server.start();
+      final manifest = await TransferManifest.fromFiles([sourceFile]);
 
-    final targetPeer = NexoraDevice(
-      deviceId: 'server-device-cancel',
-      displayName: 'Receiver Device',
-      platform: 'Android',
-      fingerprint: 'dummyfingerprint',
-      address: '127.0.0.1',
-      port: port,
-      lastSeen: DateTime.now(),
-    );
+      // Fire in background and cancel
+      unawaited(
+        client.sendManifest(
+          peer: targetPeer,
+          manifest: manifest,
+          localDevice: localSender,
+        ),
+      );
 
-    final localSender = NexoraDevice(
-      deviceId: 'sender-device-cancel',
-      displayName: 'Sender Device',
-      platform: 'Android',
-      fingerprint: 'dummyfingerprint2',
-      lastSeen: DateTime.now(),
-    );
+      await cancelCompleter.future.timeout(const Duration(seconds: 10));
 
-    late final TransferClient client;
-    client = TransferClient(
-      onProgress: (progress) {
-        if (progress.bytesTransferred > 0) {
-          // Cancel while in flight
-          client.cancel(progress.transferId);
-          if (!cancelCompleter.isCompleted) cancelCompleter.complete();
-        }
-      },
-      onCompleted: (_) {},
-      onError: (_) {
-        if (!cancelCompleter.isCompleted) cancelCompleter.complete();
-      },
-    );
+      expect(client.isCancelled(manifest.transferId), isTrue);
 
-    final manifest = await TransferManifest.fromFiles([sourceFile]);
+      server.stop();
+      await tempDir.delete(recursive: true);
+    },
+  );
 
-    // Fire in background and cancel
-    unawaited(client.sendManifest(
-      peer: targetPeer,
-      manifest: manifest,
-      localDevice: localSender,
-    ));
+  test(
+    'ISSUE 2 Regression: 18.3 KB transfer transitions to Completed with TransferCompleteAck & zero speed/eta',
+    () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'nexora_18kb_test_',
+      );
 
-    await cancelCompleter.future.timeout(const Duration(seconds: 10));
+      // Create exact 18.3 KB (18,739 bytes) file
+      final sourceFile = File('${tempDir.path}/screenshot_doc.pdf');
+      final fileBytes = Uint8List(18739);
+      for (int i = 0; i < fileBytes.length; i++) {
+        fileBytes[i] = (i * 73) % 256;
+      }
+      await sourceFile.writeAsBytes(fileBytes);
+      final expectedSha = sha256.convert(fileBytes).toString();
 
-    expect(client.isCancelled(manifest.transferId), isTrue);
+      final serverCompleter = Completer<NexoraTransfer>();
+      final clientCompleter = Completer<NexoraTransfer>();
 
-    server.stop();
-    await tempDir.delete(recursive: true);
-  });
+      final server = TransferServer(
+        customDestinationDirectory: tempDir,
+        onRequestApproval: (offer) async => true,
+        onTransferProgress: (progress) {},
+        onTransferCompleted: (completed) {
+          serverCompleter.complete(completed);
+        },
+      );
+
+      final port = await server.start();
+
+      final targetPeer = NexoraDevice(
+        deviceId: 'server-18kb',
+        displayName: 'Android Receiver',
+        platform: 'Android',
+        fingerprint: 'fp-18kb',
+        address: '127.0.0.1',
+        port: port,
+        lastSeen: DateTime.now(),
+      );
+
+      final localSender = NexoraDevice(
+        deviceId: 'sender-18kb',
+        displayName: 'Windows Sender',
+        platform: 'Windows',
+        fingerprint: 'fp-sender-18kb',
+        lastSeen: DateTime.now(),
+      );
+
+      final client = TransferClient(
+        onProgress: (p) {},
+        onCompleted: (c) {
+          clientCompleter.complete(c);
+        },
+        onError: (err) => fail('Unexpected error: $err'),
+      );
+
+      await client.sendFile(
+        peer: targetPeer,
+        file: sourceFile,
+        localDevice: localSender,
+      );
+
+      final serverResult = await serverCompleter.future.timeout(
+        const Duration(seconds: 10),
+      );
+      final clientResult = await clientCompleter.future.timeout(
+        const Duration(seconds: 10),
+      );
+
+      // Verify server completion attributes
+      expect(serverResult.state, TransferState.completed);
+      expect(serverResult.bytesTransferred, 18739);
+      expect(serverResult.totalBytes, 18739);
+      expect(serverResult.speedBytesPerSec, 0.0);
+      expect(serverResult.etaSeconds, 0);
+
+      // Verify client completion attributes
+      expect(clientResult.state, TransferState.completed);
+      expect(clientResult.bytesTransferred, 18739);
+      expect(clientResult.totalBytes, 18739);
+      expect(clientResult.speedBytesPerSec, 0.0);
+      expect(clientResult.etaSeconds, 0);
+
+      // Verify received file on disk
+      final receivedFile = File('${tempDir.path}/screenshot_doc.pdf');
+      expect(await receivedFile.exists(), isTrue);
+      final receivedBytes = await receivedFile.readAsBytes();
+      expect(receivedBytes.length, 18739);
+      expect(sha256.convert(receivedBytes).toString(), expectedSha);
+
+      server.stop();
+      await tempDir.delete(recursive: true);
+    },
+  );
 }

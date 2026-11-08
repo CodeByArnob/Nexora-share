@@ -9,6 +9,7 @@ import '../services/android_foreground_service.dart';
 import 'file_transfer_manifest.dart';
 import 'protocol_messages.dart';
 import 'retry_policy.dart';
+import 'transfer_metrics.dart';
 
 class TransferCancelledException implements Exception {
   final String message;
@@ -21,6 +22,7 @@ class TransferClient {
   final void Function(NexoraTransfer progress) onProgress;
   final void Function(NexoraTransfer completed) onCompleted;
   final void Function(String error) onError;
+  final void Function(TransferPerformanceMetrics metrics)? onMetrics;
 
   final Map<String, Socket> _activeSockets = {};
   final Set<String> _cancelledTransferIds = {};
@@ -30,6 +32,7 @@ class TransferClient {
     required this.onProgress,
     required this.onCompleted,
     required this.onError,
+    this.onMetrics,
   });
 
   /// Cancels an in-flight transfer immediately from the sender side.
@@ -266,38 +269,12 @@ class TransferClient {
         throw TransferCancelledException('Transfer cancelled by user');
       }
 
-      // Compute SHA-256 hashes for all manifest files if not present
-      final verifiedItems = <ManifestItem>[];
-      for (final item in manifest.files) {
-        String sha = item.sha256Hash ?? '';
-        if (sha.isEmpty && item.localPath != null) {
-          final f = File(item.localPath!);
-          if (await f.exists()) {
-            Digest? d;
-            await for (final digest in sha256.bind(f.openRead())) {
-              d = digest;
-            }
-            sha = (d ?? sha256.convert(const [])).toString();
-          }
-        }
-        verifiedItems.add(
-          ManifestItem(
-            fileId: item.fileId,
-            name: item.name,
-            relativePath: item.relativePath,
-            sizeBytes: item.sizeBytes,
-            sha256Hash: sha,
-            localPath: item.localPath,
-          ),
-        );
-      }
-
-      final verifiedManifest = TransferManifest(
+      final tracker = TransferPerformanceTracker(
         transferId: transferId,
-        files: verifiedItems,
-        totalFiles: manifest.totalFiles,
         totalBytes: manifest.totalBytes,
+        totalFiles: manifest.totalFiles,
       );
+      tracker.markCreationEnd();
 
       // Log in SQLite
       try {
@@ -318,7 +295,8 @@ class TransferClient {
         );
       } catch (_) {}
 
-      // 2. Send TransferOffer
+      // 2. Send Lightweight TransferOffer IMMEDIATELY without waiting for whole-file hashing
+      tracker.markOfferSent();
       socket.add(
         encodeFrame({
           'type': 'TransferOffer',
@@ -329,7 +307,7 @@ class TransferClient {
               'display_name': localDevice.displayName,
               'platform': localDevice.platform,
             },
-            'manifest': verifiedManifest.toJson(),
+            'manifest': manifest.toJson(),
           },
         }),
       );
@@ -342,6 +320,7 @@ class TransferClient {
           )
           .timeout(const Duration(seconds: 30));
 
+      tracker.markAcceptReceived();
       if (responseMsg['type'] == 'TransferReject') {
         final reason =
             (responseMsg['payload'] as Map<String, dynamic>)['reason']
@@ -358,13 +337,13 @@ class TransferClient {
 
       // If resuming, send TransferResume query and negotiate starting offset
       int currentFileResumeOffset = resumeOffset;
-      if (resumeOffset > 0 && verifiedItems.isNotEmpty) {
+      if (resumeOffset > 0 && manifest.files.isNotEmpty) {
         socket.add(
           encodeFrame({
             'type': 'TransferResume',
             'payload': {
               'transfer_id': transferId,
-              'file_id': verifiedItems.first.fileId,
+              'file_id': manifest.files.first.fileId,
               'resume_offset': resumeOffset,
             },
           }),
@@ -394,12 +373,14 @@ class TransferClient {
         }
       });
 
-      for (int fileIndex = 0; fileIndex < verifiedItems.length; fileIndex++) {
+      final computedFileHashes = <String, String>{};
+
+      for (int fileIndex = 0; fileIndex < manifest.files.length; fileIndex++) {
         if (_cancelledTransferIds.contains(transferId)) {
           throw TransferCancelledException('Transfer cancelled by user');
         }
 
-        final item = verifiedItems[fileIndex];
+        final item = manifest.files[fileIndex];
         if (item.localPath == null) continue;
 
         final localFile = File(item.localPath!);
@@ -415,6 +396,8 @@ class TransferClient {
         final startChunk = startOffset ~/ defaultChunkSize;
 
         activeRaf = await localFile.open(mode: FileMode.read);
+        final digestSink = DigestSink();
+        final fileHasher = sha256.startChunkedConversion(digestSink);
 
         for (int i = startChunk; i < totalChunks; i++) {
           // Check for user cancellation
@@ -460,6 +443,8 @@ class TransferClient {
           final chunkSize = (fileLength - offset).clamp(0, defaultChunkSize);
           activeRaf.setPositionSync(offset);
           final chunkBytes = activeRaf.readSync(chunkSize);
+          fileHasher.add(chunkBytes);
+          tracker.markFirstByteStreamed();
 
           // Fast SHA-256 for checkpointing
           final chunkHash = sha256.convert(chunkBytes).toString();
@@ -544,6 +529,8 @@ class TransferClient {
           }
         }
 
+        fileHasher.close();
+        computedFileHashes[item.fileId] = digestSink.value?.toString() ?? '';
         await activeRaf.close();
         activeRaf = null;
       }
@@ -557,16 +544,32 @@ class TransferClient {
 
       await ackSubscription.cancel();
 
-      // 4. Send TransferComplete
+      // Setup TransferCompleteAck future before dispatching TransferComplete
+      final completeAckFuture = frameStream
+          .firstWhere((m) => m['type'] == 'TransferCompleteAck')
+          .timeout(const Duration(seconds: 10), onTimeout: () => {});
+
+      // 4. Send TransferComplete with on-the-fly computed full-file SHA-256 hashes
       socket.add(
         encodeFrame({
           'type': 'TransferComplete',
           'payload': {
             'transfer_id': transferId,
             'verified_files': manifest.totalFiles,
+            'file_hashes': computedFileHashes,
           },
         }),
       );
+      try {
+        await socket.flush();
+      } catch (_) {}
+
+      // Await confirmation that receiver has flushed and verified files
+      await completeAckFuture;
+      tracker.markTransferComplete();
+
+      final metrics = tracker.buildMetrics();
+      onMetrics?.call(metrics);
 
       await AndroidForegroundService.stopService();
 
@@ -603,7 +606,12 @@ class TransferClient {
       await peerCancelSub.cancel();
       await subscription.cancel();
       _activeSockets.remove(transferId);
-      socket.destroy();
+      try {
+        await socket.flush();
+        await socket.close();
+      } catch (_) {
+        socket.destroy();
+      }
     } catch (e) {
       if (activeRaf != null) {
         try {

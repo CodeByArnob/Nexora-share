@@ -89,7 +89,8 @@ class NetworkController {
   }
 
   void _updateActiveTransfer(NexoraTransfer transfer) {
-    if (transfer.state == TransferState.cancelled) {
+    if (transfer.state == TransferState.cancelled ||
+        transfer.state == TransferState.completed) {
       _completeTransfer(transfer);
       return;
     }
@@ -104,17 +105,27 @@ class NetworkController {
   }
 
   void _completeTransfer(NexoraTransfer transfer) {
-    // Remove from active
+    // 1. Remove from active
     final active = List<NexoraTransfer>.from(_ref.read(activeTransfersProvider))
       ..removeWhere((t) => t.transferId == transfer.transferId);
     _ref.read(activeTransfersProvider.notifier).state = active;
 
-    // Add to history
-    final history = <NexoraTransfer>[
-      transfer,
-      ..._ref.read(transferHistoryProvider),
-    ];
-    _ref.read(transferHistoryProvider.notifier).state = history;
+    // 2. Add to history without duplicates
+    final history = _ref.read(transferHistoryProvider);
+    final alreadyCompleted = history.any(
+      (t) => t.transferId == transfer.transferId && t.state == transfer.state,
+    );
+    if (!alreadyCompleted) {
+      final finalized = transfer.copyWith(
+        speedBytesPerSec: 0,
+        etaSeconds: 0,
+        completedAt: transfer.completedAt ?? DateTime.now(),
+      );
+      _ref.read(transferHistoryProvider.notifier).state = [
+        finalized,
+        ...history.where((t) => t.transferId != transfer.transferId),
+      ];
+    }
   }
 
   /// Cancels an active in-flight transfer (sending or receiving).
@@ -180,9 +191,7 @@ class NetworkController {
     );
     final idx = active.indexWhere((t) => t.transferId == transferId);
     if (idx >= 0) {
-      active[idx] = active[idx].copyWith(
-        state: TransferState.inProgress,
-      );
+      active[idx] = active[idx].copyWith(state: TransferState.inProgress);
       _ref.read(activeTransfersProvider.notifier).state = active;
     }
   }

@@ -4,12 +4,13 @@ import '../database/database_service.dart';
 import '../network/network_controller.dart';
 import '../providers/app_state.dart';
 import '../services/device_identity_service.dart';
+import '../theme/nexora_theme.dart';
 import '../widgets/receiver_approval_dialog.dart';
-import 'home_screen.dart';
-import 'transfers_screen.dart';
-import 'history_screen.dart';
 import 'devices_screen.dart';
+import 'history_screen.dart';
+import 'home_screen.dart';
 import 'settings_screen.dart';
+import 'transfers_screen.dart';
 
 class NavigationShell extends ConsumerStatefulWidget {
   const NavigationShell({super.key});
@@ -60,6 +61,18 @@ class _NavigationShellState extends ConsumerState<NavigationShell> {
     _controller.initialize(
       approvalCallback: (offer) async {
         if (!mounted) return false;
+
+        // Auto-approve if trusted
+        final trusted = ref.read(trustedDevicesProvider);
+        final isTrusted = trusted.any((d) => d.displayName == offer.senderName);
+        final autoAccept = await DatabaseService.instance.getSetting(
+          'auto_accept_trusted',
+        );
+        if (isTrusted && autoAccept != 'false') {
+          return true;
+        }
+
+        if (!mounted) return false;
         final result = await showDialog<bool>(
           context: context,
           barrierDismissible: false,
@@ -78,42 +91,79 @@ class _NavigationShellState extends ConsumerState<NavigationShell> {
 
   @override
   Widget build(BuildContext context) {
+    final activeTransfers = ref.watch(activeTransfersProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: IndexedStack(index: _currentIndex, children: _screens),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _currentIndex,
-        onDestinationSelected: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: isDark
+                  ? NexoraColors.darkBorder
+                  : NexoraColors.lightBorder,
+              width: 1,
+            ),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.swap_horiz_outlined),
-            selectedIcon: Icon(Icons.swap_horiz),
-            label: 'Transfers',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history_outlined),
-            selectedIcon: Icon(Icons.history),
-            label: 'History',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.devices_outlined),
-            selectedIcon: Icon(Icons.devices),
-            label: 'Devices',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+        ),
+        child: NavigationBar(
+          selectedIndex: _currentIndex,
+          onDestinationSelected: (index) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          destinations: [
+            const NavigationDestination(
+              icon: Icon(Icons.home_outlined),
+              selectedIcon: Icon(Icons.home, color: NexoraColors.electricBlue),
+              label: 'Home',
+            ),
+            NavigationDestination(
+              icon: Badge(
+                isLabelVisible: activeTransfers.isNotEmpty,
+                label: Text('${activeTransfers.length}'),
+                backgroundColor: NexoraColors.signalTeal,
+                child: const Icon(Icons.swap_horiz_outlined),
+              ),
+              selectedIcon: Badge(
+                isLabelVisible: activeTransfers.isNotEmpty,
+                label: Text('${activeTransfers.length}'),
+                backgroundColor: NexoraColors.signalTeal,
+                child: const Icon(
+                  Icons.swap_horiz,
+                  color: NexoraColors.electricBlue,
+                ),
+              ),
+              label: 'Transfers',
+            ),
+            const NavigationDestination(
+              icon: Icon(Icons.history_outlined),
+              selectedIcon: Icon(
+                Icons.history,
+                color: NexoraColors.electricBlue,
+              ),
+              label: 'History',
+            ),
+            const NavigationDestination(
+              icon: Icon(Icons.devices_outlined),
+              selectedIcon: Icon(
+                Icons.devices,
+                color: NexoraColors.electricBlue,
+              ),
+              label: 'Devices',
+            ),
+            const NavigationDestination(
+              icon: Icon(Icons.settings_outlined),
+              selectedIcon: Icon(
+                Icons.settings,
+                color: NexoraColors.electricBlue,
+              ),
+              label: 'Settings',
+            ),
+          ],
+        ),
       ),
     );
   }

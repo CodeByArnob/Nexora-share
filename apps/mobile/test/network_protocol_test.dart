@@ -29,42 +29,45 @@ void main() {
       expect(decoded['payload']['device']['device_id'], 'nexora-test-01');
     });
 
-    test('encodeBinaryChunkFrame and decodeFramePayload zero-copy round-trip', () {
-      final rawData = Uint8List(128 * 1024);
-      for (int i = 0; i < rawData.length; i++) {
-        rawData[i] = (i * 29) % 256;
-      }
+    test(
+      'encodeBinaryChunkFrame and decodeFramePayload zero-copy round-trip',
+      () {
+        final rawData = Uint8List(128 * 1024);
+        for (int i = 0; i < rawData.length; i++) {
+          rawData[i] = (i * 29) % 256;
+        }
 
-      final frame = encodeBinaryChunkFrame(
-        transferId: 't-1234-abcd',
-        fileId: 'f-file-01',
-        chunkIndex: 3,
-        totalChunks: 10,
-        offset: 3 * 128 * 1024,
-        data: rawData,
-        chunkSha256: 'mock-sha256-hash',
-      );
+        final frame = encodeBinaryChunkFrame(
+          transferId: 't-1234-abcd',
+          fileId: 'f-file-01',
+          chunkIndex: 3,
+          totalChunks: 10,
+          offset: 3 * 128 * 1024,
+          data: rawData,
+          chunkSha256: 'mock-sha256-hash',
+        );
 
-      expect(frame.length, greaterThan(rawData.length + lengthPrefixSize));
+        expect(frame.length, greaterThan(rawData.length + lengthPrefixSize));
 
-      final payloadBytes = frame.sublist(lengthPrefixSize);
-      expect(payloadBytes[0], binaryChunkMagic);
+        final payloadBytes = frame.sublist(lengthPrefixSize);
+        expect(payloadBytes[0], binaryChunkMagic);
 
-      final decoded = decodeFramePayload(payloadBytes);
-      expect(decoded['type'], 'ChunkData');
+        final decoded = decodeFramePayload(payloadBytes);
+        expect(decoded['type'], 'ChunkData');
 
-      final payload = decoded['payload'] as Map<String, dynamic>;
-      expect(payload['transfer_id'], 't-1234-abcd');
-      expect(payload['file_id'], 'f-file-01');
-      expect(payload['chunk_index'], 3);
-      expect(payload['total_chunks'], 10);
-      expect(payload['offset'], 3 * 128 * 1024);
-      expect(payload['chunk_sha256'], 'mock-sha256-hash');
+        final payload = decoded['payload'] as Map<String, dynamic>;
+        expect(payload['transfer_id'], 't-1234-abcd');
+        expect(payload['file_id'], 'f-file-01');
+        expect(payload['chunk_index'], 3);
+        expect(payload['total_chunks'], 10);
+        expect(payload['offset'], 3 * 128 * 1024);
+        expect(payload['chunk_sha256'], 'mock-sha256-hash');
 
-      final chunkData = payload['data'] as Uint8List;
-      expect(chunkData.length, rawData.length);
-      expect(chunkData, equals(rawData));
-    });
+        final chunkData = payload['data'] as Uint8List;
+        expect(chunkData.length, rawData.length);
+        expect(chunkData, equals(rawData));
+      },
+    );
 
     test('encodeFrame rejects payloads exceeding maxFrameSize', () {
       final hugeMessage = {

@@ -25,9 +25,7 @@ class MediaStoreService {
       } catch (_) {}
 
       // Fallback: check standard external storage download path
-      final standardDownload = Directory(
-        '/storage/emulated/0/Download/Nexora',
-      );
+      final standardDownload = Directory('/storage/emulated/0/Download/Nexora');
       try {
         if (!await standardDownload.exists()) {
           await standardDownload.create(recursive: true);

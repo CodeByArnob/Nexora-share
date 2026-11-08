@@ -9,6 +9,7 @@ import '../services/android_foreground_service.dart';
 import '../services/media_store_service.dart';
 import 'file_transfer_manifest.dart';
 import 'protocol_messages.dart';
+import 'transfer_metrics.dart';
 
 class IncomingTransferOffer {
   final String transferId;
@@ -142,6 +143,9 @@ class TransferServer {
     final List<String> completedFilePaths = [];
     Directory? activeDownloadDir;
     final Map<String, ManifestItem> manifestFiles = {};
+    final Map<String, DigestSink> incomingFileSinks = {};
+    final Map<String, ByteConversionSink> incomingFileHashers = {};
+    Map<String, String> declaredFileHashes = {};
 
     DateTime startTime = DateTime.now();
     DateTime lastProgressUpdate = DateTime.now();
@@ -154,13 +158,107 @@ class TransferServer {
       destinationFile = null;
       if (f != null) {
         try {
+          f.flushSync();
           await f.close();
         } catch (_) {}
       }
-      if (path != null) {
+      if (path != null && !completedFilePaths.contains(path)) {
         completedFilePaths.add(path);
         // Automatically scan into Android MediaStore so Gallery shows images/videos
         unawaited(MediaStoreService.scanFile(path));
+      }
+    }
+
+    bool isCompleted = false;
+
+    Future<void> completeTransferSession() async {
+      if (isCompleted) return;
+      isCompleted = true;
+
+      await safeCloseFile();
+
+      // Trigger MediaScanner for all received files to show in Gallery
+      for (final path in completedFilePaths) {
+        await MediaStoreService.scanFile(path);
+      }
+
+      await AndroidForegroundService.stopService();
+
+      // Close streaming hashers and perform zero-memory verification
+      for (final hasher in incomingFileHashers.values) {
+        try {
+          hasher.close();
+        } catch (_) {}
+      }
+
+      bool allVerified = true;
+      for (final entry in incomingFileSinks.entries) {
+        final fileId = entry.key;
+        final actualSha = entry.value.value?.toString().toLowerCase();
+        final expectedSha =
+            declaredFileHashes[fileId]?.toLowerCase() ??
+            manifestFiles[fileId]?.sha256Hash?.toLowerCase();
+        if (expectedSha != null && expectedSha.isNotEmpty) {
+          if (actualSha != expectedSha) {
+            allVerified = false;
+          }
+        }
+      }
+
+      // Send TransferCompleteAck to sender
+      try {
+        socket.add(
+          encodeFrame({
+            'type': 'TransferCompleteAck',
+            'payload': {
+              'transfer_id': activeTransferId,
+              'verified': allVerified,
+            },
+          }),
+        );
+        await socket.flush();
+      } catch (_) {}
+
+      // Update SQLite state
+      try {
+        if (activeTransferId != null) {
+          await DatabaseService.instance.updateTransferProgress(
+            activeTransferId!,
+            totalBytes,
+            TransferState.completed,
+          );
+          await DatabaseService.instance.clearResumeCheckpoints(
+            activeTransferId!,
+          );
+        }
+      } catch (_) {}
+
+      final completed = NexoraTransfer(
+        transferId: activeTransferId ?? 'incoming',
+        direction: TransferDirection.receive,
+        remoteDeviceId: 'peer',
+        remoteDeviceName: remoteDeviceName,
+        totalFiles: totalFiles,
+        totalBytes: totalBytes,
+        bytesTransferred: totalBytes,
+        speedBytesPerSec: 0.0,
+        etaSeconds: 0,
+        currentFile: currentFileName ?? 'Files',
+        state: TransferState.completed,
+        createdAt: startTime,
+        completedAt: DateTime.now(),
+      );
+
+      onTransferCompleted(completed);
+
+      if (activeTransferId != null) {
+        _activeSockets.remove(activeTransferId);
+      }
+      try {
+        await socket.flush();
+        await socket.close();
+      } catch (_) {
+        socket.destroy();
       }
     }
 
@@ -291,6 +389,9 @@ class TransferServer {
               totalFiles = manifest.totalFiles;
 
               manifestFiles.clear();
+              incomingFileSinks.clear();
+              incomingFileHashers.clear();
+              declaredFileHashes.clear();
               for (final f in manifest.files) {
                 manifestFiles[f.fileId] = f;
               }
@@ -462,6 +563,15 @@ class TransferServer {
                 );
               }
 
+              if (!incomingFileHashers.containsKey(fileId)) {
+                final sink = DigestSink();
+                incomingFileSinks[fileId] = sink;
+                incomingFileHashers[fileId] = sha256.startChunkedConversion(
+                  sink,
+                );
+              }
+              incomingFileHashers[fileId]!.add(chunkBytes);
+
               if (destinationFile != null) {
                 destinationFile!.setPositionSync(offset);
                 destinationFile!.writeFromSync(chunkBytes);
@@ -551,50 +661,12 @@ class TransferServer {
                 onTransferProgress(currentTransfer);
               }
             } else if (type == 'TransferComplete') {
-              await safeCloseFile();
-
-              // Trigger MediaScanner for all received files to show in Gallery
-              for (final path in completedFilePaths) {
-                await MediaStoreService.scanFile(path);
-              }
-
-              await AndroidForegroundService.stopService();
-
-              // Update SQLite state
-              try {
-                if (activeTransferId != null) {
-                  await DatabaseService.instance.updateTransferProgress(
-                    activeTransferId!,
-                    totalBytes,
-                    TransferState.completed,
-                  );
-                  await DatabaseService.instance.clearResumeCheckpoints(
-                    activeTransferId!,
-                  );
-                }
-              } catch (_) {}
-
-              final completed = NexoraTransfer(
-                transferId: activeTransferId ?? 'incoming',
-                direction: TransferDirection.receive,
-                remoteDeviceId: 'peer',
-                remoteDeviceName: remoteDeviceName,
-                totalFiles: totalFiles,
-                totalBytes: totalBytes,
-                bytesTransferred: totalBytes,
-                speedBytesPerSec: 0.0,
-                etaSeconds: 0,
-                currentFile: currentFileName ?? 'Files',
-                state: TransferState.completed,
-                createdAt: startTime,
-                completedAt: DateTime.now(),
-              );
-
-              onTransferCompleted(completed);
-              if (activeTransferId != null) {
-                _activeSockets.remove(activeTransferId);
-              }
-              socket.destroy();
+              final incomingHashes =
+                  (payload['file_hashes'] as Map<String, dynamic>?)
+                      ?.cast<String, String>() ??
+                  {};
+              declaredFileHashes = incomingHashes;
+              await completeTransferSession();
             }
           } catch (_) {
             if (activeTransferId != null) {
@@ -605,18 +677,26 @@ class TransferServer {
         }
       },
       onDone: () async {
-        await safeCloseFile();
-        if (activeTransferId != null) {
-          _activeSockets.remove(activeTransferId);
+        if (!isCompleted && receivedBytes >= totalBytes && totalBytes > 0) {
+          await completeTransferSession();
+        } else {
+          await safeCloseFile();
+          if (activeTransferId != null) {
+            _activeSockets.remove(activeTransferId);
+          }
+          await AndroidForegroundService.stopService();
         }
-        await AndroidForegroundService.stopService();
       },
       onError: (_) async {
-        await safeCloseFile();
-        if (activeTransferId != null) {
-          _activeSockets.remove(activeTransferId);
+        if (!isCompleted && receivedBytes >= totalBytes && totalBytes > 0) {
+          await completeTransferSession();
+        } else {
+          await safeCloseFile();
+          if (activeTransferId != null) {
+            _activeSockets.remove(activeTransferId);
+          }
+          await AndroidForegroundService.stopService();
         }
-        await AndroidForegroundService.stopService();
       },
     );
   }

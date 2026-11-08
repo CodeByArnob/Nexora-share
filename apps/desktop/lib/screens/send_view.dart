@@ -1,3 +1,4 @@
+import 'package:desktop_drop/desktop_drop.dart';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ class SendView extends ConsumerStatefulWidget {
 
 class _SendViewState extends ConsumerState<SendView> {
   final List<File> _stagedFiles = [];
+  bool _isDragging = false;
   NexoraDevice? _selectedDevice;
 
   String _formatBytes(int bytes) {
@@ -223,85 +225,127 @@ class _SendViewState extends ConsumerState<SendView> {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 12),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 36, horizontal: 24),
-              decoration: BoxDecoration(
-                color:
-                    Theme.of(context).cardTheme.color ?? NexoraColors.lightCard,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: NexoraColors.electricBlue.withValues(alpha: 0.5),
-                  width: 2,
-                  strokeAlign: BorderSide.strokeAlignInside,
+            DropTarget(
+              onDragEntered: (detail) => setState(() => _isDragging = true),
+              onDragExited: (detail) => setState(() => _isDragging = false),
+              onDragDone: (detail) {
+                setState(() {
+                  _isDragging = false;
+                  for (final xFile in detail.files) {
+                    final f = File(xFile.path);
+                    if (f.existsSync()) {
+                      if (!_stagedFiles.any(
+                        (existing) => existing.path == f.path,
+                      )) {
+                        _stagedFiles.add(f);
+                      }
+                    } else if (Directory(xFile.path).existsSync()) {
+                      final dir = Directory(xFile.path);
+                      for (final entity in dir.listSync(recursive: true)) {
+                        if (entity is File &&
+                            !_stagedFiles.any(
+                              (existing) => existing.path == entity.path,
+                            )) {
+                          _stagedFiles.add(entity);
+                        }
+                      }
+                    }
+                  }
+                });
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(
+                  vertical: 36,
+                  horizontal: 24,
                 ),
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: NexoraColors.electricBlue.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.cloud_upload_outlined,
-                      size: 48,
-                      color: NexoraColors.electricBlue,
-                    ),
+                decoration: BoxDecoration(
+                  color: _isDragging
+                      ? NexoraColors.electricBlue.withValues(alpha: 0.08)
+                      : (Theme.of(context).cardTheme.color ??
+                            NexoraColors.lightCard),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: _isDragging
+                        ? NexoraColors.signalTeal
+                        : NexoraColors.electricBlue.withValues(alpha: 0.5),
+                    width: _isDragging ? 2.5 : 2,
+                    strokeAlign: BorderSide.strokeAlignInside,
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Drop files or folders here to send',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Files stream directly with 1MB bounded chunking and SHA-256 verification',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: NexoraColors.electricBlue,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: _pickFiles,
-                        icon: const Icon(Icons.attach_file, size: 18),
-                        label: const Text('Browse Files'),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: NexoraColors.electricBlue.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
                       ),
-                      const SizedBox(width: 14),
-                      OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: NexoraColors.electricBlue,
-                          side: const BorderSide(
-                            color: NexoraColors.electricBlue,
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 12,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                        onPressed: _pickFolder,
-                        icon: const Icon(Icons.folder_open, size: 18),
-                        label: const Text('Select Folder'),
+                      child: const Icon(
+                        Icons.cloud_upload_outlined,
+                        size: 48,
+                        color: NexoraColors.electricBlue,
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Drop files or folders here to send',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Files stream directly with 1MB bounded chunking and SHA-256 verification',
+                      style: TextStyle(
+                        color: Colors.grey.shade600,
+                        fontSize: 13,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: NexoraColors.electricBlue,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: _pickFiles,
+                          icon: const Icon(Icons.attach_file, size: 18),
+                          label: const Text('Browse Files'),
+                        ),
+                        const SizedBox(width: 14),
+                        OutlinedButton.icon(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: NexoraColors.electricBlue,
+                            side: const BorderSide(
+                              color: NexoraColors.electricBlue,
+                            ),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          onPressed: _pickFolder,
+                          icon: const Icon(Icons.folder_open, size: 18),
+                          label: const Text('Select Folder'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
 

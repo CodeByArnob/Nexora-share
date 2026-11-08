@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite/sqflite.dart';
 import '../models/device_model.dart';
 import '../models/transfer_model.dart';
 
@@ -15,6 +15,8 @@ class DatabaseService {
     return _instance!;
   }
 
+  bool get isInitialized => _db != null;
+
   Database get db {
     if (_db == null) {
       throw StateError(
@@ -28,10 +30,7 @@ class DatabaseService {
   Future<void> initialize({bool inMemory = false, String? customPath}) async {
     if (_db != null) return;
 
-    if (Platform.isWindows || Platform.isLinux) {
-      sqfliteFfiInit();
-      databaseFactory = databaseFactoryFfi;
-    }
+    // Native Android SQLite backend via sqflite
 
     String path;
     if (inMemory) {
@@ -388,6 +387,17 @@ class DatabaseService {
       return rows.first['value'] as String?;
     }
     return null;
+  }
+
+  /// Removes a trusted device from local database.
+  Future<void> removeDevice(String deviceId) async {
+    await db.delete('devices', where: 'device_id = ?', whereArgs: [deviceId]);
+  }
+
+  /// Clears all past transfer records and checkpoints.
+  Future<void> clearHistory() async {
+    await db.delete('transfers');
+    await db.delete('resume_chunks');
   }
 
   Future<void> close() async {

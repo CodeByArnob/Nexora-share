@@ -1,11 +1,75 @@
 import 'dart:io';
 import 'package:uuid/uuid.dart';
 
+/// Resolves the MIME type of a file based on its extension without reading file contents.
+String resolveMimeType(String fileName) {
+  final ext = fileName.contains('.')
+      ? fileName.split('.').last.toLowerCase()
+      : '';
+  switch (ext) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'gif':
+      return 'image/gif';
+    case 'webp':
+      return 'image/webp';
+    case 'svg':
+      return 'image/svg+xml';
+    case 'mp4':
+      return 'video/mp4';
+    case 'mkv':
+      return 'video/x-matroska';
+    case 'webm':
+      return 'video/webm';
+    case 'avi':
+      return 'video/x-msvideo';
+    case 'mov':
+      return 'video/quicktime';
+    case 'mp3':
+      return 'audio/mpeg';
+    case 'wav':
+      return 'audio/wav';
+    case 'flac':
+      return 'audio/flac';
+    case 'aac':
+      return 'audio/aac';
+    case 'm4a':
+      return 'audio/mp4';
+    case 'pdf':
+      return 'application/pdf';
+    case 'zip':
+      return 'application/zip';
+    case 'tar':
+      return 'application/x-tar';
+    case 'gz':
+      return 'application/gzip';
+    case '7z':
+      return 'application/x-7z-compressed';
+    case 'apk':
+      return 'application/vnd.android.package-archive';
+    case 'exe':
+      return 'application/x-msdownload';
+    case 'txt':
+      return 'text/plain';
+    case 'json':
+      return 'application/json';
+    case 'doc':
+    case 'docx':
+      return 'application/msword';
+    default:
+      return 'application/octet-stream';
+  }
+}
+
 class ManifestItem {
   final String fileId;
   final String name;
   final String? relativePath;
   final int sizeBytes;
+  final String? mimeType;
   final String? sha256Hash;
   final String? localPath;
 
@@ -14,6 +78,7 @@ class ManifestItem {
     required this.name,
     this.relativePath,
     required this.sizeBytes,
+    this.mimeType,
     this.sha256Hash,
     this.localPath,
   });
@@ -23,6 +88,7 @@ class ManifestItem {
     'name': name,
     'relative_path': relativePath,
     'size_bytes': sizeBytes,
+    'mime_type': mimeType ?? resolveMimeType(name),
     'sha256_hash': sha256Hash,
   };
 
@@ -31,6 +97,9 @@ class ManifestItem {
     name: json['name'] as String,
     relativePath: json['relative_path'] as String?,
     sizeBytes: json['size_bytes'] as int,
+    mimeType:
+        json['mime_type'] as String? ??
+        resolveMimeType(json['name'] as String? ?? ''),
     sha256Hash: json['sha256_hash'] as String?,
   );
 }
@@ -85,6 +154,8 @@ class TransferManifest {
           name: name,
           relativePath: null,
           sizeBytes: size,
+          mimeType: resolveMimeType(name),
+          sha256Hash: null,
           localPath: file.path,
         ),
       );
@@ -128,6 +199,8 @@ class TransferManifest {
             name: name,
             relativePath: relativePath,
             sizeBytes: size,
+            mimeType: resolveMimeType(name),
+            sha256Hash: null,
             localPath: entity.path,
           ),
         );

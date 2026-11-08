@@ -45,4 +45,8 @@ Name: "{group}\NEXORA"; Filename: "{app}\{#AppExeName}"
 Name: "{autodesktop}\NEXORA"; Filename: "{app}\{#AppExeName}"; Tasks: desktopicon
 
 [Run]
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall add rule name=""NEXORA File Sharing"" dir=in action=allow program=""{app}\{#AppExeName}"" enable=yes"; Flags: runhidden; StatusMsg: "Configuring Windows Firewall permissions..."
 Filename: "{app}\{#AppExeName}"; Description: "Launch NEXORA"; Flags: postinstall nowait skipifsilent
+
+[UninstallRun]
+Filename: "{sys}\netsh.exe"; Parameters: "advfirewall firewall delete rule name=""NEXORA File Sharing"" program=""{app}\{#AppExeName}"""; Flags: runhidden
