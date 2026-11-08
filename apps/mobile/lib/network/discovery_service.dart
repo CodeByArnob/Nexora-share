@@ -256,6 +256,14 @@ class DiscoveryService {
     }
   }
 
+  /// Manually triggers an immediate broadcast beacon and purges stale peers.
+  Future<void> rescan() async {
+    _evictStalePeers();
+    if (_currentLocalDevice != null && _socket != null) {
+      await _broadcastPresence(_currentLocalDevice!, _currentTcpPort);
+    }
+  }
+
   void stop() {
     _broadcastTimer?.cancel();
     _evictionTimer?.cancel();
