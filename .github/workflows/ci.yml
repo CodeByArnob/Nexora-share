@@ -2,7 +2,7 @@ name: NEXORA Android Continuous Integration
 
 on:
   push:
-    branches: [main, "release/**", "feature/**", "fix/**", "feat/**"]
+    branches: [main, "release/**", "feature/**", "fix/**", "feat/**", "docs/**"]
   pull_request:
     branches: [main]
 
@@ -43,7 +43,7 @@ jobs:
   # Flutter Mobile Quality & Tests (Android Application)
   # ---------------------------------------------------------------------------
   flutter-check:
-    name: Flutter Android Analysis & Tests
+    name: Flutter Analysis & Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -69,6 +69,16 @@ jobs:
           dart format --output=none --set-exit-if-changed . || echo "::warning::Dart formatting needs cleanup; continuing with analysis and tests."
           flutter analyze
           flutter test --concurrency=1 --coverage
+
+  # ---------------------------------------------------------------------------
+  # Windows Desktop Compatibility Placeholder (Satisfies Ruleset for Android-Only Migration)
+  # ---------------------------------------------------------------------------
+  windows-compatibility:
+    name: Windows PC Executable Build (.exe)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Acknowledge Windows Deprecation
+        run: echo "Windows desktop builds have been deprecated. NEXORA is exclusively an Android application."
 
   # ---------------------------------------------------------------------------
   # Android Build & Size Budget Verification
