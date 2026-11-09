@@ -1,39 +1,42 @@
-# NEXORA Security Architecture & Threat Model
+# NEXORA Threat Model & Security Architecture
 
-*Document Version: 1.0.0*  
-*Classification: Public / Open Source Security Specification*  
-*Product: NEXORA (`io.github.codebyarnob.nexora`)*
-
----
-
-## 1. Executive Summary
-
-NEXORA is engineered on the principle of **Private by Design. Open by Nature.** It operates entirely over local area networks (LAN / Wi-Fi Direct) without relying on any external signaling servers, relay proxies, cloud storage, or third-party telemetry.
-
-This document details the threat modeling methodology, trust boundaries, asset classification, STRIDE threat taxonomy, and engineering mitigations incorporated into NEXORA version 1.0.0.
+**Version**: 1.1.0  
+**Methodology**: STRIDE Threat Model & OWASP Mobile Security Verification  
+**Target Platform**: Android (API 26+)  
+**Scope**: Discovery, Handshake, Transport, Storage, and UI Orchestration
 
 ---
 
-## 2. System Architecture & Trust Boundaries
+## 1. Security Architecture Principles
+
+1. **Zero Cloud Attack Surface**: No remote auth servers, NAT traversal relays, central registries, or telemetry ingest endpoints.
+2. **Cryptographic Identity**: Every device is anchored to a locally generated Ed25519 keypair.
+3. **Defense-in-Depth Framing**: Hard memory ceilings (5 MB maximum frame length) and bounded 1 MiB chunk streaming buffers.
+4. **Strict Path Sanitization**: Zero directory traversal tolerance (`PathSanitizer`).
+5. **Verified Integrity**: Chunk-level and file-level SHA-256 validation.
+
+---
+
+## 2. Trust Boundaries & Data Flow
 
 ```
 [ Local File System ]
          |
     (Boundary 1) Local Storage / Permissions
          |
-[ NEXORA Application (Flutter UI + Native Engine) ]
+[ NEXORA Android Application (Flutter UI + Kotlin + Rust Engine) ]
          |
-    (Boundary 2) Process Isolation / IPC
+    (Boundary 2) Process Isolation / Android IPC
          |
 [ TCP / UDP Sockets (Port 48842 / 48843) ]
          |
-    (Boundary 3) Untrusted Local Network (LAN)
+    (Boundary 3) Untrusted Local Network (LAN / Hotspot)
          |
-[ Remote Peer Node (Android, Windows, Linux) ]
+[ Remote Peer Node (Android Device) ]
 ```
 
 ### Trust Assumptions:
-1. **The Local Host OS is Trusted**: The kernel, memory isolation, and local storage access controls of the operating system are assumed not to be maliciously subverted.
+1. **The Local Host OS is Trusted**: The kernel, memory isolation, and local storage access controls of the Android operating system are assumed not to be maliciously subverted.
 2. **The Local Network (LAN) is Untrusted**: Anyone on the local Wi-Fi / LAN may observe UDP broadcast / multicast discovery beacons, attempt rogue TCP connections, send malformed packets, or spoof device metadata.
 3. **All Received Payloads are Untrusted**: Any incoming frame, manifest, relative file path, chunk boundary, and hash must be strictly validated before disk access.
 
@@ -65,7 +68,7 @@ This document details the threat modeling methodology, trust boundaries, asset c
 - **Threat**: Eavesdropping on file metadata, contents, or permanent device secrets.
 - **Mitigation**:
   - Zero permanent secret tokens or private keys are ever serialized into discovery broadcasts or wire packets.
-  - Private Ed25519 keys are stored in secure native platform storage (Android Keystore, Windows DPAPI / credential store).
+  - Private Ed25519 keys are stored in secure native platform storage (Android Keystore).
   - No analytics, telemetry, crash reporters, or external cloud endpoints exist in the codebase.
 
 ### 3.5 Denial of Service (DoS & Resource Exhaustion)
@@ -76,22 +79,20 @@ This document details the threat modeling methodology, trust boundaries, asset c
   - **Disk Capacity Verification**: Receiver checks free storage before accepting transfers exceeding available disk space.
 
 ### 3.6 Elevation of Privilege & Directory Traversal
-- **Threat**: Adversary crafts a manifest containing directory traversal attacks (`../../../../etc/passwd`, `C:\Windows\System32\cmd.exe`, or Windows reserved names `CON`, `PRN`, `AUX`, `NUL`) to overwrite system binaries or escape the designated download directory.
+- **Threat**: Adversary crafts a manifest containing directory traversal attacks (`../../../../etc/passwd`, `/system/bin`, or reserved system device names `CON`, `PRN`, `AUX`, `NUL`) to overwrite system binaries or escape the designated download directory.
 - **Mitigation**:
   - `PathSanitizer.resolveSafePath` strictly decomposes all relative paths into canonical segments.
-  - Strips all `..`, `.`, root slashes `/`, and Windows drive letters (`C:`).
+  - Strips all `..`, `.`, and absolute root slashes (`/`).
   - Escapes reserved device names (`CON` -> `_CON.txt`).
-  - Forces all writes strictly inside `$HOME/Downloads/NEXORA` or `%USERPROFILE%\Downloads\NEXORA`.
+  - Forces all writes strictly inside the Android device `Downloads/NEXORA` directory.
   - Rejects execution of received files.
 
 ---
 
 ## 4. Fuzzing & Security Verification Status
 
-Automated security verification in `apps/desktop/test/security_and_fuzz_test.dart` systematically tests:
+Automated security verification systematically tests:
 1. `Oversized Frame Ceiling`: Verifies 50 MB length-prefix claims result in zero RAM allocation and immediate socket termination.
-2. `Randomized Byte Fuzzing`: 50 fuzz storms of random byte streams handled without server crash or hang.
+2. `Randomized Byte Fuzzing`: Fuzz storms of random byte streams handled without server crash or hang.
 3. `Malformed Schemas`: Corrupt UTF-8, truncated JSON, and boundary anomalies rejected cleanly.
 4. `Path Traversal Injection`: 15 distinct injection patterns neutralized and sandboxed.
-5. `Chunk Tampering`: Corrupted chunk SHA-256 rejected with `CHECKSUM_MISMATCH`.
-6. `Premature Packet Rejection`: Chunks received prior to mutual approval discarded.

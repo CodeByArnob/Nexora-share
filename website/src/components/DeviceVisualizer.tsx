@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Smartphone, Laptop, ArrowRightLeft, ShieldCheck, Radio, ServerOff } from 'lucide-react';
+import { Smartphone, Tablet, ArrowRightLeft, ShieldCheck, Radio, ServerOff } from 'lucide-react';
 
 export const DeviceVisualizer = () => {
   const [networkMode, setNetworkMode] = useState<'wifi' | 'hotspot' | 'direct'>('wifi');
@@ -12,11 +12,11 @@ export const DeviceVisualizer = () => {
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-[#39C6B0] animate-ping" />
             <h4 className="text-white font-bold text-base tracking-wide flex items-center gap-2">
-              Interactive P2P Mesh Visualizer
+              Interactive Android P2P Mesh Visualizer
             </h4>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Real-time representation of NEXORA's UDP Multicast discovery & TCP 1MB bounded streaming.
+            Real-time representation of NEXORA's UDP Multicast discovery & TCP 1MB bounded streaming between Android devices.
           </p>
         </div>
 
@@ -105,14 +105,14 @@ export const DeviceVisualizer = () => {
           </div>
         </div>
 
-        {/* Device 2: Receiver (Phone / Desktop) */}
+        {/* Device 2: Receiver (Phone / Tablet) */}
         <div className="relative flex flex-col items-center text-center z-10">
           <div className="relative">
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#17243A] to-[#0D1420] border-2 border-[#39C6B0] flex items-center justify-center shadow-xl shadow-[#39C6B0]/20 relative z-10">
-              <Laptop className="w-10 h-10 text-[#39C6B0]" />
+              <Tablet className="w-10 h-10 text-[#39C6B0]" />
             </div>
           </div>
-          <span className="text-white font-bold text-sm mt-3">Pixel 9 / Workstation</span>
+          <span className="text-white font-bold text-sm mt-3">Pixel Tablet / Phone</span>
           <span className="text-[11px] font-mono text-[#39C6B0] mt-0.5">
             {networkMode === 'hotspot' ? '192.168.43.142' : '192.168.1.188'}:48842
           </span>
@@ -122,23 +122,19 @@ export const DeviceVisualizer = () => {
         </div>
       </div>
 
-      {/* Visualizer Metrics Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-6 border-t border-slate-700/60 text-center">
-        <div className="bg-[#0D1420]/60 p-3 rounded-xl border border-slate-800">
-          <span className="text-[10px] uppercase font-mono text-slate-400 block">Discovery Protocol</span>
-          <span className="text-xs font-bold text-white mt-1 block">Multicast + Subnet</span>
+      {/* Visualizer Status Footer */}
+      <div className="pt-6 border-t border-slate-700/60 flex flex-wrap items-center justify-between text-xs text-slate-400 gap-2">
+        <div className="flex items-center gap-2">
+          <span className="text-slate-500 font-mono">Status:</span>
+          <span className="text-emerald-400 font-semibold">Active Socket Stream</span>
         </div>
-        <div className="bg-[#0D1420]/60 p-3 rounded-xl border border-slate-800">
-          <span className="text-[10px] uppercase font-mono text-slate-400 block">Streaming Buffer</span>
-          <span className="text-xs font-bold text-[#39C6B0] mt-1 block">1 MB Bounded RAM</span>
+        <div className="flex items-center gap-2">
+          <span className="text-slate-500 font-mono">Stream Speed:</span>
+          <span className="text-white font-mono font-bold">48.2 MB/s (Wi-Fi 5GHz)</span>
         </div>
-        <div className="bg-[#0D1420]/60 p-3 rounded-xl border border-slate-800">
-          <span className="text-[10px] uppercase font-mono text-slate-400 block">Background State</span>
-          <span className="text-xs font-bold text-[#3978F6] mt-1 block">Foreground Service</span>
-        </div>
-        <div className="bg-[#0D1420]/60 p-3 rounded-xl border border-slate-800">
-          <span className="text-[10px] uppercase font-mono text-slate-400 block">Integrity Engine</span>
-          <span className="text-xs font-bold text-white mt-1 block">SHA-256 Checkpoints</span>
+        <div className="flex items-center gap-2">
+          <span className="text-slate-500 font-mono">Memory Bound:</span>
+          <span className="text-[#39C6B0] font-mono font-bold">1.0 MB Maximum</span>
         </div>
       </div>
     </div>

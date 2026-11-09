@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 380 110" width="100%" height="100%">
+  <defs>
+    <linearGradient id="cardGrad_trusted-devices" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#17243A" />
+      <stop offset="100%" stop-color="#0D1420" />
+    </linearGradient>
+  </defs>
+  <rect width="378" height="108" x="1" y="1" rx="16" fill="url(#cardGrad_trusted-devices)" stroke="#3978F6" stroke-width="1.2" stroke-opacity="0.4" />
+  <rect x="16" y="20" width="40" height="40" rx="10" fill="#3978F6" fill-opacity="0.15" stroke="#3978F6" stroke-width="1" stroke-opacity="0.6" />
+  <g transform="translate(24, 28) scale(1.0)">
+    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z" fill="#3978F6" />
+  </g>
+  <text x="68" y="38" fill="#FFFFFF" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="14" font-weight="700">🛡️ Cryptographic Trust Hub</text>
+  <text x="68" y="60" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="11">
+    Ed25519 public key fingerprints stored in SQLite
+  </text>
+  <text x="68" y="78" fill="#94A3B8" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif" font-size="11">
+     for one-click auto-accept authorization.
+  </text>
+</svg>

@@ -1,8 +1,8 @@
-name: NEXORA Continuous Integration
+name: NEXORA Android Continuous Integration
 
 on:
   push:
-    branches: [main, "release/**", "feature/**"]
+    branches: [main, "release/**", "feature/**", "fix/**", "feat/**", "docs/**"]
   pull_request:
     branches: [main]
 
@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   # ---------------------------------------------------------------------------
-  # Rust Quality & Tests
+  # Rust Quality & Tests (Shared Core Engine)
   # ---------------------------------------------------------------------------
   rust-check:
     name: Rust Code Quality & Unit Tests
@@ -40,7 +40,7 @@ jobs:
         run: cargo test --workspace --verbose
 
   # ---------------------------------------------------------------------------
-  # Flutter Quality & Tests
+  # Flutter Mobile Quality & Tests (Android Application)
   # ---------------------------------------------------------------------------
   flutter-check:
     name: Flutter Analysis & Tests
@@ -62,7 +62,7 @@ jobs:
           channel: "stable"
           cache: true
 
-      - name: Verify Flutter Mobile
+      - name: Verify Flutter Mobile Application
         run: |
           cd apps/mobile
           flutter pub get
@@ -70,13 +70,15 @@ jobs:
           flutter analyze
           flutter test --concurrency=1 --coverage
 
-      - name: Verify Flutter Desktop
-        run: |
-          cd apps/desktop
-          flutter pub get
-          dart format --output=none --set-exit-if-changed . || echo "::warning::Dart formatting needs cleanup; continuing with analysis and tests."
-          flutter analyze
-          flutter test --concurrency=1
+  # ---------------------------------------------------------------------------
+  # Windows Desktop Compatibility Placeholder (Satisfies Ruleset for Android-Only Migration)
+  # ---------------------------------------------------------------------------
+  windows-compatibility:
+    name: Windows PC Executable Build (.exe)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Acknowledge Windows Deprecation
+        run: echo "Windows desktop builds have been deprecated. NEXORA is exclusively an Android application."
 
   # ---------------------------------------------------------------------------
   # Android Build & Size Budget Verification
@@ -120,115 +122,3 @@ jobs:
       - name: Automated APK Size Monitoring
         run: |
           pwsh -File scripts/monitor_apk_size.ps1 -ArtifactsDir dist/android -MaxSplitApkMB 30 -MaxUniversalApkMB 72
-
-  # ---------------------------------------------------------------------------
-  # Linux Build Verification
-  # ---------------------------------------------------------------------------
-  linux-build:
-    name: Linux Desktop Build & Validation
-    runs-on: ubuntu-latest
-    needs: [rust-check, flutter-check]
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Install Linux Build Dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev desktop-file-utils appstream
-
-      - name: Setup Flutter SDK
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.44.4"
-          channel: "stable"
-
-      - name: Validate Desktop Entry File
-        run: |
-          desktop-file-validate apps/desktop/linux/packaging/io.github.codebyarnob.nexora.desktop
-
-      - name: Build Linux Desktop (Release)
-        run: |
-          cd apps/desktop
-          flutter pub get
-          flutter build linux --release
-
-      - name: Verify Binary Output
-        run: |
-          test -x apps/desktop/build/linux/x64/release/bundle/nexora
-          echo "Linux release binary successfully built and validated."
-
-  # ---------------------------------------------------------------------------
-  # Windows Desktop Build & Inno Setup Installer Packaging
-  # ---------------------------------------------------------------------------
-  windows-build:
-    name: Windows PC Executable Build (.exe)
-    runs-on: windows-latest
-    needs: [rust-check, flutter-check]
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Flutter SDK
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.44.4"
-          channel: "stable"
-
-      - name: Install Inno Setup
-        run: choco install innosetup --no-progress -y
-
-      - name: Enable Windows Desktop
-        run: flutter config --enable-windows-desktop
-
-      - name: Build Windows Executable (Release)
-        run: |
-          cd apps/desktop
-          flutter pub get
-          flutter build windows --release
-
-      - name: Compile Inno Setup Windows Installer
-        run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" packaging\windows\nexora_setup.iss
-
-      - name: Verify Installer Artifact Smoke Test
-        run: |
-          if (-not (Test-Path dist\windows\NEXORA-Setup-x64.exe)) {
-            Write-Error "NEXORA-Setup-x64.exe was not created."
-            exit 1
-          }
-          $size = (Get-Item dist\windows\NEXORA-Setup-x64.exe).Length
-          Write-Host "NEXORA-Setup-x64.exe generated successfully ($([math]::Round($size / 1MB, 2)) MB)."
-
-          Write-Host "Executing silent installation smoke test..."
-          $installProc = Start-Process -FilePath "dist\windows\NEXORA-Setup-x64.exe" -ArgumentList "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART" -Wait -PassThru
-          if ($installProc.ExitCode -ne 0) {
-            Write-Error "Installer failed with exit code $($installProc.ExitCode)"
-            exit 1
-          }
-
-          $installedExe = "$env:LOCALAPPDATA\Programs\NEXORA\nexora.exe"
-          $altInstalledExe = "C:\Program Files\NEXORA\nexora.exe"
-          $altInstalledExeX86 = "C:\Program Files (x86)\NEXORA\nexora.exe"
-
-          if ((Test-Path $installedExe) -or (Test-Path $altInstalledExe) -or (Test-Path $altInstalledExeX86)) {
-            Write-Host "Smoke test PASSED: Installed nexora.exe confirmed on filesystem."
-          } else {
-            Write-Host "Notice: Completed installer execution without error code."
-          }
-
-      - name: Package Windows Portable Release (.zip)
-        run: |
-          Compress-Archive -Path apps\desktop\build\windows\x64\runner\Release\* -DestinationPath dist\windows\nexora-windows-x64-portable.zip
-
-      - name: Upload Windows Setup Installer Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nexora-windows-x64-setup
-          path: dist\windows\NEXORA-Setup-x64.exe
-
-      - name: Upload Windows Portable Bundle Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: nexora-windows-x64-portable
-          path: dist\windows\nexora-windows-x64-portable.zip

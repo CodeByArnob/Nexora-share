@@ -19,9 +19,9 @@ Before contributing or building NEXORA locally, ensure the following toolchains 
 
 ## 2. Monorepo Workflow
 
-NEXORA uses a unified monorepo containing both the Rust core workspace and Flutter applications.
+NEXORA uses a unified monorepo containing the Rust core engine and Flutter Android mobile application.
 
-### 2.1 Rust Workspace
+### 2.1 Rust Workspace (Core Protocol & Cryptography Engine)
 ```bash
 # Verify all workspace crates compile
 cargo check --workspace
@@ -36,22 +36,13 @@ cargo clippy --workspace -- -D warnings
 cargo fmt --all -- --check
 ```
 
-### 2.2 Flutter Mobile App
+### 2.2 Flutter Android Application
 ```bash
 cd apps/mobile
 flutter pub get
-flutter test
+flutter test --concurrency=1
 flutter analyze
 flutter run
-```
-
-### 2.3 Flutter Desktop App
-```bash
-cd apps/desktop
-flutter pub get
-flutter test
-flutter analyze
-flutter run -d windows # (or -d linux)
 ```
 
 ---

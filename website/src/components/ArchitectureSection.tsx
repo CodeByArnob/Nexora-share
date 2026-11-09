@@ -72,7 +72,7 @@ export const ArchitectureSection: React.FC = () => {
               <h3 className="text-white font-bold text-lg">Presentation Layer</h3>
               <p className="text-xs text-[#39C6B0] font-mono mt-1">Flutter Material 3 & Riverpod</p>
               <p className="text-sm text-slate-300 mt-3 leading-relaxed">
-                Shared declarative UI across Android, Windows, and Linux. Reactive state management with zero UI thread blockages during heavy disk streaming.
+                Modern declarative UI engineered specifically for Android devices. Reactive state management with zero UI thread blockages during heavy disk streaming.
               </p>
               <ul className="mt-4 space-y-2 text-xs text-slate-400 font-mono">
                 <li>• GoRouter navigation shell</li>

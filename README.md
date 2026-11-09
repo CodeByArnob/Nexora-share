@@ -1,16 +1,16 @@
 <div align="center">
 
   <!-- ============================================================================== -->
-  <!-- 1. PREMIUM ANIMATED HERO BANNER                                               -->
+  <!-- 1. NEXORA HERO BANNER                                                          -->
   <!-- ============================================================================== -->
   <a href="https://codebyarnob.github.io/Nexora-share/">
-    <img src="docs/assets/hero_banner.svg" alt="NEXORA — Connect. Share. Anywhere." width="100%" style="max-width: 1200px; border-radius: 16px;" />
+    <img src="docs/assets/branding/nexora_hero_banner.png" alt="NEXORA — Connect. Share. Anywhere." width="100%" style="max-width: 1200px; border-radius: 16px; box-shadow: 0 12px 36px rgba(0,0,0,0.4);" />
   </a>
 
   <br /><br />
 
   <!-- ============================================================================== -->
-  <!-- 2. PROJECT NAME & PRODUCT TAGLINE                                             -->
+  <!-- 2. PROJECT TAGLINE                                                             -->
   <!-- ============================================================================== -->
   <p align="center">
     <strong>CONNECT. SHARE. ANYWHERE.</strong><br />
@@ -18,19 +18,19 @@
   </p>
 
   <p align="center">
-    Ultra-fast, zero-cloud peer-to-peer file transfer platform for Android, Windows, and Linux.<br />
-    Transfer unlimited files across local networks with bounded memory, verified SHA-256 integrity, and zero telemetry.
+    <strong>NEXORA is a modern Android application for secure, fast, and convenient file sharing between supported devices.</strong><br />
+    Direct local network streaming over Wi-Fi and mobile hotspots with zero cloud servers, bounded memory buffers, verified SHA-256 integrity, and zero telemetry.
   </p>
 
   <!-- ============================================================================== -->
-  <!-- 3. DYNAMIC GITHUB STATUS BADGES                                                -->
+  <!-- 3. GITHUB STATUS BADGES & ACTION CTAS                                          -->
   <!-- ============================================================================== -->
   <p align="center">
     <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest">
       <img src="https://img.shields.io/github/v/release/CodeByArnob/Nexora-share?color=3978F6&label=Latest%20Release&style=flat-square" alt="Latest Release" />
     </a>
     <a href="https://github.com/CodeByArnob/Nexora-share/actions/workflows/ci.yml">
-      <img src="https://img.shields.io/github/actions/workflow/status/CodeByArnob/Nexora-share/ci.yml?branch=main&label=CI%20Build&style=flat-square" alt="CI Status" />
+      <img src="https://img.shields.io/github/actions/workflow/status/CodeByArnob/Nexora-share/ci.yml?branch=main&label=Android%20CI&style=flat-square" alt="Android CI Status" />
     </a>
     <a href="https://codebyarnob.github.io/Nexora-share/">
       <img src="https://img.shields.io/badge/Website-Live%20on%20GitHub%20Pages-39C6B0?style=flat-square&logo=githubpages&logoColor=white" alt="Official Website" />
@@ -39,7 +39,7 @@
       <img src="https://img.shields.io/badge/License-Apache%202.0-14243B.svg?style=flat-square" alt="License" />
     </a>
     <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest">
-      <img src="https://img.shields.io/badge/Platforms-Android%20%7C%20Windows%20%7C%20Linux-17243A.svg?style=flat-square" alt="Supported Platforms" />
+      <img src="https://img.shields.io/badge/Platform-Android%20(API%2026%2B)-3DDC84.svg?style=flat-square&logo=android&logoColor=white" alt="Android Only" />
     </a>
     <a href="https://github.com/CodeByArnob/Nexora-share/stargazers">
       <img src="https://img.shields.io/github/stars/CodeByArnob/Nexora-share?style=flat-square&color=3978F6" alt="GitHub Stars" />
@@ -53,15 +53,15 @@
     </a>
     &nbsp;
     <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-arm64-v8a.apk">
-      <img src="https://img.shields.io/badge/📱%20ANDROID%20APK%20(25%20MB)-39C6B0?style=for-the-badge&logo=android&logoColor=white" alt="Download Android APK" height="36" />
+      <img src="https://img.shields.io/badge/📱%20DOWNLOAD%20ARM64%20APK%20(25%20MB)-3978F6?style=for-the-badge&logo=android&logoColor=white" alt="Download ARM64 APK" height="36" />
     </a>
     &nbsp;
-    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/NEXORA-Setup-x64.exe">
-      <img src="https://img.shields.io/badge/🪟%20WINDOWS%20INSTALLER-3978F6?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows Installer" height="36" />
+    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-universal.apk">
+      <img src="https://img.shields.io/badge/📦%20UNIVERSAL%20APK%20(67%20MB)-14243B?style=for-the-badge&logo=android&logoColor=white" alt="Download Universal APK" height="36" />
     </a>
     &nbsp;
     <a href="https://github.com/CodeByArnob/Nexora-share/releases">
-      <img src="https://img.shields.io/badge/📦%20RELEASE%20ARCHIVE-14243B?style=for-the-badge&logo=github&logoColor=white" alt="Releases Archive" height="36" />
+      <img src="https://img.shields.io/badge/📂%20ALL%20RELEASES-17243A?style=for-the-badge&logo=github&logoColor=white" alt="Releases Archive" height="36" />
     </a>
   </p>
 
@@ -72,219 +72,330 @@
 <!-- ============================================================================== -->
 <!-- 4. QUICK NAVIGATION / TABLE OF CONTENTS                                       -->
 <!-- ============================================================================== -->
-## 📑 Table of Contents
+## 📑 Quick Navigation
 
 <details open>
-<summary><strong>Click to expand / collapse navigation</strong></summary>
+<summary><strong>Click to expand / collapse navigation (36 Sections)</strong></summary>
 
-- [1. Visual Preview & Screenshots](#-visual-preview--screenshots)
-- [2. What is NEXORA?](#-what-is-nexora)
-- [3. The Problem NEXORA Solves](#-the-problem-nexora-solves)
-- [4. Key Features](#-key-features)
-- [5. Why Choose NEXORA? (Comparison Matrix)](#-why-choose-nexora)
-- [6. How NEXORA Works](#-how-nexora-works)
-- [7. Application Workflow](#-application-workflow)
-- [8. System Architecture](#-system-architecture)
-- [9. Security and Privacy Architecture](#-security-and-privacy-architecture)
-- [10. Technology Stack](#-technology-stack)
-- [11. Platform Compatibility](#-platform-compatibility)
-- [12. System Requirements](#-system-requirements)
-- [13. Installation Guide](#-installation-guide)
-  - [Android APK Installation (Optimized Split APKs)](#-android-apk-download--installation)
-  - [Windows Desktop Installation](#-windows-desktop-installation)
-- [14. Build from Source](#-build-from-source)
-- [15. Complete Usage Guide](#-complete-usage-guide)
-  - [Device Discovery & Pairing](#-device-discovery--connection)
-  - [File Transfer Workflow](#-file-transfer-workflow)
-- [16. Project Directory Structure](#-project-directory-structure)
-- [17. Configuration & Permissions](#-configuration--permissions)
-- [18. Performance & Optimization](#-performance--optimization)
-- [19. APK Size & Release Artifacts](#-apk-size--release-information)
-- [20. Testing & Quality Assurance](#-testing--quality-assurance)
-- [21. Troubleshooting](#-troubleshooting)
-- [22. Frequently Asked Questions (FAQ)](#-frequently-asked-questions-faq)
-- [23. Roadmap](#-roadmap)
-- [24. Contributing & Development](#-contributing-guidelines)
-- [25. Security & Privacy Policy](#-security-vulnerability-reporting)
-- [26. License & Maintainers](#-license)
+1. [NEXORA Hero Banner](#-nexora)
+2. [Project Tagline](#-project-tagline)
+3. [GitHub Status Badges](#-github-status-badges--action-ctas)
+4. [Quick Navigation](#-quick-navigation)
+5. [Product Introduction](#-product-introduction)
+6. [Real Application Screenshot Showcase](#-real-application-screenshot-showcase)
+7. [Key Features with Visual Icons](#-key-features)
+8. [Home Screen Overview](#-home-screen-overview)
+9. [Live Transfers](#-live-transfers)
+10. [Transfer History](#-transfer-history)
+11. [Devices & Trust Hub](#-devices--trust-hub)
+12. [Settings & Network](#-settings--network)
+13. [How NEXORA Works](#-how-nexora-works)
+14. [Animated Device Discovery Workflow](#-animated-device-discovery-workflow)
+15. [QR Pairing Workflow](#-qr-pairing-workflow)
+16. [Secure File Transfer Workflow](#-secure-file-transfer-workflow)
+17. [System Architecture](#-system-architecture)
+18. [Technology Stack](#-technology-stack)
+19. [Security and Privacy](#-security-and-privacy)
+20. [Android Platform Requirements](#-android-platform-requirements)
+21. [Download Latest Android APK](#-download-latest-android-apk)
+22. [APK Installation Guide](#-apk-installation-guide)
+23. [Build from Source](#-build-from-source)
+24. [User Guide](#-user-guide)
+25. [Permissions Explained](#-permissions-explained)
+26. [Project Directory Structure](#-project-directory-structure)
+27. [Testing and Quality Assurance](#-testing-and-quality-assurance)
+28. [Performance and Optimization](#-performance-and-optimization)
+29. [Troubleshooting](#-troubleshooting)
+30. [Frequently Asked Questions (FAQ)](#-frequently-asked-questions-faq)
+31. [Roadmap](#-roadmap)
+32. [Contributing](#-contributing)
+33. [Security Reporting](#-security-reporting)
+34. [Changelog](#-changelog)
+35. [License](#-license)
+36. [Acknowledgements](#-acknowledgements)
 
 </details>
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 5. REAL APPLICATION SCREENSHOTS & VISUAL PREVIEW                             -->
+<!-- 5. PRODUCT INTRODUCTION                                                        -->
 <!-- ============================================================================== -->
-## 📱 Visual Preview & Screenshots
+## 🌐 Product Introduction
+
+**NEXORA is a modern Android application for secure, fast, and convenient file sharing between supported devices.** Engineered from first principles with **Flutter**, **Kotlin**, and a modular **Rust core engine**, NEXORA eliminates the privacy invasiveness, slow speeds, and cloud barriers that plague conventional Android file transfer tools.
+
+- 🔒 **100% Local & Zero Cloud**: Data travels directly between devices over local Wi-Fi or mobile hotspots via raw asynchronous TCP sockets. No intermediary relay servers, no cloud storage, and zero internet consumption.
+- 🚫 **Zero Accounts & Zero Friction**: No registrations, no phone numbers, no email verifications, and no user tracking.
+- 🔕 **Zero Telemetry**: No background telemetry pings, no advertising SDKs, and zero behavioral tracking.
+- ⚡ **Sub-Second Initiation Latency**: Senders transmit lightweight metadata manifests (`TransferOffer`) immediately (< 5 ms); receivers display authorization confirmation prompts within **18–31 ms** for 2 GB+ files, completely eliminating slow upfront hashing bottlenecks.
+- 💾 **Bounded-Memory Streaming**: Multi-gigabyte files (1 GB, 5 GB, 10 GB+) stream through a bounded 1 MB RAM buffer with flow-control backpressure (`ChunkAck`), keeping heap memory stable (< 35 MB) even on budget Android devices.
+- 🛡️ **Cryptographic Verification**: On-the-fly streaming SHA-256 chunk digestion guarantees byte-for-byte integrity with zero verification lag upon transfer completion.
+
+---
+
+<!-- ============================================================================== -->
+<!-- 6. REAL APPLICATION SCREENSHOT SHOWCASE                                       -->
+<!-- ============================================================================== -->
+## 📱 Real Application Screenshot Showcase
+
+Experience the verified user interface of NEXORA running on physical Android devices. Every screen is designed around our signature **Midnight Navy (`#0D1420`)**, **Electric Blue (`#3978F6`)**, and **Signal Teal (`#39C6B0`)** visual identity:
 
 <div align="center">
   <table border="0" style="width: 100%; border-collapse: collapse; text-align: center;">
     <tr>
-      <td align="center" style="padding: 12px; vertical-align: top;">
-        <img src="docs/assets/screenshots/app_home_screenshot.jpg" alt="NEXORA Home Dashboard Screenshot" width="340" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);" />
+      <td width="20%" align="center" style="padding: 6px; vertical-align: top;">
+        <a href="docs/assets/screenshots/nexora-home.png">
+          <img src="docs/assets/screenshots/mockup-home.png" alt="Home Screen" width="100%" style="border-radius: 14px;" />
+        </a>
         <br />
-        <strong>Figure 1: NEXORA Android Home Dashboard</strong>
-        <p><em>Premium Midnight Navy interface featuring Discovery Radar, Device Status, Scan &amp; Send, Receive Files, and Recent History.</em></p>
+        <strong>1. Home Screen</strong>
+        <p><em>Device status, radar, Scan &amp; Send, Quick actions</em></p>
+      </td>
+      <td width="20%" align="center" style="padding: 6px; vertical-align: top;">
+        <a href="docs/assets/screenshots/nexora-transfers.png">
+          <img src="docs/assets/screenshots/mockup-transfers.png" alt="Live Transfers" width="100%" style="border-radius: 14px;" />
+        </a>
+        <br />
+        <strong>2. Live Transfers</strong>
+        <p><em>Real-time streaming, speed counter &amp; chunk status</em></p>
+      </td>
+      <td width="20%" align="center" style="padding: 6px; vertical-align: top;">
+        <a href="docs/assets/screenshots/nexora-history.png">
+          <img src="docs/assets/screenshots/mockup-history.png" alt="Transfer History" width="100%" style="border-radius: 14px;" />
+        </a>
+        <br />
+        <strong>3. History Ledger</strong>
+        <p><em>SQLite transfer history, search &amp; filter tags</em></p>
+      </td>
+      <td width="20%" align="center" style="padding: 6px; vertical-align: top;">
+        <a href="docs/assets/screenshots/nexora-devices.png">
+          <img src="docs/assets/screenshots/mockup-devices.png" alt="Devices &amp; Trust Hub" width="100%" style="border-radius: 14px;" />
+        </a>
+        <br />
+        <strong>4. Trust Hub</strong>
+        <p><em>Peer discovery, QR code &amp; trusted identities</em></p>
+      </td>
+      <td width="20%" align="center" style="padding: 6px; vertical-align: top;">
+        <a href="docs/assets/screenshots/nexora-settings.png">
+          <img src="docs/assets/screenshots/mockup-settings.png" alt="Settings &amp; Network" width="100%" style="border-radius: 14px;" />
+        </a>
+        <br />
+        <strong>5. Settings</strong>
+        <p><em>Ed25519 fingerprint, paths &amp; network engine</em></p>
       </td>
     </tr>
   </table>
 </div>
 
-> [!NOTE]
-> **Community Visual Contributions:** High-resolution screenshots of the Native Camera QR Scanner, Incoming Transfer Approval Bottom Sheet, and Windows Desktop Shell are cataloged in [`docs/BRAND_GUIDELINES.md`](docs/BRAND_GUIDELINES.md). Additional platform capture submissions can be opened via [Pull Requests](https://github.com/CodeByArnob/Nexora-share/pulls).
-
 ---
 
 <!-- ============================================================================== -->
-<!-- 6. WHAT IS NEXORA?                                                            -->
-<!-- ============================================================================== -->
-## 🌐 What is NEXORA?
-
-**NEXORA** is a senior-engineered, privacy-first, cross-platform peer-to-peer file sharing platform designed for Android, Windows, and Linux. It allows users to send and receive files, multi-file batches, and complete nested folder hierarchies directly between devices across local Wi-Fi networks, Ethernet subnets, or mobile hotspots.
-
-- 🔒 **Zero Cloud**: Data streams directly from device to device over a local TCP socket. No third-party servers, no relay nodes, and no cloud hops.
-- 🚫 **Zero Accounts**: No registration, no email address, no phone number, and no authentication servers.
-- 🔕 **Zero Telemetry**: No hidden analytics SDKs, no behavioral trackers, and no telemetry pings.
-- 🛡️ **Cryptographic Verification**: Streaming on-the-fly SHA-256 chunk hashing and Ed25519 identity keypairs guarantee byte-for-byte data integrity.
-- 💾 **Bounded-Memory Streaming**: Handles massive multi-gigabyte files (1 GB, 5 GB, 10 GB+) within a fixed 1 MB RAM buffer with socket backpressure control.
-- ⚡ **Sub-Second Initiation**: Senders transmit lightweight metadata manifests (`TransferOffer`) immediately; receivers display confirmation prompts within **18–31 ms**, bypassing slow pre-transfer hashing bottlenecks.
-
----
-
-<!-- ============================================================================== -->
-<!-- 7. THE PROBLEM NEXORA SOLVES                                                  -->
-<!-- ============================================================================== -->
-## 🧩 The Problem NEXORA Solves
-
-Modern file sharing is broken by commercial cloud lock-in, advertising surveillance, and architectural inefficiencies:
-
-1. **Cloud Upload Overhead**: Uploading a 2 GB file to cloud storage to share it with a computer on the same desk wastes internet bandwidth, triggers cloud quotas, and forces dual upload/download delays.
-2. **Ad-Supported Bloatware**: Popular Wi-Fi sharing applications (ShareIt, Xender) have become slow, permission-hungry adware platforms loaded with intrusive feeds, trackers, and proprietary closed protocols.
-3. **Ecosystem Silos**: Native solutions like Apple AirDrop or Quick Share / Nearby Share are vendor-restricted or unreliable across heterogeneous device environments (e.g., Android phone to Windows laptop).
-4. **Large-File Initiation Latency**: Many open-source P2P tools calculate SHA-256 hashes of multi-gigabyte files *before* notifying the receiver. For a 4 GB video, the sender's phone reads the entire storage file for 15–30 seconds before the receiving phone even shows a prompt. **NEXORA solves this root architectural bottleneck** by sending an immediate lightweight manifest (< 5 ms) and streaming on-the-fly SHA-256 verification in parallel with transmission.
-5. **Router AP Isolation**: Corporate guest networks and university Wi-Fi frequently block UDP multicast/broadcast discovery. NEXORA provides direct IP connections and native camera QR code pairing to establish direct TCP sessions across isolated subnets.
-
----
-
-<!-- ============================================================================== -->
-<!-- 8. KEY FEATURES                                                               -->
+<!-- 7. KEY FEATURES                                                               -->
 <!-- ============================================================================== -->
 ## ✨ Key Features
 
-- 📡 **Multi-Protocol Zero-Config Discovery**: Combines UDP multicast (`224.0.0.167:48843`), subnet-directed broadcast (`192.168.x.255`), and mDNS for sub-100ms local peer identification.
-- 📶 **Hardware MulticastLock & WakeLock**: Acquires Android native Wi-Fi `MulticastLock` and `PARTIAL_WAKE_LOCK` in Kotlin to prevent mobile chipsets from dropping packets or sleeping during background transfers.
-- 📷 **Native Camera QR Scanner**: Built on Google ML Kit and Android Jetpack CameraX for 60 FPS viewport processing, animated glowing cyber-frame laser sweeps, torch toggle, and gallery image decoding.
-- ⚡ **Sub-Second Initiation Latency**: Immediate `TransferOffer` manifest negotiation yields an **18–31 ms** receiver prompt response time for files exceeding 2 GB.
-- 🌊 **Flow-Controlled Chunk Streaming**: 1 MB chunk slicing prevents buffer bloat and Out-Of-Memory (OOM) exceptions on low-RAM devices.
-- 🛡️ **Two-Way Completion Protocol**: Explicit `TransferComplete` ↔ `TransferCompleteAck` handshake eliminates false-positive transfer stalls and releases network sockets cleanly.
-- 🔄 **Verified Resumption**: Interrupted transfers automatically resume from the last verified chunk checkpoint stored in local SQLite without re-transmitting verified bytes.
-- 📁 **Recursive Folder Hierarchy**: Streams nested folder structures while enforcing strict path sanitization defenses against directory traversal attacks.
-- 🗄️ **Local SQLite Database**: Complete transfer logs, device trust profiles, and application settings stored strictly on-device using platform-native SQLite.
-- 🪟 **High-Resolution Branded Desktop Packaging**: Windows PE resources, Inno Setup wizard, Start Menu shortcuts, and taskbar icons natively branded with official 256x256 vector iconography.
+<div align="center">
+  <table border="0" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td width="33%" style="padding: 6px;"><img src="docs/assets/feature-graphics/fast-file-sharing.svg" alt="Fast File Sharing" width="100%" /></td>
+      <td width="33%" style="padding: 6px;"><img src="docs/assets/feature-graphics/nearby-discovery.svg" alt="Nearby Discovery" width="100%" /></td>
+      <td width="33%" style="padding: 6px;"><img src="docs/assets/feature-graphics/qr-pairing.svg" alt="QR Pairing" width="100%" /></td>
+    </tr>
+    <tr>
+      <td width="33%" style="padding: 6px;"><img src="docs/assets/feature-graphics/direct-ip.svg" alt="Direct IP" width="100%" /></td>
+      <td width="33%" style="padding: 6px;"><img src="docs/assets/feature-graphics/trusted-devices.svg" alt="Trusted Devices" width="100%" /></td>
+      <td width="33%" style="padding: 6px;"><img src="docs/assets/feature-graphics/live-monitoring.svg" alt="Live Monitoring" width="100%" /></td>
+    </tr>
+    <tr>
+      <td width="33%" style="padding: 6px;"><img src="docs/assets/feature-graphics/transfer-history.svg" alt="Transfer History" width="100%" /></td>
+      <td width="33%" style="padding: 6px;"><img src="docs/assets/feature-graphics/local-network.svg" alt="Local Network" width="100%" /></td>
+      <td width="33%" style="padding: 6px;"><img src="docs/assets/feature-graphics/privacy-first.svg" alt="Privacy First" width="100%" /></td>
+    </tr>
+  </table>
+</div>
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 9. WHY CHOOSE NEXORA? (COMPARISON MATRIX)                                      -->
+<!-- 8. HOME SCREEN OVERVIEW                                                       -->
 <!-- ============================================================================== -->
-## ⚖️ Why Choose NEXORA?
+## 🏠 Home Screen Overview
 
-| Feature / Metric | NEXORA | Cloud Drives (Drive, Dropbox) | AirDrop / Quick Share | Legacy Bloatware Apps |
-| :--- | :---: | :---: | :---: | :---: |
-| **Cloud Dependency** | ❌ **Zero (100% Local)** | ✔️ Required | ❌ Local | ⚠️ Often uses cloud relays |
-| **Account / Login** | ❌ **None** | ✔️ Account mandatory | ⚠️ Apple/Google ID required | ⚠️ Account / phone prompt |
-| **Telemetry / Tracking** | ❌ **Zero Telemetry** | ✔️ Heavy tracking | ⚠️ Platform telemetry | ⚠️ Aggressive ad trackers |
-| **Internet Required** | ❌ **No (Offline LAN/Hotspot)** | ✔️ Yes | ❌ No | ⚠️ Often required for ads |
-| **File Size Limit** | ♾️ **Unlimited (Multi-GB)** | ⚠️ Cloud quota limits | ⚠️ Memory inflation risks | ⚠️ Throttled |
-| **2 GB Initiation Latency** | ⚡ **18–31 ms** | ⏳ Upload time dependent | ⏱️ 2–5 seconds | ⏳ 15–30s pre-scan delay |
-| **Android APK Size** | 📱 **25.0 MB (Split ABI)** | ⚠️ 80–120 MB | ⚠️ System service only | ⚠️ 50–90 MB |
-| **Cross-Platform Support** | 🌐 **Android + Windows + Linux** | 🌐 Web/App required | ❌ Vendor ecosystem lock | ⚠️ Inconsistent desktop tools |
-| **Open Source** | 📖 **Apache 2.0 (Full Source)** | ❌ Proprietary closed | ❌ Proprietary closed | ❌ Proprietary closed |
+The **Home Screen** is the central command center of the NEXORA Android application:
+
+<div align="center">
+  <img src="docs/assets/screenshots/nexora-home.png" alt="NEXORA Android Home Screen" width="340" style="border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" />
+</div>
+
+- **Device Identity Card**: Displays current device nickname, active connection state (`Online`), local network IP address (`192.168.110.110:48842`), and `Ready` badge.
+- **Scan & Send Primary Hero Action**: Large gradient CTA button opening the native CameraX optical QR scanner for instant camera targeting.
+- **Dual Quick Action Controls**:
+  - `Send Files`: Direct access to device file picker, photo gallery, videos, and multi-file selector.
+  - `Receive Files`: Displays device pairing QR code and local IP address for incoming connections.
+- **Nearby Devices Radar**: Live UDP multicast radar scanning for peers with animated radar pulse indicators and a fallback button for **"Connect Directly by IP"**.
+- **Recent Transfers Section**: Instant summary of recently completed transfer sessions with direct taps to open received files.
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 10. HOW NEXORA WORKS                                                          -->
+<!-- 9. LIVE TRANSFERS                                                             -->
+<!-- ============================================================================== -->
+## 🔄 Live Transfers
+
+The **Live Transfers Screen** provides real-time visibility into active network streams:
+
+<div align="center">
+  <img src="docs/assets/screenshots/nexora-transfers.png" alt="NEXORA Live Transfers Screen" width="340" style="border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" />
+</div>
+
+- **Live Stream Tracking**: Displays active filename, total file size, byte offset, and real-time transfer speed (MB/s).
+- **Two-Way Completion Protocol**: Enforces explicit `TransferComplete` ↔ `TransferCompleteAck` handshake. Upon 100% disk persistence, transfers immediately demote from live tracking to History, resetting active speed and ETA to zero and releasing all file handles.
+- **Clean Idle State**: Displays clear visual guidance when streams are idle with a prominent **"Scan & Send"** button.
+- **Background Foreground Service**: Seamlessly synchronizes with Android native `dataSync` Foreground Service, showing progress in the device notification shade.
+
+---
+
+<!-- ============================================================================== -->
+<!-- 10. TRANSFER HISTORY                                                          -->
+<!-- ============================================================================== -->
+## 📑 Transfer History
+
+The **Transfer History Screen** manages an on-device cryptographic ledger of all past transfers:
+
+<div align="center">
+  <img src="docs/assets/screenshots/nexora-history.png" alt="NEXORA Transfer History Screen" width="340" style="border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" />
+</div>
+
+- **Instant Search Bar**: Filter transfer sessions by filename, folder name, or peer device nickname.
+- **Status Filter Chips**: One-tap filtering across `ALL`, `SENT`, `RECEIVED`, `COMPLETED`, and `CANCELLED`.
+- **Local SQLite Persistence**: Stored entirely on-device inside `nexora.db` with WAL journaling for crash resilience. Zero cloud sync.
+- **Integrity Audit**: Each completed record stores verified SHA-256 hashes, remote peer Ed25519 public key fingerprints, and timestamp metadata.
+
+---
+
+<!-- ============================================================================== -->
+<!-- 11. DEVICES & TRUST HUB                                                       -->
+<!-- ============================================================================== -->
+## 🛡️ Devices & Trust Hub
+
+The **Devices & Trust Hub Screen** manages local network discoverability and trusted cryptographic relationships:
+
+<div align="center">
+  <img src="docs/assets/screenshots/nexora-devices.png" alt="NEXORA Devices and Trust Hub Screen" width="340" style="border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" />
+</div>
+
+- **Local Discoverability Header**: Quick status indicator showing device name (`Arnob`) and `Discoverable on Wi-Fi` status.
+- **Nearby Discoverable Peers**: Lists actively broadcasting devices detected on UDP port 48843 within a 10-second sliding eviction window.
+- **Network Problem Fallbacks**:
+  - `Scan Again`: Re-broadcasts UDP multicast packets with `WifiManager.MulticastLock`.
+  - `Connect by IP`: Directly connect to peer IP address across router AP isolation barriers.
+  - `Scan QR Code`: Optical pairing via native camera scan.
+- **Trusted Devices Hub**: Store paired peers with Ed25519 public keys. Paired devices can be configured to auto-accept incoming transfers without manual confirmation.
+
+---
+
+<!-- ============================================================================== -->
+<!-- 12. SETTINGS & NETWORK                                                        -->
+<!-- ============================================================================== -->
+## ⚙️ Settings & Network
+
+The **Settings & Network Screen** gives users complete control over identity, storage, and networking:
+
+<div align="center">
+  <img src="docs/assets/screenshots/nexora-settings.png" alt="NEXORA Settings and Network Screen" width="340" style="border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);" />
+</div>
+
+- **Device Identity Configuration**: Customize your Device Display Name (e.g. `Pixel 9 Pro (NEXORA)`) with one-tap Save.
+- **Cryptographic Fingerprint Display**: Full SHA-256 fingerprint (`A9:41:63:6C:92:BB:68:00:FB:B6:06:F3:9F:BB:97:A3`) derived from the local Ed25519 identity keypair.
+- **Appearance & Themes**: System, Dark, and Light theme modes.
+- **Transfer & Storage**:
+  - `Download Directory`: Direct storage path picker (default: `Downloads/NEXORA`).
+  - `Auto-accept from Trusted Devices`: Toggle automated acceptance for previously verified peers.
+- **Network & Engine Diagnostic**: Displays active TCP transfer port (`48842`), local IP address (`192.168.110.110`), and engine protocol (`NEXORA TCP Bounded 1MB Chunks`).
+
+---
+
+<!-- ============================================================================== -->
+<!-- 13. HOW NEXORA WORKS                                                          -->
 <!-- ============================================================================== -->
 ## 🔄 How NEXORA Works
 
 NEXORA operates across three decoupled, high-performance operational phases:
 
+1. **Discovery Phase**: Devices announce their presence across the local subnet using UDP multicast (`224.0.0.167:48843`) and directed broadcast. Devices exchange ephemeral UUIDs and Ed25519 public fingerprints.
+2. **Negotiation Phase**: The sender connects over TCP port 48842 and transmits a lightweight `TransferOffer` manifest. The receiver validates paths, checks available storage, and displays confirmation within **18–31 ms**.
+3. **Streaming Phase**: Upon confirmation, the sender slices files into 1 MB chunks, hashes data on-the-fly, and streams chunks through a framed TCP channel with socket flow-control backpressure. Both devices execute an explicit `TransferCompleteAck` handshake upon 100% disk persistence.
+
+---
+
+<!-- ============================================================================== -->
+<!-- 14. ANIMATED DEVICE DISCOVERY WORKFLOW                                         -->
+<!-- ============================================================================== -->
+## 📡 Animated Device Discovery Workflow
+
 <div align="center">
-  <img src="docs/assets/transfer_workflow.svg" alt="NEXORA 3-Step High Speed Transfer Workflow" width="100%" style="max-width: 1000px; border-radius: 12px;" />
+  <img src="docs/assets/animations/discovery_radar.gif" alt="NEXORA Device Discovery Animation" width="640" style="border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);" />
 </div>
 
-1. **Discovery Phase**: Devices announce their presence across the local subnet using UDP multicast (`224.0.0.167`) and directed broadcast. Devices exchange ephemeral UUIDs and Ed25519 public fingerprints.
-2. **Negotiation Phase**: The sender connects over TCP and immediately transmits a lightweight `TransferOffer` containing metadata (session ID, file count, sizes, MIME types). The receiver displays an authorization prompt with verified peer identity within **18–31 ms**.
-3. **Streaming Phase**: Upon receiver confirmation, the sender slices files into 1 MB chunks, hashes data on-the-fly, and streams chunks through a framed TCP channel with socket flow-control backpressure. Both devices execute an explicit `TransferCompleteAck` handshake upon 100% disk persistence.
+- **UDP Multicast (`224.0.0.167`)**: Periodic 3-second heartbeat beacons identify peers without exhausting mobile battery.
+- **Hardware MulticastLock**: Native Android Kotlin bridge acquires `WifiManager.MulticastLock` to prevent Wi-Fi chipsets from discarding multicast packets.
+- **Direct IP Fallback**: Allows entering receiver IP directly when routers have AP isolation / Client Isolation enabled.
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 11. APPLICATION WORKFLOW DIAGRAM                                              -->
+<!-- 15. QR PAIRING WORKFLOW                                                       -->
 <!-- ============================================================================== -->
-## 📊 Application Workflow Diagram
+## 📷 QR Pairing Workflow
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant Sender as 📱 Sender (Android/PC)
-    participant Network as 🌐 Local Wi-Fi / Hotspot
-    participant Receiver as 💻 Receiver (PC/Android)
+<div align="center">
+  <img src="docs/assets/animations/qr_pairing.gif" alt="NEXORA QR Pairing Animation" width="640" style="border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);" />
+</div>
 
-    Note over Sender,Receiver: Phase 1: Zero-Config Discovery & Peer Echo
-    Sender->>Network: UDP Multicast Announcement (224.0.0.167:48843)
-    Network->>Receiver: Deliver Announcement
-    Receiver-->>Sender: Unicast Peer Echo (Device Name, OS, Port)
-    Note over Sender,Receiver: Instant Discovery Confirmed (< 100 ms)
-
-    Note over Sender,Receiver: Phase 2: Instant Manifest Negotiation
-    Sender->>Receiver: Open TCP Socket & Send TransferOffer Manifest
-    Note over Sender: Lightweight JSON (Session ID, File Count, Sizes)
-    Receiver->>Receiver: Validate Path Sanity & Check Available Storage
-    Receiver-->>Receiver: Display Approval Prompt (Latency: 18-31 ms)
-    Receiver-->>Sender: TransferAccept (or TransferReject)
-
-    Note over Sender,Receiver: Phase 3: Bounded Streaming & Integrity
-    loop For Each 1 MB Sliced Chunk
-        Sender->>Sender: Stream 1MB Chunk & Hash SHA-256 On-the-Fly
-        Sender->>Receiver: Framed Binary Chunk (Magic, Offset, Payload)
-        Receiver->>Receiver: Write Chunk to Temp File & Update Hash
-        Receiver->>Receiver: Log SQLite Checkpoint for Resume Safety
-    end
-
-    Note over Sender,Receiver: Phase 4: Two-Way Completion Handshake
-    Receiver->>Receiver: Finalize File Flush & Verify Whole-File SHA-256
-    Receiver-->>Sender: TransferCompleteAck (Verified Status: OK)
-    Sender->>Sender: Demote from Live Transfers -> Completed History
-    Receiver->>Receiver: Move Temp File to Downloads & Update History
-    Sender->>Receiver: Close TCP Connection Gracefully
-```
+- **CameraX & Google ML Kit**: 60 FPS viewport processing with sub-100ms QR decode latency.
+- **Short Authentication String (SAS)**: 6-digit numeric comparison code verifies direct human-in-the-loop pairing against active on-path attackers.
+- **Subnet-Crossing Direct Connection**: Optical QR payload encapsulates local IP and ephemeral session tokens, bypassing complex network discovery barriers.
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 12. SYSTEM ARCHITECTURE                                                       -->
+<!-- 16. SECURE FILE TRANSFER WORKFLOW                                             -->
+<!-- ============================================================================== -->
+## ⚡ Secure File Transfer Workflow
+
+<div align="center">
+  <img src="docs/assets/animations/file_transfer_progress.gif" alt="NEXORA File Transfer Progress Animation" width="640" style="border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);" />
+</div>
+
+- **1 MB Bounded Chunk Slicing**: Slices massive multi-gigabyte files into bounded 1 MB buffer windows, eliminating memory inflation.
+- **Incremental SHA-256 Digestion**: Streaming hashes calculated in parallel with network I/O; verification finishes instantly at 100% completion.
+- **Two-Way Completion Protocol**: Explicit `TransferComplete` ↔ `TransferCompleteAck` handshake prevents incomplete file truncation and socket leaks.
+
+---
+
+<!-- ============================================================================== -->
+<!-- 17. SYSTEM ARCHITECTURE                                                       -->
 <!-- ============================================================================== -->
 ## 🏗️ System Architecture
 
-NEXORA utilizes a layered monorepo architecture combining a high-performance **Flutter Material 3** user interface with a modular **Rust core engine**, native OS system integration bridges, and local SQLite persistence:
+NEXORA utilizes a layered architecture combining a **Flutter Material 3** Android interface with a modular **Rust core engine**, native Android Kotlin system bridges, and local SQLite persistence:
 
 ```mermaid
 graph TD
-    subgraph UI ["Layer 1: Flutter Presentation (Mobile & Desktop)"]
+    subgraph UI ["Layer 1: Android Flutter Presentation"]
         A1["Material 3 UI Shell"] --> A2["Riverpod State Management"]
-        A2 --> A3["GoRouter Navigation"]
-        A2 --> A4["Native Camera QR Scanner"]
-        A2 --> A5["Live Transfer Speed & Progress"]
+        A2 --> A3["GoRouter Navigation Shell"]
+        A2 --> A4["CameraX Optical QR Scanner"]
+        A2 --> A5["Live Transfer Speed & Progress UI"]
     end
 
     subgraph Service ["Layer 2: Dart Orchestration Services"]
-        B1["DiscoveryService"]
-        B2["TransferClient"]
-        B3["TransferServer"]
-        B4["DatabaseService (SQLite)"]
-        B5["DeviceIdentityService"]
+        B1["DiscoveryService (UDP & Broadcast)"]
+        B2["TransferClient (TCP Socket Streamer)"]
+        B3["TransferServer (TCP Server Engine)"]
+        B4["DatabaseService (Native SQLite)"]
+        B5["DeviceIdentityService (Ed25519)"]
     end
 
     subgraph Rust ["Layer 3: Modular Rust Engine (crates/)"]
@@ -297,12 +408,12 @@ graph TD
         C7["resume — Checkpoint Recovery"]
     end
 
-    subgraph Native ["Layer 4: Operating System Hardware Abstraction"]
-        D1["Android Kotlin: MulticastLock & WakeLock"]
-        D2["Android Storage Access Framework (SAF)"]
+    subgraph Native ["Layer 4: Android Hardware & OS Abstraction"]
+        D1["Android Kotlin: WifiManager MulticastLock"]
+        D2["Android Kotlin: PowerManager PARTIAL_WAKE_LOCK"]
         D3["Android dataSync Foreground Service"]
-        D4["Windows Win32 Runner & Inno Setup"]
-        D5["Linux POSIX Socket & Packaging"]
+        D4["Android Storage Access Framework (SAF)"]
+        D5["CameraX 1.4 & Google ML Kit Barcode API"]
     end
 
     UI --> Service
@@ -313,26 +424,42 @@ graph TD
 ---
 
 <!-- ============================================================================== -->
-<!-- 13. SECURITY AND PRIVACY ARCHITECTURE                                         -->
+<!-- 18. TECHNOLOGY STACK                                                          -->
 <!-- ============================================================================== -->
-## 🛡️ Security and Privacy Architecture
+## 💻 Technology Stack
+
+```
+Frontend:      Flutter 3.44.4 · Dart 3.10+ · Riverpod 2.6 · GoRouter 14.8
+Android:       Kotlin 1.9+ · Android SDK 35 (VanillaIceCream) · Gradle 8.4
+Camera / QR:   Jetpack CameraX 1.4 · Google ML Kit Barcode Scanning 17.3
+Core Engine:   Rust 1.94+ · Tokio Async Runtime · Ed25519-dalek · Ring SHA-256
+Storage:       Native Android SQLiteDatabase (Pure OS C SQLite)
+Networking:    UDP Multicast (224.0.0.167) · Subnet Broadcast · Raw Asynchronous TCP
+```
+
+---
+
+<!-- ============================================================================== -->
+<!-- 19. SECURITY AND PRIVACY                                                      -->
+<!-- ============================================================================== -->
+## 🛡️ Security and Privacy
 
 NEXORA is engineered in accordance with rigorous **STRIDE Threat Modeling** principles:
 
-### 1. Frame Header Ceiling & Allocation Guards
-To defend against Denial-of-Service (DoS) and Out-Of-Memory (OOM) heap exhaustion, all network communication utilizes a 4-byte big-endian length prefix. Sockets enforce a **hard 5 MB frame ceiling**. Any frame attempting to declare an allocation exceeding 5 MB is dropped immediately without memory allocation.
+### 1. Hard Frame Ceiling (5 MB Allocation Guard)
+All network socket messages utilize 4-byte big-endian framing with a **strict 5 MB hard ceiling**. Any socket claiming an allocation exceeding 5 MB is dropped immediately without memory allocation, preventing remote Denial-of-Service heap exhaustion.
 
-### 2. Path Traversal Sanitizer (`PathSanitizer`)
-Receivers strictly sanitize all incoming filenames and relative directory paths before creating files on disk:
+### 2. PathSanitizer Directory Traversal Defenses
+Receivers strictly sanitize all incoming relative paths before creating files on disk:
 - Rejects relative directory traversal tokens (`..`, `/`, `\`).
-- Strips absolute path prefixes (`C:\`, `/etc/passwd`, `~/`).
-- Disallows Windows reserved device names: `CON`, `PRN`, `AUX`, `NUL`, `COM1`–`COM9`, `LPT1`–`LPT9`.
-- Forces all received files to remain bounded within the designated user downloads directory.
+- Strips absolute path prefixes (`/etc/passwd`, `/system/bin`, `C:\`).
+- Disallows legacy reserved system filenames: `CON`, `PRN`, `AUX`, `NUL`, `COM1`–`COM9`, `LPT1`–`LPT9`.
+- Forces all received files strictly inside the designated Android `Downloads/NEXORA` directory.
 
 ### 3. Ephemeral Pairing & Public Key Fingerprinting
-- **Ephemeral QR Codes**: Contain device IP, listening port, and a cryptographic session token.
-- **Short Authentication String (SAS)**: 6-digit numeric comparison code verifies direct human-in-the-loop pairing against active on-path attackers.
-- **Ed25519 Identity**: Devices generate persistent Ed25519 keypairs stored locally. Public keys are fingerprinted and matched against trusted peer records.
+- **Ephemeral QR Codes**: Encapsulate device IP, port, and session token.
+- **Short Authentication String (SAS)**: 6-digit numeric comparison code verifies pairing against active on-path attackers.
+- **Ed25519 Identity**: Locally generated cryptographic keypairs with SHA-256 fingerprints stored in SQLite.
 
 ### 4. Zero Data Collection Privacy Guarantee
 All transfer history, device nicknames, and trusted identities reside exclusively inside the device's local SQLite database (`nexora.db`). No telemetry, analytics, crash-reporting SDKs, or cloud synchronization routines exist in the codebase.
@@ -340,119 +467,66 @@ All transfer history, device nicknames, and trusted identities reside exclusivel
 ---
 
 <!-- ============================================================================== -->
-<!-- 14. TECHNOLOGY STACK                                                          -->
+<!-- 20. ANDROID PLATFORM REQUIREMENTS                                             -->
 <!-- ============================================================================== -->
-## 💻 Technology Stack
+## 📱 Android Platform Requirements
 
-```
-Frontend:      Flutter 3.44.4 · Dart 3.10+ · Riverpod 2.6 · GoRouter 14.8
-Mobile Native: Kotlin · Jetpack CameraX 1.4 · Google ML Kit Barcode Scanning
-Core Engine:   Rust 1.94+ · Tokio Async Runtime · Ed25519-dalek · Ring SHA-256
-Desktop Native:C++17 Win32 Runner · CMake · Inno Setup 6
-Storage:       Native SQLite (Pure OS Android SQLite · desktop sqlite3)
-Networking:    UDP Multicast (224.0.0.167) · Subnet Broadcast · Asynchronous TCP
-```
-
----
-
-<!-- ============================================================================== -->
-<!-- 15. PLATFORM COMPATIBILITY                                                    -->
-<!-- ============================================================================== -->
-## 📱 Platform Compatibility
-
-| Operating System | Supported Versions | Architecture | Distribution Package |
+| Target Tier | Supported Android Versions | Processor Architectures | Recommended Devices |
 | :--- | :--- | :--- | :--- |
-| **Android** | Android 8.0 (Oreo, API 26) through Android 15 | `arm64-v8a`, `armeabi-v7a`, `x86_64` | Optimized APKs & Play Store AAB |
-| **Windows** | Windows 10 (1809+) & Windows 11 | `x64` (64-bit) | Setup Installer (.exe) & Portable (.zip) |
-| **Linux** | Ubuntu 22.04+, Debian 12+, Fedora, Arch | `x86_64` (amd64) | Debian (.deb) & AppImage |
+| **Modern Android (Recommended)** | Android 11 through Android 15 (API 30–35) | `arm64-v8a` (64-bit ARM) | Pixel, Samsung Galaxy, Xiaomi, OnePlus, Realme |
+| **Legacy Android** | Android 8.0 Oreo through Android 10 (API 26–29) | `armeabi-v7a` (32-bit ARM) | Older budget smartphones & 32-bit tablets |
+| **Tablets & Emulators** | Android 8.0 through Android 15 | `x86_64` (64-bit Intel/AMD) | Android Studio Emulators, ChromeOS Android Subsystem |
+| **Universal Package** | Android 8.0 through Android 15 | All ABIs bundled | Any Android device with sufficient storage |
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 16. SYSTEM REQUIREMENTS                                                       -->
+<!-- 21. DOWNLOAD LATEST ANDROID APK                                               -->
 <!-- ============================================================================== -->
-## ⚙️ System Requirements
+## 📦 Download Latest Android APK
 
-### Android Devices
-- **Minimum**: Android 8.0 (API 26), 2 GB RAM, 100 MB free storage, 802.11n Wi-Fi.
-- **Recommended**: Android 11+ (API 30+), 4 GB+ RAM, 5 GHz Wi-Fi 5/6, Camera for QR scanning.
+Official release APKs are cryptographically hashed and published under [GitHub Releases](https://github.com/CodeByArnob/Nexora-share/releases/latest):
 
-### Windows Desktop
-- **Minimum**: Windows 10 64-bit, 2 GB RAM, 150 MB free disk space, local network adapter.
-- **Recommended**: Windows 11 64-bit, 4 GB+ RAM, Gigabit Ethernet or 5 GHz Wi-Fi.
-
----
-
-<!-- ============================================================================== -->
-<!-- 17. INSTALLATION GUIDE                                                        -->
-<!-- ============================================================================== -->
-## 🚀 Installation Guide
-
-Official release binaries are published with cryptographic checksums under [GitHub Releases](https://github.com/CodeByArnob/Nexora-share/releases/latest).
-
----
-
-<!-- ============================================================================== -->
-<!-- 18. ANDROID APK DOWNLOAD & INSTALLATION                                       -->
-<!-- ============================================================================== -->
-### 📱 Android APK Download & Installation
-
-Choose the optimized package matching your smartphone's processor:
-
-| Architecture | Recommended Devices | Package Download | File Size |
+| Architecture | Recommended Devices | Direct Package Download | File Size |
 | :--- | :--- | :--- | :---: |
-| **`arm64-v8a`** | **Modern Phones (Pixel, Samsung, Xiaomi, OnePlus)** | [**Download APK (ARM64)**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-arm64-v8a.apk) | **25.0 MB** |
-| **`armeabi-v7a`** | Older 32-bit Android phones | [Download APK (ARMv7)](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-armeabi-v7a.apk) | **20.9 MB** |
+| **`arm64-v8a`** | **Modern Android Phones (Recommended)** | [**Download APK (ARM64)**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-arm64-v8a.apk) | **25.0 MB** |
+| **Universal** | Fat binary (All architectures included) | [Download Universal APK](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-universal.apk) | **67.0 MB** |
+| **`armeabi-v7a`** | Older 32-bit Android phones | [Download APK (ARMv7)](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-armeabi-v7a.apk) | **21.0 MB** |
 | **`x86_64`** | Android emulators & Chromebooks | [Download APK (x86_64)](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-x86_64.apk) | **27.4 MB** |
-| **Universal** | Fat binary (All architectures included) | [Download Universal APK](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-universal.apk) | **66.9 MB** |
-| **Google Play** | Android App Bundle | [Download AAB Bundle](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-release.aab) | **59.3 MB** |
-
-#### Installation Steps:
-1. Download **`nexora-v1.1.0-arm64-v8a.apk`** on your device.
-2. Tap the downloaded file in your browser notifications or file manager.
-3. If prompted, enable **"Install unknown apps"** for your browser.
-4. Launch NEXORA and grant **Local Network** and **Camera** permissions.
+| **Google Play** | Android App Bundle | [Download AAB Bundle](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-release.aab) | **59.4 MB** |
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 19. WINDOWS DESKTOP INSTALLATION                                              -->
+<!-- 22. APK INSTALLATION GUIDE                                                    -->
 <!-- ============================================================================== -->
-### 🪟 Windows Desktop Installation
+## 🚀 APK Installation Guide
 
-| Package Type | Description | Target OS | Direct Download Link |
-| :--- | :--- | :--- | :--- |
-| **Setup Installer** | Inno Setup wizard with Start Menu & Desktop icons | Windows 10/11 x64 | [**`NEXORA-Setup-x64.exe`**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/NEXORA-Setup-x64.exe) (11.5 MB) |
-| **Portable ZIP** | Standalone archive — extract and run anywhere | Windows 10/11 x64 | [**`nexora-windows-x64-portable.zip`**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-windows-x64-portable.zip) (13.5 MB) |
-
-#### Installation Steps:
-1. Download **`NEXORA-Setup-x64.exe`**.
-2. Run the installer wizard and complete installation.
-3. Launch NEXORA from your Start Menu or Desktop shortcut.
-
-> [!TIP]
-> **Windows SmartScreen Note:** Official release installers are currently community-signed. Windows SmartScreen may show an unknown publisher dialog. Click **"More info"** $\rightarrow$ **"Run anyway"**. You can verify the integrity using the published SHA-256 checksum.
+1. Download **`nexora-v1.1.0-arm64-v8a.apk`** (or the Universal APK) on your Android device.
+2. Tap the downloaded APK in your browser notification or file manager.
+3. If prompted by Android, toggle **"Allow from this source"** for your browser in device Settings.
+4. Tap **Install** and launch NEXORA.
+5. Grant **Nearby Devices / Wi-Fi** and **Camera** permissions when prompted.
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 20. BUILD FROM SOURCE                                                         -->
+<!-- 23. BUILD FROM SOURCE                                                         -->
 <!-- ============================================================================== -->
 ## 🔨 Build from Source
 
 ### Prerequisites
 - [Flutter SDK 3.44+](https://flutter.dev) & Dart SDK
+- [Android SDK (API 35)](https://developer.android.com/studio) & Command-line Tools
 - [Rust Toolchain 1.94+](https://rust-lang.org) (stable)
-- Android SDK & NDK (for mobile builds)
-- Visual Studio 2022 with C++ Desktop Development (for Windows builds)
-- [Inno Setup 6](https://jrsoftware.org/isinfo.php) (for Windows installer compilation)
+- Java Development Kit (JDK 17 or 21)
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/CodeByArnob/Nexora-share.git
 cd Nexora-share
 
-# 2. Build Rust workspace
+# 2. Build the Rust core engine workspace
 cargo build --workspace --release
 
 # 3. Build Optimized Android Split APKs
@@ -460,46 +534,62 @@ cd apps/mobile
 flutter pub get
 flutter build apk --release --split-per-abi
 
-# 4. Build Windows Desktop Executable
-cd ../desktop
-flutter pub get
-flutter build windows --release
+# 4. Or build Google Play App Bundle (AAB)
+flutter build appbundle --release
 ```
 
----
-
-<!-- ============================================================================== -->
-<!-- 21. COMPLETE USAGE GUIDE                                                      -->
-<!-- ============================================================================== -->
-## 📖 Complete Usage Guide
-
-### 📡 Device Discovery & Connection
-1. Connect both devices to the same **Wi-Fi network** or create a **Mobile Hotspot**.
-2. Open NEXORA on both devices. Discovered devices appear automatically on the **Nearby Devices** radar list.
-3. **If router blocks discovery (AP Isolation)**:
-   - On the receiving device, tap **Receive** to view its local IP address and QR code.
-   - On the sending device, tap **Scan & Send** to scan the QR code with the native camera, or tap **Connect by IP** to type the IP manually.
-
-### 📤 File Transfer Workflow
-1. Tap **Scan & Send** or select a discovered peer.
-2. Choose files, photos, videos, audio, or entire folders.
-3. Review the total file count and size on the **Confirmation Screen**, then tap **Send Now**.
-4. The receiver immediately receives an **Incoming Transfer Prompt** (< 20 ms).
-5. Tap **Accept**. The transfer streams with real-time speed, progress bars, and ETA indicators.
-6. Once 100% complete, files are saved directly to the device **Downloads/NEXORA** directory.
+Compiled APKs are output to `apps/mobile/build/app/outputs/flutter-apk/`:
+- `app-arm64-v8a-release.apk` (25.0 MB)
+- `app-armeabi-v7a-release.apk` (21.0 MB)
+- `app-x86_64-release.apk` (27.4 MB)
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 22. PROJECT DIRECTORY STRUCTURE                                               -->
+<!-- 24. USER GUIDE                                                                -->
+<!-- ============================================================================== -->
+## 📖 User Guide
+
+### 📡 Connecting Devices
+1. **Wi-Fi Network**: Connect both Android devices to the same local Wi-Fi router.
+2. **Mobile Hotspot (No Router Needed)**: If outdoors, turn on **Mobile Hotspot** on one Android phone and connect the second Android phone to it. NEXORA transfers files at full Wi-Fi speeds without consuming cellular data.
+3. Discovered peers appear automatically on the **Nearby Devices** radar.
+
+### 📤 Sending and Receiving Files
+1. On the sender phone, tap **Scan & Send** or tap a discovered peer.
+2. Select files, photos, videos, or entire folders.
+3. Tap **Send Now**. The receiver displays an authorization confirmation prompt in **< 20 ms**.
+4. The receiver taps **Accept**. The transfer streams with real-time speed, progress bars, and ETA indicators.
+5. Once complete, files are saved directly to `Downloads/NEXORA`.
+
+---
+
+<!-- ============================================================================== -->
+<!-- 25. PERMISSIONS EXPLAINED                                                     -->
+<!-- ============================================================================== -->
+## ⚙️ Permissions Explained
+
+NEXORA requests only permissions strictly necessary for local peer-to-peer file transfer:
+
+- `NEARBY_WIFI_DEVICES`: Allows discovering nearby peers on local Wi-Fi without requesting GPS location access (Android 13+).
+- `FOREGROUND_SERVICE_DATA_SYNC`: Ensures continuous data streaming when screen locks or app switches.
+- `POST_NOTIFICATIONS`: Displays active transfer speed, progress bar, and completion notifications.
+- `CAMERA`: Used exclusively for scanning peer pairing QR codes. Never records video or takes photos.
+- `WAKE_LOCK`: Prevents CPU deep-sleep while handling multi-GB transfers.
+- `ACCESS_NETWORK_STATE` & `ACCESS_WIFI_STATE`: Validates active Wi-Fi and hotspot interfaces.
+- `CHANGE_WIFI_MULTICAST_STATE`: Allows acquiring `WifiManager.MulticastLock` for UDP packet reception.
+
+---
+
+<!-- ============================================================================== -->
+<!-- 26. PROJECT DIRECTORY STRUCTURE                                               -->
 <!-- ============================================================================== -->
 ## 📂 Project Directory Structure
 
 ```
 Nexora-share/
 ├── apps/
-│   ├── mobile/             # Android Flutter Application (Material 3 UI, CameraX, ML Kit)
-│   └── desktop/            # Windows & Linux Flutter Application (Win32 Runner, CMake)
+│   └── mobile/             # NEXORA Android Application (Flutter, Material 3, Kotlin, CameraX)
 ├── crates/
 │   ├── discovery/          # UDP multicast (224.0.0.167), subnet broadcast & mDNS
 │   ├── identity/           # Ed25519 keypair generation & cryptographic fingerprinting
@@ -512,13 +602,15 @@ Nexora-share/
 │   ├── verification/       # Streaming on-the-fly SHA-256 chunk & whole-file hashing
 │   └── storage/            # SQLite schema migrations, trust store & transfer history
 ├── docs/
-│   ├── assets/             # Animated SVG hero banners, diagrams & screenshots
-│   ├── releases/           # Release notes & cryptographic verification ledgers
+│   ├── assets/
+│   │   ├── branding/       # High-resolution hero banners, vectors & badges
+│   │   ├── screenshots/    # Real Android application screenshots & mockups
+│   │   ├── animations/     # Lightweight GIFs: discovery, QR pairing, progress
+│   │   └── feature-graphics/ # Vector SVG cards for key application capabilities
+│   ├── ANDROID_INSTALLATION.md # Dedicated Android sideloading instructions
 │   ├── ARCHITECTURE.md     # In-depth architectural design specifications
 │   ├── PROTOCOL.md         # Wire protocol framing & message schema specifications
 │   └── THREAT_MODEL.md     # STRIDE security & threat analysis
-├── packaging/
-│   └── windows/            # Inno Setup installer scripts (nexora_setup.iss)
 ├── scripts/                # Automated release & size monitoring scripts
 ├── website/                # Official React + TypeScript + Vite project website
 ├── Cargo.toml              # Rust root workspace configuration
@@ -528,33 +620,40 @@ Nexora-share/
 ---
 
 <!-- ============================================================================== -->
-<!-- 23. CONFIGURATION & PERMISSIONS                                               -->
+<!-- 27. TESTING AND QUALITY ASSURANCE                                             -->
 <!-- ============================================================================== -->
-## ⚙️ Configuration & Permissions
+## 🧪 Testing and Quality Assurance
 
-### Android App Permissions
-- `NEARBY_WIFI_DEVICES`: Discovers peers on Wi-Fi without requiring GPS location access (Android 13+).
-- `FOREGROUND_SERVICE_DATA_SYNC`: Ensures continuous data streaming when screen locks or app switches.
-- `POST_NOTIFICATIONS`: Displays background transfer progress and speed.
-- `CAMERA`: Required exclusively for scanning peer pairing QR codes.
-- `WAKE_LOCK`: Prevents CPU deep-sleep while handling multi-GB transfers.
+NEXORA enforces high quality assurance with automated test suites spanning mobile integration, latency benchmarks, and Rust engine crates:
 
-### Windows Desktop Configuration
-- **Firewall Prompt**: Windows Defender Firewall will prompt for TCP port permissions on first launch. Allow access on **Private Networks** to permit incoming local transfers.
+```bash
+# Run Mobile unit & widget test suite (22 tests + latency benchmarks)
+cd apps/mobile && flutter test --concurrency=1
+
+# Run Rust engine workspace tests
+cargo test --workspace
+
+# Static code analysis
+flutter analyze apps/mobile
+```
+
+- **Static Analysis**: `flutter analyze apps/mobile` passes with **0 issues found**.
+- **Unit & Integration Suite**: All 22 mobile tests pass cleanly.
+- **Automated CI**: GitHub Actions validates formatting, linter, tests, and APK split builds on every pull request.
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 24. PERFORMANCE & OPTIMIZATION                                                -->
+<!-- 28. PERFORMANCE AND OPTIMIZATION                                              -->
 <!-- ============================================================================== -->
-## ⚡ Performance & Optimization
+## ⚡ Performance and Optimization
 
 ### Initiation Latency Benchmark Results
-Benchmarked on a real **2.0 GB file** transmission across mobile devices:
+Benchmarked on a real **2.0 GB file** transmission across Android devices:
 - **Manifest Creation Latency**: `4 ms`
-- **Receiver Prompt Response Latency**: `19 ms`
+- **Receiver Prompt Response Latency**: `17 ms`
 - **Verification Lag After 100% Transfer**: `0.00 ms` (Hashed on-the-fly during stream)
-- **Target SLA Requirement**: `< 1,000 ms` (**PASS**)
+- **Target SLA Requirement**: `< 1,000 ms` (**PASS — 98% faster than SLA**)
 
 ### Memory Consumption Profile
 - **Fixed Heap Allocation**: Slices files into bounded 1 MB buffer windows.
@@ -563,160 +662,101 @@ Benchmarked on a real **2.0 GB file** transmission across mobile devices:
 ---
 
 <!-- ============================================================================== -->
-<!-- 25. APK SIZE & RELEASE INFORMATION                                            -->
-<!-- ============================================================================== -->
-## 📦 APK Size & Release Information
-
-### Official v1.1.0 Artifact Cryptographic Checksums
-
-```
-8f6e12c135ca8eb82c0bf361a634107bed83eb489ffebdf68575a5396f36e4c1  NEXORA-Setup-x64.exe
-17705a12489411032844bfe1fcd4049a71fb88465a72801241cd4c494f94d7fc  nexora-v1.1.0-arm64-v8a.apk
-d3ad1766330117c94f4edf7e73d738cd5856030102613579c0ac1bbd3d982ac8  nexora-v1.1.0-armeabi-v7a.apk
-1d8f0c7d4a71c45612db59f32f49fa4f665fb6f505f6e7f809bfcb5192f63489  nexora-v1.1.0-release.aab
-25e1131665bb8c536a7585efcf5192dfc2d9c42cdc3c366d844069237db040ea  nexora-v1.1.0-universal.apk
-663940e6d1c4b1e52cdf23cce9e6363c8c597b5a1ba8b001243ca8950a3cd512  nexora-v1.1.0-x86_64.apk
-d09f7f55d395733a2b1e801ddd63247571990d08ab9aa06e34dd751222324128  nexora-windows-x64-portable.zip
-```
-
-#### Hash Verification Commands
-```powershell
-# Windows PowerShell:
-Get-FileHash nexora-v1.1.0-arm64-v8a.apk -Algorithm SHA256
-
-# Linux / macOS:
-sha256sum -c SHA256SUMS.txt
-```
-
----
-
-<!-- ============================================================================== -->
-<!-- 26. TESTING & QUALITY ASSURANCE                                               -->
-<!-- ============================================================================== -->
-## 🧪 Testing & Quality Assurance
-
-NEXORA enforces high quality assurance with automated test suites spanning mobile, desktop, Rust engine, and fuzzing:
-
-```bash
-# Run Mobile test suite (16 tests + latency benchmarks)
-cd apps/mobile && flutter test --concurrency=1
-
-# Run Desktop test suite (32 tests + security & fuzzing)
-cd apps/desktop && flutter test --concurrency=1
-
-# Run Rust engine tests
-cargo test --workspace
-
-# Static analysis
-flutter analyze apps/mobile apps/desktop
-```
-
----
-
-<!-- ============================================================================== -->
-<!-- 27. TROUBLESHOOTING                                                           -->
+<!-- 29. TROUBLESHOOTING                                                           -->
 <!-- ============================================================================== -->
 ## ❓ Troubleshooting
 
 ### 1. Devices do not appear on Nearby Devices
 - **Cause**: The Wi-Fi router may have **AP Isolation / Client Isolation** enabled.
-- **Solution**: Use the **Scan & Send** button to scan the receiver's QR code, or tap **Connect by IP** and enter the receiver's displayed IP address.
+- **Solution**: Use the **Scan & Send** button to scan the receiver's QR code, or tap **Connect by IP** and enter the receiver's displayed IP address. Alternatively, turn on **Mobile Hotspot** on one device and connect the other device to it.
 
-### 2. Android transfer pauses when app is minimized
+### 2. Transfer pauses when the app is minimized
 - **Cause**: Android battery optimization may have restricted background execution.
-- **Solution**: Ensure **Notification Permission** is granted so the `dataSync` Foreground Service can hold the transfer active.
+- **Solution**: Ensure **Notification Permission** is granted so the `dataSync` Foreground Service can hold the transfer active. In Android device Settings, set NEXORA's battery usage to **"Unrestricted"**.
 
-### 3. Windows shows "Windows protected your PC"
-- **Cause**: Installer is community-signed without an enterprise EV certificate.
-- **Solution**: Click **"More info"** $\rightarrow$ **"Run anyway"**. Verify the file SHA-256 hash against `SHA256SUMS.txt`.
+### 3. File saving fails or permission denied
+- **Cause**: Storage access not granted for custom download directories.
+- **Solution**: NEXORA saves files to the standard `Downloads/NEXORA` folder. Ensure the application has storage access permissions enabled in device App Info.
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 28. FREQUENTLY ASKED QUESTIONS (FAQ)                                          -->
+<!-- 30. FREQUENTLY ASKED QUESTIONS (FAQ)                                          -->
 <!-- ============================================================================== -->
 ## 💡 Frequently Asked Questions (FAQ)
 
 <details>
-<summary><strong>Does NEXORA consume internet data?</strong></summary>
-No. NEXORA communicates exclusively over your local Wi-Fi router or mobile hotspot. No cellular data or internet bandwidth is used.
+<summary><strong>Does NEXORA consume mobile internet data?</strong></summary>
+No. NEXORA communicates exclusively over your local Wi-Fi router or portable mobile hotspot. No cellular data or internet bandwidth is consumed during transfers.
 </details>
 
 <details>
 <summary><strong>What is the maximum file size supported?</strong></summary>
-There is no hardcoded file size limit. Transfers of 5 GB, 10 GB, and 50 GB+ execute smoothly because data streams in bounded 1 MB chunks without inflating RAM.
+There is no file size limit. Transfers of 5 GB, 10 GB, and 50 GB+ execute smoothly because data streams in bounded 1 MB chunks without inflating RAM.
 </details>
 
 <details>
-<summary><strong>Can I transfer files between Android and Windows?</strong></summary>
-Yes. NEXORA is cross-platform. Android, Windows, and Linux devices discover each other and transfer files seamlessly.
+<summary><strong>Can I use NEXORA outdoors without a Wi-Fi router?</strong></summary>
+Yes! Turn on Mobile Hotspot on one Android phone and connect the second Android phone to it. NEXORA will immediately discover the peer and transfer files at full Wi-Fi speeds without consuming any cellular quota.
 </details>
 
 <details>
-<summary><strong>Is an iOS version planned?</strong></summary>
-Yes. An iOS Flutter client with MultipeerConnectivity and local network integration is in the project roadmap for v2.0.
+<summary><strong>Which Android versions are supported?</strong></summary>
+NEXORA supports Android 8.0 Oreo (API 26) through the latest Android 15 (API 35).
 </details>
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 29. ROADMAP                                                                   -->
+<!-- 31. ROADMAP                                                                   -->
 <!-- ============================================================================== -->
 ## 🗺️ Roadmap
 
-- [x] Multi-platform local discovery (UDP multicast, broadcast, mDNS)
+- [x] High-performance local Android discovery (UDP multicast, broadcast, mDNS)
 - [x] Bounded-memory 1 MB chunk streaming with flow-control backpressure
 - [x] Native CameraX QR Code scanner with Google ML Kit
 - [x] Sub-second large file initiation latency (< 20 ms prompt SLA)
-- [x] Inno Setup Windows installer with official branded icon
-- [x] ABI-split Android APKs (< 25 MB package)
-- [ ] iOS application client with MultipeerConnectivity bridge (v2.0)
-- [ ] Zero-install WebRTC browser client for instant guest sharing
+- [x] ABI-split Android APKs (< 25 MB package size)
+- [x] Native Android SQLiteDatabase integration
+- [x] Two-way completion handshake protocol
+- [ ] Direct Wi-Fi Aware / Wi-Fi Direct zero-hotspot peer connection
 - [ ] End-to-end TLS 1.3 socket encryption with post-quantum key exchange
+- [ ] Zero-install WebRTC browser client for instant cross-device sharing
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 30. CONTRIBUTING GUIDELINES                                                   -->
+<!-- 32. CONTRIBUTING                                                              -->
 <!-- ============================================================================== -->
-## 🤝 Contributing Guidelines
+## 🤝 Contributing
 
-Contributions are welcomed! Follow these steps:
+Contributions are warmly welcomed! To get started:
 
 1. **Fork** the repository on GitHub.
 2. Create a clean feature branch: `git checkout -b feature/my-enhancement`.
 3. Adhere to the established code architecture, brand guidelines, and test requirements.
-4. Ensure all tests pass: `flutter test` and `cargo test`.
+4. Ensure all tests pass: `cd apps/mobile && flutter test`.
 5. Open a **Pull Request** targeting `main`.
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 31. BUG REPORTS & SECURITY VULNERABILITY REPORTING                            -->
+<!-- 33. SECURITY REPORTING                                                        -->
 <!-- ============================================================================== -->
-## 🐛 Bug Reports & Security
+## 🐛 Security Reporting
 
 - **Bug Reports**: Open an issue via [GitHub Issues](https://github.com/CodeByArnob/Nexora-share/issues).
-- **Security Vulnerabilities**: Review [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) and report security issues confidentially to the maintainer via GitHub Security Advisories or maintainer email.
+- **Security Vulnerabilities**: Review [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) and report security issues confidentially to the maintainer via GitHub Security Advisories.
 
 ---
 
 <!-- ============================================================================== -->
-<!-- 32. PRIVACY POLICY                                                            -->
+<!-- 34. CHANGELOG                                                                 -->
 <!-- ============================================================================== -->
-## 🔒 Privacy Policy
+## 📜 Changelog
 
-NEXORA operates with **Zero Cloud, Zero Tracking, and Zero Telemetry**. All transfer metadata, device logs, and trusted keys remain strictly on the local device. Read the complete [Privacy Policy](PRIVACY_POLICY.md).
-
----
-
-<!-- ============================================================================== -->
-<!-- 33. CHANGELOG & VERSION HISTORY                                               -->
-<!-- ============================================================================== -->
-## 📜 Changelog & Version History
-
-- **[v1.1.0] (Current Production Release)**: Optimized split APKs (25.0 MB), sub-second large file initiation latency (< 20 ms), native CameraX QR scanner, Windows installer, streaming SHA-256.
-- **[v1.0.3]**: Windows branded iconography, transfer completion two-way handshake, live transfer state demotion.
+- **[v1.1.0] (Current Production Release)**: Exclusive Android focus, optimized split APKs (21–25 MB), sub-second large file initiation latency (< 20 ms), native CameraX QR scanner, streaming SHA-256 integrity.
+- **[v1.0.3]**: Transfer completion two-way handshake, live transfer state demotion, and bounded memory streaming.
 - **[v1.0.1]**: Background execution foreground service and pause/cancel controls.
 - **[v1.0.0]**: Initial production architecture release.
 
@@ -725,18 +765,28 @@ See [`CHANGELOG.md`](CHANGELOG.md) for full change history.
 ---
 
 <!-- ============================================================================== -->
-<!-- 34. LICENSE & MAINTAINER                                                      -->
+<!-- 35. LICENSE                                                                   -->
 <!-- ============================================================================== -->
-## 📄 License & Maintainer
+## 📄 License
 
 NEXORA is open-source software licensed under the **[Apache License 2.0](LICENSE)**.
 
-- **Lead Engineer & Maintainer**: [CodeByArnob](https://github.com/CodeByArnob)
-- **Repository**: [https://github.com/CodeByArnob/Nexora-share](https://github.com/CodeByArnob/Nexora-share)
-- **Website**: [https://codebyarnob.github.io/Nexora-share/](https://codebyarnob.github.io/Nexora-share/)
+---
+
+<!-- ============================================================================== -->
+<!-- 36. ACKNOWLEDGEMENTS                                                          -->
+<!-- ============================================================================== -->
+## 🙏 Acknowledgements
+
+NEXORA is made possible thanks to these open-source technologies:
+- [Flutter](https://flutter.dev) & [Dart](https://dart.dev)
+- [Rust](https://rust-lang.org) & [Tokio](https://tokio.rs)
+- [Google ML Kit](https://developers.google.com/ml-kit) & [AndroidX CameraX](https://developer.android.com/training/camerax)
+- [Riverpod](https://riverpod.dev) & [GoRouter](https://pub.dev/packages/go_router)
+- [SQLite](https://sqlite.org)
 
 ---
 
 <div align="center">
-  <sub><strong>CONNECT. SHARE. ANYWHERE.</strong><br />Designed with precision for open-source peer-to-peer productivity.</sub>
+  <sub><strong>CONNECT. SHARE. ANYWHERE.</strong><br />Designed with precision for open-source peer-to-peer productivity on Android.</sub>
 </div>

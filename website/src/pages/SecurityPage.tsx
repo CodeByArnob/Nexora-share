@@ -64,8 +64,8 @@ export const SecurityPage = () => {
             </p>
             <ul className="list-disc pl-6 space-y-2 text-slate-300">
               <li>Neutralizes directory traversal sequences: <code className="text-slate-200">../</code>, <code className="text-slate-200">..\</code></li>
-              <li>Strips absolute roots: <code className="text-slate-200">/etc/passwd</code>, <code className="text-slate-200">C:\Windows</code></li>
-              <li>Rejects Windows reserved device names: <code className="text-slate-200">CON, PRN, AUX, NUL, COM1-9, LPT1-9</code></li>
+              <li>Strips absolute roots: <code className="text-slate-200">/etc/passwd</code>, <code className="text-slate-200">/system/bin</code></li>
+              <li>Rejects reserved device names: <code className="text-slate-200">CON, PRN, AUX, NUL, COM1-9, LPT1-9</code></li>
             </ul>
           </section>
 

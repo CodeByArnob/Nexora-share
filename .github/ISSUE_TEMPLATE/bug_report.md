@@ -15,7 +15,9 @@ A clear and concise description of what the bug is.
 3. Observe error: '....'
 
 ### Environment
-- **Platform**: [e.g. Android 15, Windows 11 26H2, Ubuntu 24.04]
+- **Device Model**: [e.g. Google Pixel 9 Pro, Samsung Galaxy S24, Xiaomi 14]
+- **Android OS Version**: [e.g. Android 15 (API 35), Android 14 (API 34)]
+- **APK Package**: [e.g. arm64-v8a, armeabi-v7a, universal]
 - **NEXORA Version**: [e.g. 0.1.0]
 - **Network Topology**: [e.g. Same 5GHz Wi-Fi, Ethernet, Hotspot]
 

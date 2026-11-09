@@ -1,35 +1,28 @@
-# NEXORA v1.0.1 — High-Speed Streaming & Motion Release
+# NEXORA v1.0.1 Release Notes
 
-> **CONNECT. SHARE. ANYWHERE.**  
-> *PRIVATE BY DESIGN. OPEN BY NATURE.*
-
----
-
-### 🚀 Primary Download Link
-👉 **[Download NEXORA for Android](https://github.com/CodeByArnob/Nexora-share/releases/download/v1.0.1/nexora-v1.0.1-release.apk)** *(Direct APK Download, 54.7 MB)*
+**Release Tag**: `v1.0.1`  
+**Build Number**: `101`  
+**Date**: November 8, 2026  
+**License**: Apache License 2.0  
+**Status**: Production Verified  
 
 ---
 
-## 🌟 What's New in v1.0.1
+## 🚀 Key Improvements & Bug Fixes
 
-### ⏹️ Interactive Transfer Pause, Resume & Instant Cancellation
-- **Instant Cancel**: Wired up the cancel (`X`) button across `TransfersScreen`, `TransferClient`, and `TransferServer`. Users can instantly abort an in-flight transfer with clean socket termination, safe file handle cleanup, and graceful SQLite state transition.
-- **Bi-directional Remote Cancel Protocol**: Added `TransferCancel` wire message frame. When one device aborts, the peer immediately ceases streaming and cleans up active resources.
-- **Pause & Resumption**: Added dynamic pause/resume toggling. Transfer sessions flush verified checkpoints and can be resumed with zero data corruption.
+### 1. File Transfer Completion Handshake
+- Implemented explicit two-way completion protocol (`TransferComplete` ↔ `TransferCompleteAck`).
+- Resolves transfer status stuck at 100% on receiver devices.
+- Ensures immediate clean closure and resource disposal for completed TCP streams.
 
-### ⚡ Line-Rate Transfer Speed Acceleration (50–100+ MB/s)
-- **Zero-Copy Binary Chunk Framing**: Replaced CPU-heavy JSON integer array serialization with a raw binary frame layout (`0xAA` magic marker + 4-byte length prefix). Completely eliminated JSON AST parsing and Base64 conversion overhead.
-- **Sliding-Window Flow Control**: Implemented 4MB pipelining over TCP sockets with `TCP_NODELAY` enabled. Bypassed lockstep stop-and-wait roundtrip delays.
-- **Throttled SQLite Checkpointing**: Checkpoint transactions are buffered to 5MB intervals, eliminating flash memory I/O bottlenecks.
+### 2. Live Transfer State Machine Management
+- Completed transfers are immediately promoted to history and demoted from active transfers.
+- Live transfer speed resets to `0 B/s` and ETA clears upon receipt of completion acknowledgement.
+- Added comprehensive unit and widget tests for file transfer completion state transitions.
 
-### 🖼️ Android MediaStore & Auto-Gallery Indexing
-- **Public Downloads Integration**: Received files now default to `/storage/emulated/0/Download/Nexora` instead of app-internal sandboxes.
-- **Instant Gallery Scanning**: Added `MediaScannerConnection.scanFile` and `ACTION_MEDIA_SCANNER_SCAN_FILE` broadcast integration in `MainActivity.kt`. All incoming photos (`.jpg`, `.png`, `.webp`) and videos (`.mp4`, `.mkv`, etc.) appear immediately in Google Photos and device Gallery apps.
-
-### 🎨 Premium Motion Graphics & UI Polish
-- **Dynamic Breathing Glow**: Active transfer cards feature real-time pulsing neon gradient borders (`#3978F6` & `#39C6B0`) with GPU-accelerated micro-interactions.
-- **Shimmer Progress Bar**: Fluid animated gradient progress bar with moving light streak and live speed badge (`MB/s`).
-- **P2P Radar Wave Empty State**: Smooth concentric circular pulse waves when idle.
+### 3. Background Transfer Execution Continuity
+- Reinforced Android foreground service persistence (`FOREGROUND_SERVICE_DATA_SYNC`).
+- Maintained active Wi-Fi `MulticastLock` and `WakeLock` across device sleep and app backgrounding.
 
 ---
 
@@ -45,7 +38,7 @@
 
 ## 📱 Compatibility & Requirements
 
-- **Supported Platforms**: Android (Mobile), Windows (Desktop), Linux (Desktop)
+- **Supported Platforms**: Android (Mobile)
 - **Minimum Android Version**: Android 8.0 Oreo (API level 26) or higher
 - **Target Android Version**: Android 15 (API level 35)
 - **Supported ABIs**: `arm64-v8a`, `armeabi-v7a`, `x86_64`

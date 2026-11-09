@@ -11,10 +11,10 @@ This directory contains the production release artifacts for NEXORA on Android, 
 
 ## Verification Command
 ```bash
-# Verify checksum on Linux/macOS
+# Verify checksum on Linux/macOS/Termux
 sha256sum -c SHA256SUMS.txt
 
-# Verify checksum on Windows (PowerShell)
+# Verify checksum on PowerShell
 Get-FileHash nexora-v1.0.0-release.apk -Algorithm SHA256
 Get-FileHash nexora-v1.0.0-release.aab -Algorithm SHA256
 ```

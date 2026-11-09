@@ -1,4 +1,4 @@
-import { Download, ShieldCheck, FileCheck, ExternalLink, HelpCircle, Laptop, Smartphone } from 'lucide-react';
+import { Download, ShieldCheck, FileCheck, ExternalLink, HelpCircle, Smartphone, Layers } from 'lucide-react';
 import { RELEASE_INFO } from '../constants/releaseInfo';
 
 export const DownloadSection = () => {
@@ -8,10 +8,10 @@ export const DownloadSection = () => {
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#3978F6]/10 border border-[#3978F6]/30 text-[#3978F6] text-xs font-semibold uppercase tracking-wider mb-4">
             <Download className="w-3.5 h-3.5" />
-            Official Release Distribution
+            Official Android Release Distribution
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
-            Download NEXORA. <br />
+            Download NEXORA for Android. <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#3978F6] to-[#39C6B0]">
               Start Sharing Anywhere.
             </span>
@@ -25,9 +25,9 @@ export const DownloadSection = () => {
           </div>
         </div>
 
-        {/* Dual Platform Showcase Grid */}
+        {/* Android Distribution Cards Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-          {/* Card 1: Android Platform */}
+          {/* Card 1: Android ARM64 Primary */}
           <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-br from-[#17243A] to-[#0D1420] border-2 border-[#3978F6] shadow-2xl shadow-[#3978F6]/15 flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
@@ -35,30 +35,30 @@ export const DownloadSection = () => {
                   <Smartphone className="w-6 h-6" />
                 </div>
                 <span className="text-xs font-mono text-[#39C6B0] bg-[#39C6B0]/10 px-2.5 py-1 rounded-full font-semibold">
-                  Android 8.0 – 15
+                  Recommended • Modern Android
                 </span>
               </div>
 
               <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
-                NEXORA for Android
+                ARM64-v8a Package
               </h3>
 
               <p className="text-sm text-slate-300">
-                Optimized split-per-ABI packages with native SQLite and instant large-file initiation.
+                Highly optimized 64-bit APK for modern Android smartphones and tablets (Android 8.0 through Android 15).
               </p>
 
               <div className="space-y-2 pt-2 text-xs text-slate-300">
                 <div className="flex justify-between py-1.5 border-b border-slate-800">
-                  <span className="text-slate-400">ARM64-v8a (Recommended):</span>
+                  <span className="text-slate-400">Target Architecture:</span>
+                  <strong className="text-white font-mono">arm64-v8a (64-bit)</strong>
+                </div>
+                <div className="flex justify-between py-1.5 border-b border-slate-800">
+                  <span className="text-slate-400">Package Size:</span>
                   <strong className="text-white font-mono">{RELEASE_INFO.apkArm64Size}</strong>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-slate-800">
-                  <span className="text-slate-400">Universal Package:</span>
-                  <strong className="text-white font-mono">{RELEASE_INFO.apkUniversalSize}</strong>
-                </div>
-                <div className="flex justify-between py-1.5 border-b border-slate-800">
-                  <span className="text-slate-400">ARMv7 (Legacy 32-bit):</span>
-                  <strong className="text-white font-mono">{RELEASE_INFO.apkArmv7Size}</strong>
+                  <span className="text-slate-400">OS Compatibility:</span>
+                  <strong className="text-white">Android 8.0+ (API 26 to 35)</strong>
                 </div>
               </div>
             </div>
@@ -73,73 +73,73 @@ export const DownloadSection = () => {
               </a>
 
               <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-400 pt-1">
-                <a href={RELEASE_INFO.downloadUniversalApkUrl} className="hover:text-white underline transition-colors">
-                  Universal APK ({RELEASE_INFO.apkUniversalSize})
-                </a>
+                <span className="text-slate-400">SHA-256 Verified</span>
                 <span>•</span>
-                <a href={RELEASE_INFO.downloadArmv7ApkUrl} className="hover:text-white underline transition-colors">
-                  ARMv7
-                </a>
-                <span>•</span>
-                <a href={RELEASE_INFO.downloadAabUrl} className="hover:text-white underline transition-colors">
-                  Play Bundle (AAB)
-                </a>
+                <span className="text-[#39C6B0]">Native Wi-Fi & Hotspot Support</span>
               </div>
             </div>
           </div>
 
-          {/* Card 2: Windows Desktop Platform */}
+          {/* Card 2: Universal & Other Android Architectures */}
           <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-br from-[#17243A] to-[#0D1420] border-2 border-[#39C6B0] shadow-2xl shadow-[#39C6B0]/15 flex flex-col justify-between">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="w-12 h-12 rounded-2xl bg-[#39C6B0]/20 text-[#39C6B0] flex items-center justify-center">
-                  <Laptop className="w-6 h-6" />
+                  <Layers className="w-6 h-6" />
                 </div>
                 <span className="text-xs font-mono text-[#3978F6] bg-[#3978F6]/10 px-2.5 py-1 rounded-full font-semibold">
-                  Windows 10 / 11 (x64)
+                  All Architectures
                 </span>
               </div>
 
               <h3 className="text-2xl sm:text-3xl font-extrabold text-white">
-                NEXORA for Windows
+                Universal & Alternative Builds
               </h3>
 
               <p className="text-sm text-slate-300">
-                Official Inno Setup installer with branded icon assets, Start Menu & Desktop shortcuts, and automated firewall rules.
+                Multi-architecture standalone APKs and Google Play App Bundle for legacy phones, emulators, and store distribution.
               </p>
 
               <div className="space-y-2 pt-2 text-xs text-slate-300">
                 <div className="flex justify-between py-1.5 border-b border-slate-800">
-                  <span className="text-slate-400">Setup Installer (.exe):</span>
-                  <strong className="text-white font-mono">{RELEASE_INFO.windowsSetupSize}</strong>
+                  <span className="text-slate-400">Universal APK (All ABIs):</span>
+                  <strong className="text-white font-mono">{RELEASE_INFO.apkUniversalSize}</strong>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-slate-800">
-                  <span className="text-slate-400">Standalone Portable (.zip):</span>
-                  <strong className="text-white font-mono">{RELEASE_INFO.windowsPortableSize}</strong>
+                  <span className="text-slate-400">ARMv7 (Legacy 32-bit):</span>
+                  <strong className="text-white font-mono">{RELEASE_INFO.apkArmv7Size}</strong>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-slate-800">
-                  <span className="text-slate-400">System Integration:</span>
-                  <strong className="text-white">Auto Firewall & System Tray</strong>
+                  <span className="text-slate-400">x86_64 (Emulators / ChromeOS):</span>
+                  <strong className="text-white font-mono">{RELEASE_INFO.apkX86Size}</strong>
                 </div>
               </div>
             </div>
 
             <div className="mt-8 space-y-3">
               <a
-                href={RELEASE_INFO.downloadWindowsSetupUrl}
-                className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl bg-gradient-to-r from-[#00E5FF] via-[#0284C7] to-[#0369A1] hover:from-[#0284C7] hover:to-[#075985] text-[#0A0F1D] hover:text-white font-extrabold text-sm shadow-xl shadow-[#00E5FF]/20 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                href={RELEASE_INFO.downloadUniversalApkUrl}
+                className="w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl bg-gradient-to-r from-[#39C6B0] via-[#0D9488] to-[#0F766E] hover:from-[#0D9488] hover:to-[#115E59] text-white font-extrabold text-sm shadow-xl shadow-[#39C6B0]/20 transition-all hover:scale-[1.01] active:scale-[0.99]"
               >
                 <Download className="w-4 h-4 animate-bounce" />
-                <span>Download Windows Setup (.exe)</span>
+                <span>Download Universal APK ({RELEASE_INFO.apkUniversalSize})</span>
               </a>
 
               <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-slate-400 pt-1">
-                <a href={RELEASE_INFO.downloadWindowsPortableUrl} className="hover:text-white underline transition-colors">
-                  Portable ZIP ({RELEASE_INFO.windowsPortableSize})
+                <a href={RELEASE_INFO.downloadArmv7ApkUrl} className="hover:text-white underline transition-colors">
+                  ARMv7 ({RELEASE_INFO.apkArmv7Size})
                 </a>
                 <span>•</span>
-                <a href={`${RELEASE_INFO.latestReleasePageUrl}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#39C6B0] flex items-center gap-1 transition-colors">
-                  <span>GitHub Release</span>
+                <a href={RELEASE_INFO.downloadX86ApkUrl} className="hover:text-white underline transition-colors">
+                  x86_64 ({RELEASE_INFO.apkX86Size})
+                </a>
+                <span>•</span>
+                <a href={RELEASE_INFO.downloadAabUrl} className="hover:text-white underline transition-colors">
+                  Play Bundle AAB
+                </a>
+                <span>•</span>
+                <a href={RELEASE_INFO.latestReleasePageUrl} target="_blank" rel="noopener noreferrer" className="hover:text-[#39C6B0] flex items-center gap-1 transition-colors">
+                  <span>Releases</span>
                   <ExternalLink className="w-3 h-3" />
                 </a>
               </div>
@@ -154,7 +154,7 @@ export const DownloadSection = () => {
               <ShieldCheck className="w-6 h-6 text-[#39C6B0] shrink-0" />
               <div>
                 <span className="text-xs uppercase font-mono text-slate-400 block font-semibold">Cryptographic Integrity Ledger</span>
-                <p className="text-xs text-slate-300">Every release artifact is SHA-256 hashed and verified automatically in GitHub Actions.</p>
+                <p className="text-xs text-slate-300">Every Android APK artifact is SHA-256 hashed and verified automatically in GitHub Actions.</p>
               </div>
             </div>
 

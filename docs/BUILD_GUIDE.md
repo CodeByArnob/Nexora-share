@@ -1,21 +1,22 @@
-# NEXORA Build Guide
+# NEXORA Android Build Guide
 
-This document provides complete, reproducible instructions for building production-ready NEXORA artifacts for Android, Windows, and Linux.
+This document provides complete, reproducible instructions for building production-ready NEXORA Android artifacts (split APKs, universal APK, and Android App Bundle).
 
 ---
 
 ## 1. Prerequisites
 
-| Platform | Required Toolchains & Dependencies |
-|---|---|
-| **All Platforms** | Flutter SDK 3.44+ (Channel `stable`), Dart 3.12+, Git |
-| **Android** | Android SDK 34+ (Build-Tools 36+), OpenJDK 17 or 21, Android NDK |
-| **Windows PC** | Visual Studio 2022 with **"Desktop development with C++"** workload |
-| **Linux** | `clang`, `cmake`, `ninja-build`, `pkg-config`, `libgtk-3-dev`, `liblzma-dev` |
+| Tool | Version / Requirement | Purpose |
+|---|---|---|
+| **Flutter SDK** | `3.44.4+` (Channel `stable`) | UI framework & Dart runtime |
+| **Dart SDK** | `3.12+` | Embedded within Flutter SDK |
+| **Android SDK** | API 34+ (Build-Tools 34+) | Android compilation & packaging |
+| **Java Development Kit** | OpenJDK 17 or 21 (Temurin recommended) | Gradle execution |
+| **Rust Toolchain** | `1.94.0+` (stable) | Shared protocol and cryptography engine |
 
 ---
 
-## 2. Secure Keystore & Signing Configuration (Android)
+## 2. Secure Keystore & Signing Configuration
 
 NEXORA release signing keys must **NEVER** be committed to the Git repository.
 
@@ -44,64 +45,36 @@ storeFile=C:/Users/Arnob/.android/nexora-release-key.jks
 
 ## 3. Building Android Artifacts
 
-### Production Release APK (Direct Sideload / Distributable)
+### A. ABI-Split Release APKs (Recommended for Production Distribution)
+Splitting APKs per target ABI produces the smallest, most efficient downloads for users:
 ```bash
 cd apps/mobile
 flutter pub get
+flutter build apk --release --split-per-abi
+```
+Generated artifacts in `apps/mobile/build/app/outputs/flutter-apk/`:
+- `app-arm64-v8a-release.apk` (**~25.0 MB**) &mdash; Modern 64-bit Android smartphones.
+- `app-armeabi-v7a-release.apk` (**~20.9 MB**) &mdash; 32-bit legacy devices.
+- `app-x86_64-release.apk` (**~27.4 MB**) &mdash; Tablets, Chromebooks & Emulators.
+
+### B. Universal Release APK (Fat Binary)
+Contains native code for all CPU architectures in a single standalone package:
+```bash
+cd apps/mobile
 flutter build apk --release
 ```
-* Output path: `apps/mobile/build/app/outputs/flutter-apk/app-release.apk`
-* Form-factor size: ~54 MB (with R8 optimization and resource tree-shaking)
+* Output path: `apps/mobile/build/app/outputs/flutter-apk/app-release.apk` (~67 MB)
 
-### Android App Bundle (Google Play Store)
+### C. Android App Bundle (Google Play Store)
+Format required for publishing on the Google Play Store:
 ```bash
 cd apps/mobile
-flutter pub get
 flutter build appbundle --release
 ```
-* Output path: `apps/mobile/build/app/outputs/bundle/release/app-release.aab`
-* Form-factor size: ~53.5 MB
+* Output path: `apps/mobile/build/app/outputs/bundle/release/app-release.aab` (~59 MB)
 
 ---
 
-## 4. Building Windows PC Executable (`nexora.exe`)
+## 4. Automated CI/CD Compilation
 
-### Step 1: Ensure Visual Studio C++ Workload
-If not already installed, install the C++ build tools via Windows Package Manager:
-```powershell
-winget install --id Microsoft.VisualStudio.2022.BuildTools --override "--passive --config vsbuildtools.config --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
-```
-
-### Step 2: Build Release Binary
-```powershell
-cd apps/desktop
-flutter config --enable-windows-desktop
-flutter pub get
-flutter build windows --release
-```
-* Output directory: `apps/desktop/build/windows/x64/runner/Release/`
-* Binary executable: `nexora.exe`
-
-### Automated Cloud Build
-If building on a machine without Visual Studio, NEXORA's GitHub Actions workflow (`.github/workflows/ci.yml`) automatically builds the Windows `nexora.exe` on `windows-latest` runners upon push to `main` or release branches.
-
----
-
-## 5. Building Linux Desktop Binary
-
-```bash
-cd apps/desktop
-flutter config --enable-linux-desktop
-flutter pub get
-flutter build linux --release
-```
-* Output binary: `apps/desktop/build/linux/x64/release/bundle/nexora`
-
----
-
-## 6. Checksum Verification
-
-```bash
-# Verify integrity of generated release files
-sha256sum release/android/nexora-v1.0.0-release.apk
-```
+NEXORA's GitHub Actions workflow (`.github/workflows/ci.yml`) automatically compiles and verifies the Android release split APKs on an `ubuntu-latest` runner upon every push to `main` or release branch, enforcing strict APK size limits via `scripts/monitor_apk_size.ps1`.

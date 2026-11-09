@@ -14,7 +14,7 @@ export const HeroSection = () => {
           {/* Release Version Announcement Pill */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#17243A] border border-[#3978F6]/40 text-xs font-semibold text-slate-200 shadow-lg shadow-[#3978F6]/10 hover:border-[#39C6B0] transition-colors">
             <span className="w-2 h-2 rounded-full bg-[#39C6B0] animate-ping" />
-            <span>NEXORA {RELEASE_INFO.tag} Production Release Available</span>
+            <span>NEXORA {RELEASE_INFO.tag} Android Production Release Available</span>
             <span className="text-slate-500">•</span>
             <a href="#download" className="text-[#39C6B0] hover:underline flex items-center gap-1 font-bold">
               Download APK <ArrowRight className="w-3 h-3" />
@@ -41,7 +41,7 @@ export const HeroSection = () => {
 
           {/* Core Description */}
           <p className="text-base sm:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
-            Directly stream multi-gigabyte files between Android, Windows, and Linux over local Wi-Fi or mobile hotspots. No accounts, no data harvesting, no file size limits, and verified SHA-256 integrity.
+            NEXORA is a modern Android application for secure, fast, and convenient file sharing between supported devices. Directly stream multi-gigabyte files over local Wi-Fi or mobile hotspots with zero cloud servers, zero file size limits, and cryptographic SHA-256 integrity verification.
           </p>
 
           {/* Primary Action Buttons */}
@@ -51,17 +51,24 @@ export const HeroSection = () => {
               className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-[#3978F6] to-[#2563EB] hover:from-[#2563EB] hover:to-[#1D4ED8] text-white font-black text-base shadow-2xl shadow-[#3978F6]/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               <Download className="w-5 h-5 animate-bounce" />
-              <span>Download Latest APK (54.4MB)</span>
+              <span>Download Android APK (ARM64 • {RELEASE_INFO.apkArm64Size})</span>
+            </a>
+
+            <a
+              href="#download"
+              className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl bg-[#14243B] hover:bg-[#17243A] text-slate-200 hover:text-white font-bold text-base border border-slate-700/80 transition-all shadow-lg"
+            >
+              <span>All APK Builds & Architectures</span>
             </a>
 
             <a
               href={RELEASE_INFO.repoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-7 py-4 rounded-2xl bg-[#14243B] hover:bg-[#17243A] text-slate-200 hover:text-white font-bold text-base border border-slate-700/80 transition-all shadow-lg"
+              className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-4 rounded-2xl bg-[#14243B]/60 hover:bg-[#17243A] text-slate-300 hover:text-white font-medium text-base border border-slate-800 transition-all shadow-lg"
             >
               <GithubIcon className="w-5 h-5" />
-              <span>View on GitHub</span>
+              <span>GitHub</span>
             </a>
           </div>
 
@@ -77,7 +84,7 @@ export const HeroSection = () => {
             </div>
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-[#39C6B0]" />
-              <span>Native Android MulticastLock</span>
+              <span>Android MulticastLock & WakeLock</span>
             </div>
             <div className="flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-[#39C6B0]" />
