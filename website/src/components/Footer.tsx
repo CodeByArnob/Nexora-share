@@ -22,7 +22,7 @@ export const Footer = () => {
             </p>
 
             <p className="text-xs text-slate-400 max-w-sm leading-relaxed">
-              High-performance, privacy-first peer-to-peer file sharing platform for Android, Windows, and Linux. Direct local network streaming with zero cloud telemetry.
+              NEXORA is a modern Android application for secure, fast, and convenient file sharing between supported devices. Direct local network streaming with zero cloud telemetry.
             </p>
 
             <div className="pt-2 flex items-center gap-2 text-xs text-slate-400 font-mono">
@@ -37,7 +37,7 @@ export const Footer = () => {
             <ul className="space-y-2.5 text-xs">
               <li><a href="/#features" className="hover:text-white transition-colors">Key Features</a></li>
               <li><a href="/#architecture" className="hover:text-white transition-colors">Architecture & Protocols</a></li>
-              <li><a href="/#compatibility" className="hover:text-white transition-colors">Platform Compatibility</a></li>
+              <li><a href="/#compatibility" className="hover:text-white transition-colors">Android Ecosystem</a></li>
               <li><a href="/#download" className="hover:text-[#3978F6] transition-colors font-semibold">Download Android APK</a></li>
               <li><a href={RELEASE_INFO.releasesArchiveUrl} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors flex items-center gap-1">Release History <ExternalLink className="w-3 h-3" /></a></li>
             </ul>

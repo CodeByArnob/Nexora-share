@@ -154,7 +154,7 @@
       Ultra-fast, zero-cloud peer-to-peer file transfer engine with bounded memory streaming,
     </text>
     <text x="2" y="275" fill="#9FB5D4" class="body-text" font-size="16">
-      streaming SHA-256 verification, and native support for Android, Windows, and Linux.
+      streaming SHA-256 verification, and dedicated support for the Android ecosystem.
     </text>
 
     <!-- Feature Attribute Cards / Pills -->

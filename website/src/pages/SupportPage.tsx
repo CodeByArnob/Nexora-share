@@ -31,9 +31,9 @@ export const SupportPage = () => {
               <div className="p-5 rounded-2xl bg-[#14243B]/60 border border-slate-800">
                 <h3 className="font-bold text-white text-base">Devices not discovering each other?</h3>
                 <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                  1. Verify both devices are connected to the exact same Wi-Fi network or portable hotspot.<br />
+                  1. Verify both Android devices are connected to the exact same Wi-Fi network or portable hotspot.<br />
                   2. Ensure NEXORA is actively open on both devices.<br />
-                  3. If on public Wi-Fi (such as a university or hotel), the router may have "AP Isolation" or "Client Isolation" enabled. In this case, use <strong>"Add IP" / "Connect by IP"</strong> or scan the <strong>QR Code</strong> to connect directly.
+                  3. If on public Wi-Fi (such as a university or hotel), the router may have "AP Isolation" or "Client Isolation" enabled. In this case, use <strong>"Connect by IP"</strong> or scan the <strong>QR Code</strong> to connect directly.
                 </p>
               </div>
 
@@ -45,9 +45,9 @@ export const SupportPage = () => {
               </div>
 
               <div className="p-5 rounded-2xl bg-[#14243B]/60 border border-slate-800">
-                <h3 className="font-bold text-white text-base">Desktop Firewall warnings?</h3>
+                <h3 className="font-bold text-white text-base">Sharing via Mobile Hotspot?</h3>
                 <p className="text-xs text-slate-300 mt-2 leading-relaxed">
-                  On Windows Defender or Linux UFW, allow inbound/outbound connections for NEXORA on TCP port 48842 (streaming) and UDP port 48843 (discovery).
+                  When no Wi-Fi router is available, turn on Mobile Hotspot on one Android phone and connect the other Android device to it. NEXORA will immediately discover the peer without consuming any cellular data.
                 </p>
               </div>
             </div>

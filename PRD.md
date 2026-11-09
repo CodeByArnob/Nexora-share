@@ -26,7 +26,7 @@ Every advertised feature must perform its actual function.
 
 Product Name: NEXORA
 
-Product Category: Cross-platform Peer-to-Peer File Sharing.
+Product Category: Modern Android Peer-to-Peer File Sharing Application.
 
 Official Tagline:
 
@@ -34,7 +34,7 @@ CONNECT. SHARE. ANYWHERE.
 
 Brand Statement:
 
-PRIVATE BY DESIGN. OPEN BY NATURE.
+NEXORA is a modern Android application for secure, fast, and convenient file sharing between supported devices.
 
 Repository Name:
 
@@ -42,7 +42,7 @@ nexora-share
 
 Repository Description:
 
-Privacy-first cross-platform peer-to-peer file sharing for Android, Windows and Linux. No account, no cloud, no unnecessary tracking.
+NEXORA is a modern Android application for secure, fast, and convenient file sharing between supported devices. No account, no cloud, no unnecessary tracking.
 
 License:
 
@@ -50,9 +50,7 @@ Apache License 2.0.
 
 Platforms:
 
-- Android
-- Windows
-- Linux
+- Android (Android 8.0 Oreo through Android 15/16)
 
 Core Technology:
 
@@ -182,7 +180,7 @@ https://github.com/CodeByArnob/Nexora-share
 
 Repository description:
 
-Privacy-first cross-platform peer-to-peer file sharing for Android, Windows and Linux.
+NEXORA is a modern Android application for secure, fast, and convenient file sharing between supported devices.
 
 Topics:
 
@@ -193,11 +191,8 @@ Topics:
 - p2p
 - file-sharing
 - offline-first
-- cross-platform
 - privacy
 - android
-- windows
-- linux
 
 README branding:
 
@@ -743,36 +738,19 @@ Respect Android background restrictions.
 
 Never claim guaranteed uninterrupted background transfer.
 
-# 14. WINDOWS REQUIREMENTS
+# 14. ANDROID ECOSYSTEM REQUIREMENTS
 
 Implement:
 
-- Discovery.
-- Pairing.
-- Sending.
-- Receiving.
-- Native file picker.
-- Drag-and-drop.
-- Transfer queue.
-- Notifications.
-- Firewall troubleshooting.
-- Installer and uninstaller.
-
-# 15. LINUX REQUIREMENTS
-
-Implement:
-
-- Discovery.
-- Pairing.
-- File picker.
-- Folder transfer.
-- Notifications.
-- Packaging.
-- Network diagnostics.
-
-Validate supported distributions.
-
-Prepare Flatpak and/or AppImage.
+- Discovery via UDP multicast (224.0.0.167) and directed broadcast.
+- CameraX optical QR code pairing and 6-digit SAS verification.
+- Sending and receiving single files, batches, and folder hierarchies.
+- Native Android file picker and Download directory persistence.
+- dataSync Foreground Service with ongoing notification channel.
+- Hardware WifiManager MulticastLock and PARTIAL_WAKE_LOCK management.
+- Native Android SQLiteDatabase integration.
+- Bounded 1 MB streaming buffers and real-time SHA-256 chunk hashing.
+- Split-per-ABI production packaging (arm64-v8a, armeabi-v7a, x86_64).
 
 # 16. DATABASE
 
@@ -877,11 +855,9 @@ Security tests:
 Interoperability:
 
 - Android ↔ Android.
-- Android ↔ Windows.
-- Windows ↔ Android.
-- Android ↔ Linux.
-- Linux ↔ Android.
-- Windows ↔ Linux.
+- Android ↔ Android.
+- Android Smartphone ↔ Android Tablet.
+- Modern Android (API 31+) ↔ Legacy Android (API 26-30).
 
 Do not claim a platform combination works without actual test evidence.
 
@@ -915,8 +891,8 @@ Create GitHub Actions workflows for:
 - Rust tests.
 - Dependency audit.
 - Android build.
-- Windows build.
-- Linux build.
+- Android APK ABI-splits.
+- Android App Bundle (AAB).
 
 Use suitable platform runners.
 
@@ -996,9 +972,9 @@ PHASE 2 — Android MVP
 - Real single-file transfer.
 - SHA-256 verification.
 
-PHASE 3 — Windows Interoperability
+PHASE 3 — Android Optimization & Release Distribution
 
-- Windows discovery.
+- Android split packaging.
 - Pairing.
 - Send.
 - Receive.
@@ -1118,7 +1094,7 @@ NEXORA is not production-ready merely because the UI looks complete.
 
 The primary acceptance test is:
 
-A real user opens NEXORA on an Android device and a Windows computer.
+A real user opens NEXORA on two Android devices connected to the same Wi-Fi or hotspot.
 
 Both devices discover each other.
 

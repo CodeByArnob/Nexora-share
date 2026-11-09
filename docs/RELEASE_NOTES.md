@@ -9,7 +9,7 @@
 
 ## Highlights
 
-NEXORA is a lightweight, privacy-first peer-to-peer file sharing platform engineered for Android, Windows, and Linux. It delivers verified file transfers across your local Wi-Fi or subnet with no account, zero cloud storage, and no tracking.
+NEXORA is a lightweight, privacy-first peer-to-peer file sharing platform engineered for Android devices. It delivers verified file transfers across your local Wi-Fi or subnet with no account, zero cloud storage, and no tracking.
 
 > **CONNECT. SHARE. ANYWHERE.**  
 > *PRIVATE BY DESIGN. OPEN BY NATURE.*
@@ -19,10 +19,9 @@ NEXORA is a lightweight, privacy-first peer-to-peer file sharing platform engine
 ## What's New in Version 1.0.0
 
 ### 1. Production Release Architecture
-* **Signed Android Release APK**: 54.2 MB release binary optimized with R8 shrinking, ProGuard rules, and private keystore signing.
-* **Google Play App Bundle (AAB)**: 53.5 MB AAB ready for Google Play Store publishing.
-* **Windows PC Executable**: Native x64 Windows binary target (`nexora.exe`) with consistent iconography and metadata.
-* **Linux Desktop Support**: Native Linux executable target (`nexora`) with Desktop Entry, AppStream metainfo, and Debian packaging scripts.
+* **Signed Android Release APK**: Release binary optimized with R8 shrinking, ProGuard rules, and private keystore signing.
+* **Google Play App Bundle (AAB)**: Production AAB ready for Google Play Store publishing.
+* **Multi-Architecture Support**: Native support across `arm64-v8a`, `armeabi-v7a`, and `x86_64` Android hardware.
 
 ### 2. High-Performance Bounded-Memory Streaming
 * **Bounded RAM Consumption**: Streams multi-gigabyte files (1GB, 5GB, 10GB+) using fixed 1MB chunk slicing without memory inflation (~2.7MB heap on real devices).
@@ -40,16 +39,7 @@ NEXORA is a lightweight, privacy-first peer-to-peer file sharing platform engine
 * **GPU-Accelerated Motion**: Lightweight radar pulse discovery rings, smooth progress bar tweening, and animated success badges that respect reduced-motion accessibility.
 
 ### 5. Multi-File Batches & Folder Hierarchy
-* Send and receive entire directories while preserving nested folder hierarchy on all target operating systems.
+* Send and receive entire directories while preserving nested folder hierarchy on Android devices.
 
 ### 6. Developer & Project Credits
 * Detailed About NEXORA section in Settings displaying developer profile (`CodeByArnob`), repository links, version number, build code, and technology acknowledgements.
-
----
-
-## Artifact Checksums
-
-```
-06e9432170563a715032a52309fc0b4e9c1d5f59effbdee87cb19cbd27754432  nexora-v1.0.0-release.apk
-59b729c82696af71636a9bcb89fa17a8eb1e1aa5d0ea8ae56d0db0d9f95f5526  nexora-v1.0.0-release.aab
-```

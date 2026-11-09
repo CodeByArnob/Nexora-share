@@ -1,7 +1,17 @@
 import React from 'react';
-import { Wifi, Cpu, RefreshCw, ShieldOff, QrCode, BatteryCharging, FolderTree, UserCheck } from 'lucide-react';
+import {
+  Wifi,
+  Zap,
+  Lock,
+  RefreshCw,
+  ShieldOff,
+  QrCode,
+  BatteryCharging,
+  FolderTree,
+  UserCheck,
+} from 'lucide-react';
 
-interface FeatureCard {
+interface FeatureItem {
   icon: React.ReactNode;
   title: string;
   badge: string;
@@ -9,22 +19,30 @@ interface FeatureCard {
   techHighlight: string;
 }
 
-const FEATURES: FeatureCard[] = [
+const FEATURES: FeatureItem[] = [
   {
     icon: <Wifi className="w-6 h-6 text-[#3978F6]" />,
-    title: 'Subnet-Directed Peer Discovery',
-    badge: 'Hardware MulticastLock',
+    title: 'Instant Local Discovery',
+    badge: 'Zero Configuration',
     description:
-      'Discovers nearby devices instantaneously using Android native MulticastLock and directed subnet broadcasts (192.168.x.255). No dropped packets during phone screen sleep.',
-    techHighlight: 'UDP Multicast (224.0.0.167:48843) + Direct Subnet Broadcast',
+      'Devices running NEXORA on the same network discover each other within milliseconds using UDP multicast broadcasts on port 48843 with native WifiManager MulticastLock.',
+    techHighlight: '224.0.0.167 Multicast + Android MulticastLock preservation',
   },
   {
-    icon: <Cpu className="w-6 h-6 text-[#39C6B0]" />,
-    title: 'Bounded-Memory Streaming',
-    badge: 'Fixed 1MB Buffer',
+    icon: <Zap className="w-6 h-6 text-[#39C6B0]" />,
+    title: 'Gigabit-Speed Streaming',
+    badge: 'Raw TCP Throughput',
     description:
-      'Streams multi-gigabyte files (5GB, 10GB+) with fixed 1MB RAM chunks and receiver backpressure flow control. Never causes memory inflation or Out-Of-Memory (OOM) crashes.',
-    techHighlight: 'RAM stays under 30MB during continuous full-speed streaming',
+      'Transfer files at the maximum physical speed of your Wi-Fi router or hotspot (50+ MB/s on 5GHz 802.11ac/ax) with zero cloud throttles, compression loss, or intermediary proxies.',
+    techHighlight: 'Asynchronous buffered I/O with 1MB bounded RAM chunking',
+  },
+  {
+    icon: <Lock className="w-6 h-6 text-[#3978F6]" />,
+    title: 'Cryptographic Security',
+    badge: 'Ed25519 & SHA-256',
+    description:
+      'Every device generates a unique Ed25519 keypair. Public key fingerprints verify device identities, while per-chunk SHA-256 checksums prevent corrupted or modified payloads.',
+    techHighlight: 'Hardware-backed Ed25519 identity keys + chunk checksums',
   },
   {
     icon: <RefreshCw className="w-6 h-6 text-[#3978F6]" />,
@@ -63,7 +81,7 @@ const FEATURES: FeatureCard[] = [
     title: 'Hierarchical Folder Streaming',
     badge: 'PathSanitizer Protected',
     description:
-      'Send nested folder hierarchies preserving subdirectories. Built-in security layers sanitize paths against directory traversal attacks (.. and Windows reserved names).',
+      'Send nested folder hierarchies preserving subdirectories. Built-in security layers sanitize paths against directory traversal attacks (.. and reserved filenames).',
     techHighlight: 'Multi-file manifest framing + OS path escaping neutralizer',
   },
   {
@@ -82,7 +100,7 @@ export const FeatureGrid: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#39C6B0]/10 border border-[#39C6B0]/30 text-[#39C6B0] text-xs font-semibold uppercase tracking-wider mb-4">
-            <Cpu className="w-3.5 h-3.5" />
+            <Wifi className="w-3.5 h-3.5" />
             Core Capabilities
           </div>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight">
@@ -96,7 +114,7 @@ export const FeatureGrid: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {FEATURES.map((feat, idx) => (
             <div
               key={idx}
@@ -121,10 +139,9 @@ export const FeatureGrid: React.FC = () => {
                 </p>
               </div>
 
-              <div className="mt-5 pt-4 border-t border-slate-800/80">
-                <p className="text-[11px] font-mono text-slate-400">
-                  <strong className="text-slate-300">Spec:</strong> {feat.techHighlight}
-                </p>
+              <div className="mt-5 pt-3 border-t border-slate-800/80">
+                <span className="text-[10px] font-mono text-slate-500 block uppercase font-semibold">Engineering Layer</span>
+                <span className="text-xs font-mono text-[#3978F6] font-medium">{feat.techHighlight}</span>
               </div>
             </div>
           ))}

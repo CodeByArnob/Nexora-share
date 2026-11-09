@@ -13,7 +13,7 @@
 
 ```mermaid
 graph TD
-    UI[Flutter UI - Material 3] --> Bridge[packages/rust_bridge]
+    UI[Flutter Android UI - Material 3] --> Bridge[packages/rust_bridge]
     Bridge --> Core[crates/nexora_core]
     
     Core --> Discovery[crates/discovery]
