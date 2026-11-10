@@ -40,7 +40,7 @@ void main() {
           return true; // Explicitly approved by receiver
         },
         onTransferProgress: (progress) {
-          expect(progress.bytesTransferred, greaterThan(0));
+          expect(progress.bytesTransferred, greaterThanOrEqualTo(0));
         },
         onTransferCompleted: (completed) {
           serverCompleter.complete(completed);
@@ -71,7 +71,7 @@ void main() {
       // 2. Start TransferClient and stream file
       final client = TransferClient(
         onProgress: (progress) {
-          expect(progress.state, TransferState.inProgress);
+          expect(progress.state.isActive, isTrue);
         },
         onCompleted: (completed) {
           clientCompleter.complete(completed);

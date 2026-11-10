@@ -45,6 +45,7 @@ class TransferServer {
   final Future<bool> Function(int requiredBytes)? checkStorageSpace;
 
   final Map<String, Socket> _activeSockets = {};
+  final Map<String, NexoraTransfer> _activeTransfers = {};
   final Set<String> _cancelledTransferIds = {};
   final Set<String> _pausedTransferIds = {};
 
@@ -58,9 +59,49 @@ class TransferServer {
   });
 
   /// Cancels an in-flight transfer from the receiver side.
-  void cancel(String transferId) {
+  Future<void> cancel(
+    String transferId, {
+    String reason = 'Cancelled by receiver',
+  }) async {
     _cancelledTransferIds.add(transferId);
     _pausedTransferIds.remove(transferId);
+
+    final existing = _activeTransfers[transferId];
+    final cancelledTransfer = (existing != null)
+        ? existing.copyWith(
+            state: TransferState.cancelled,
+            failureReason: reason,
+            speedBytesPerSec: 0.0,
+            etaSeconds: 0,
+            completedAt: DateTime.now(),
+          )
+        : NexoraTransfer(
+            transferId: transferId,
+            direction: TransferDirection.receive,
+            remoteDeviceId: 'peer',
+            remoteDeviceName: 'Peer',
+            totalFiles: 1,
+            totalBytes: 0,
+            bytesTransferred: 0,
+            speedBytesPerSec: 0.0,
+            etaSeconds: 0,
+            currentFile: 'Cancelled',
+            state: TransferState.cancelled,
+            failureReason: reason,
+            createdAt: DateTime.now(),
+            completedAt: DateTime.now(),
+          );
+
+    try {
+      await DatabaseService.instance.updateTransferProgress(
+        transferId,
+        cancelledTransfer.bytesTransferred,
+        TransferState.cancelled,
+      );
+    } catch (_) {}
+
+    onTransferProgress(cancelledTransfer);
+    _activeTransfers.remove(transferId);
 
     final socket = _activeSockets[transferId];
     if (socket != null) {
@@ -70,14 +111,19 @@ class TransferServer {
             'type': 'TransferCancel',
             'payload': {
               'transfer_id': transferId,
-              'reason': 'Cancelled by receiver',
+              'reason': reason,
             },
           }),
         );
+        await socket.flush().timeout(const Duration(milliseconds: 600));
       } catch (_) {}
+      await Future.delayed(const Duration(milliseconds: 250));
       try {
+        await socket.close();
+      } catch (_) {
         socket.destroy();
-      } catch (_) {}
+      }
+      _activeSockets.remove(transferId);
     }
   }
 
@@ -143,6 +189,7 @@ class TransferServer {
     String? activeFileId;
     String? currentFilePath;
     final List<String> completedFilePaths = [];
+    final Set<String> sessionCreatedPaths = {};
     Directory? activeDownloadDir;
     final Map<String, ManifestItem> manifestFiles = {};
     final Map<String, DigestSink> incomingFileSinks = {};
@@ -153,8 +200,9 @@ class TransferServer {
     DateTime lastProgressUpdate = DateTime.now();
     String remoteDeviceName = 'Remote Peer';
     String remoteDevicePlatform = 'Remote';
+    String remoteDeviceId = 'peer';
 
-    Future<void> safeCloseFile() async {
+    Future<void> safeCloseFile({bool deleteIncomplete = false}) async {
       final f = destinationFile;
       final path = currentFilePath;
       destinationFile = null;
@@ -163,6 +211,27 @@ class TransferServer {
           f.flushSync();
           await f.close();
         } catch (_) {}
+      }
+      if (deleteIncomplete) {
+        currentFilePath = null;
+        final pathsToDelete = {...sessionCreatedPaths};
+        if (path != null) pathsToDelete.add(path);
+
+        for (final p in pathsToDelete) {
+          for (int attempt = 0; attempt < 20; attempt++) {
+            try {
+              final file = File(p);
+              if (await file.exists()) {
+                await file.delete();
+              }
+              break;
+            } catch (_) {
+              await Future.delayed(const Duration(milliseconds: 100));
+            }
+          }
+        }
+        sessionCreatedPaths.clear();
+        return;
       }
       if (path != null && !completedFilePaths.contains(path)) {
         completedFilePaths.add(path);
@@ -238,8 +307,9 @@ class TransferServer {
       final completed = NexoraTransfer(
         transferId: activeTransferId ?? 'incoming',
         direction: TransferDirection.receive,
-        remoteDeviceId: 'peer',
+        remoteDeviceId: remoteDeviceId,
         remoteDeviceName: remoteDeviceName,
+        remotePlatform: remoteDevicePlatform,
         totalFiles: totalFiles,
         totalBytes: totalBytes,
         bytesTransferred: totalBytes,
@@ -255,6 +325,7 @@ class TransferServer {
 
       if (activeTransferId != null) {
         _activeSockets.remove(activeTransferId);
+        _activeTransfers.remove(activeTransferId);
       }
       try {
         await socket.flush();
@@ -264,8 +335,10 @@ class TransferServer {
       }
     }
 
+    final frameController = StreamController<Map<String, dynamic>>();
+
     socket.listen(
-      (data) async {
+      (data) {
         buffer.add(data);
 
         while (true) {
@@ -279,6 +352,7 @@ class TransferServer {
 
             if (expectedLength > maxFrameSize) {
               socket.destroy();
+              if (!frameController.isClosed) frameController.close();
               return;
             }
           }
@@ -301,8 +375,33 @@ class TransferServer {
 
           try {
             final message = decodeFramePayload(payloadBytes);
-            final type = message['type'] as String;
-            final payload = message['payload'] as Map<String, dynamic>;
+            if (!frameController.isClosed) {
+              frameController.add(message);
+            }
+          } catch (e) {
+            if (!frameController.isClosed) {
+              frameController.addError(e);
+            }
+          }
+        }
+      },
+      onError: (e) {
+        if (!frameController.isClosed) {
+          frameController.addError(e);
+        }
+      },
+      onDone: () {
+        if (!frameController.isClosed) {
+          frameController.close();
+        }
+      },
+    );
+
+    unawaited(() async {
+      try {
+        await for (final message in frameController.stream) {
+          final type = message['type'] as String;
+          final payload = message['payload'] as Map<String, dynamic>;
 
             if (type == 'Hello') {
               final device = payload['device'] as Map<String, dynamic>;
@@ -322,26 +421,42 @@ class TransferServer {
               socket.add(reply);
             } else if (type == 'TransferCancel') {
               // Sender cancelled transfer
-              if (activeTransferId != null) {
-                _cancelledTransferIds.add(activeTransferId!);
+              final reason =
+                  (payload['reason'] as String?) ?? 'Cancelled by sender';
+              final cancelTransferId =
+                  payload['transfer_id'] as String? ?? activeTransferId;
+              if (cancelTransferId != null) {
+                _cancelledTransferIds.add(cancelTransferId);
               }
-              await safeCloseFile();
+              isCompleted = true;
+              await safeCloseFile(deleteIncomplete: true);
               await AndroidForegroundService.stopService();
 
-              if (activeTransferId != null) {
+              // Send TransferCancelAck
+              if (cancelTransferId != null) {
+                try {
+                  socket.add(
+                    buildTransferCancelAckFrame(transferId: cancelTransferId),
+                  );
+                  await socket.flush().timeout(
+                    const Duration(milliseconds: 500),
+                  );
+                } catch (_) {}
+
                 try {
                   await DatabaseService.instance.updateTransferProgress(
-                    activeTransferId!,
+                    cancelTransferId,
                     receivedBytes,
                     TransferState.cancelled,
                   );
                 } catch (_) {}
 
                 final cancelledTransfer = NexoraTransfer(
-                  transferId: activeTransferId!,
+                  transferId: cancelTransferId,
                   direction: TransferDirection.receive,
-                  remoteDeviceId: 'peer',
+                  remoteDeviceId: remoteDeviceId,
                   remoteDeviceName: remoteDeviceName,
+                  remotePlatform: remoteDevicePlatform,
                   totalFiles: totalFiles,
                   totalBytes: totalBytes,
                   bytesTransferred: receivedBytes,
@@ -349,11 +464,19 @@ class TransferServer {
                   etaSeconds: 0,
                   currentFile: currentFileName ?? 'Cancelled',
                   state: TransferState.cancelled,
+                  failureReason: reason,
                   createdAt: startTime,
+                  completedAt: DateTime.now(),
                 );
                 onTransferProgress(cancelledTransfer);
+                _activeSockets.remove(cancelTransferId);
+                _activeTransfers.remove(cancelTransferId);
               }
-              socket.destroy();
+              try {
+                await socket.close();
+              } catch (_) {
+                socket.destroy();
+              }
               return;
             } else if (type == 'TransferPause') {
               if (activeTransferId != null) {
@@ -361,8 +484,9 @@ class TransferServer {
                 final pausedTransfer = NexoraTransfer(
                   transferId: activeTransferId!,
                   direction: TransferDirection.receive,
-                  remoteDeviceId: 'peer',
+                  remoteDeviceId: remoteDeviceId,
                   remoteDeviceName: remoteDeviceName,
+                  remotePlatform: remoteDevicePlatform,
                   totalFiles: totalFiles,
                   totalBytes: totalBytes,
                   bytesTransferred: receivedBytes,
@@ -372,13 +496,14 @@ class TransferServer {
                   state: TransferState.paused,
                   createdAt: startTime,
                 );
+                _activeTransfers[activeTransferId!] = pausedTransfer;
                 onTransferProgress(pausedTransfer);
               }
             } else if (type == 'TransferResume') {
               if (activeTransferId != null) {
                 _pausedTransferIds.remove(activeTransferId!);
               }
-            } else if (type == 'TransferOffer') {
+} else if (type == 'TransferOffer') {
               final manifestMap = payload['manifest'] as Map<String, dynamic>;
               final manifest = TransferManifest.fromJson(manifestMap);
 
@@ -407,6 +532,32 @@ class TransferServer {
                         : firstFile.name)
                   : 'received_files';
 
+              final senderMap = payload['sender'] as Map<String, dynamic>?;
+              final senderDeviceId = senderMap?['device_id'] as String? ?? 'peer';
+              remoteDeviceId = senderDeviceId;
+
+              // IMMEDIATELY notify receiver UI so activeTransfersProvider contains incoming transfer!
+              final incomingTransfer = NexoraTransfer(
+                transferId: activeTransferId!,
+                direction: TransferDirection.receive,
+                remoteDeviceId: remoteDeviceId,
+                remoteDeviceName: remoteDeviceName,
+                remotePlatform: remoteDevicePlatform,
+                totalFiles: totalFiles,
+                totalBytes: totalBytes,
+                bytesTransferred: 0,
+                speedBytesPerSec: 0.0,
+                etaSeconds: 0,
+                currentFile: currentFileName!,
+                state: TransferState.awaitingAcceptance,
+                createdAt: startTime,
+              );
+              _activeTransfers[activeTransferId!] = incomingTransfer;
+              onTransferProgress(incomingTransfer);
+              try {
+                await DatabaseService.instance.logTransfer(incomingTransfer);
+              } catch (_) {}
+
               final offer = IncomingTransferOffer(
                 transferId: activeTransferId!,
                 senderName: remoteDeviceName,
@@ -431,13 +582,26 @@ class TransferServer {
                       },
                     }),
                   );
+                  isCompleted = true;
+                  final failedTransfer = incomingTransfer.copyWith(
+                    state: TransferState.failed,
+                    failureReason: 'Insufficient storage space on receiver device',
+                    completedAt: DateTime.now(),
+                  );
+                  onTransferProgress(failedTransfer);
                   _activeSockets.remove(activeTransferId);
+                  _activeTransfers.remove(activeTransferId);
                   socket.destroy();
                   return;
                 }
               }
 
               final approved = await onRequestApproval(offer);
+
+              // Check if cancelled while dialog was displaying
+              if (_cancelledTransferIds.contains(activeTransferId)) {
+                return;
+              }
 
               if (approved) {
                 if (customDestinationDirectory != null) {
@@ -466,22 +630,10 @@ class TransferServer {
                   isSending: false,
                 );
 
-                // Log in SQLite
-                try {
-                  await DatabaseService.instance.logTransfer(
-                    NexoraTransfer(
-                      transferId: activeTransferId!,
-                      direction: TransferDirection.receive,
-                      remoteDeviceId: 'peer',
-                      remoteDeviceName: remoteDeviceName,
-                      totalFiles: totalFiles,
-                      totalBytes: totalBytes,
-                      currentFile: currentFileName!,
-                      state: TransferState.inProgress,
-                      createdAt: startTime,
-                    ),
-                  );
-                } catch (_) {}
+                // Transition state to inProgress
+                final inProgressTransfer = incomingTransfer.copyWith(state: TransferState.inProgress);
+                _activeTransfers[activeTransferId!] = inProgressTransfer;
+                onTransferProgress(inProgressTransfer);
 
                 socket.add(
                   encodeFrame({
@@ -495,6 +647,14 @@ class TransferServer {
                   }),
                 );
               } else {
+                isCompleted = true;
+                final rejectedTransfer = incomingTransfer.copyWith(
+                  state: TransferState.rejected,
+                  failureReason: 'Transfer declined by receiver',
+                  completedAt: DateTime.now(),
+                );
+                onTransferProgress(rejectedTransfer);
+
                 socket.add(
                   encodeFrame({
                     'type': 'TransferReject',
@@ -505,10 +665,15 @@ class TransferServer {
                   }),
                 );
                 _activeSockets.remove(activeTransferId);
-                socket.destroy();
+                _activeTransfers.remove(activeTransferId);
+                try {
+                  await socket.close();
+                } catch (_) {
+                  socket.destroy();
+                }
                 return;
               }
-            } else if (type == 'TransferResume') {
+                        } else if (type == 'TransferResume') {
               final reqFileId = payload['file_id'] as String;
               int verifiedOffset = 0;
               try {
@@ -529,7 +694,7 @@ class TransferServer {
             } else if (type == 'ChunkData') {
               if (activeTransferId != null &&
                   _cancelledTransferIds.contains(activeTransferId!)) {
-                await safeCloseFile();
+                await safeCloseFile(deleteIncomplete: true);
                 socket.destroy();
                 return;
               }
@@ -574,6 +739,7 @@ class TransferServer {
                 );
 
                 currentFilePath = targetFile.path;
+                sessionCreatedPaths.add(targetFile.path);
 
                 if (!await targetFile.parent.exists()) {
                   await targetFile.parent.create(recursive: true);
@@ -666,8 +832,9 @@ class TransferServer {
                 final currentTransfer = NexoraTransfer(
                   transferId: activeTransferId ?? 'incoming',
                   direction: TransferDirection.receive,
-                  remoteDeviceId: 'peer',
+                  remoteDeviceId: remoteDeviceId,
                   remoteDeviceName: remoteDeviceName,
+                  remotePlatform: remoteDevicePlatform,
                   totalFiles: totalFiles,
                   totalBytes: totalBytes,
                   bytesTransferred: receivedBytes,
@@ -679,6 +846,7 @@ class TransferServer {
                   createdAt: startTime,
                 );
 
+                _activeTransfers[activeTransferId ?? 'incoming'] = currentTransfer;
                 onTransferProgress(currentTransfer);
               }
             } else if (type == 'TransferComplete') {
@@ -688,38 +856,82 @@ class TransferServer {
                   {};
               declaredFileHashes = incomingHashes;
               await completeTransferSession();
-            }
-          } catch (_) {
-            if (activeTransferId != null) {
-              _activeSockets.remove(activeTransferId);
-            }
-            socket.destroy();
           }
         }
-      },
-      onDone: () async {
-        if (!isCompleted && receivedBytes >= totalBytes && totalBytes > 0) {
+
+        if (isCompleted) return;
+        if (receivedBytes >= totalBytes &&
+            totalBytes > 0 &&
+            (activeTransferId == null ||
+                !_cancelledTransferIds.contains(activeTransferId))) {
           await completeTransferSession();
         } else {
-          await safeCloseFile();
-          if (activeTransferId != null) {
+          await safeCloseFile(deleteIncomplete: true);
+          if (activeTransferId != null &&
+              !_cancelledTransferIds.contains(activeTransferId)) {
+            final interrupted = NexoraTransfer(
+              transferId: activeTransferId!,
+              direction: TransferDirection.receive,
+              remoteDeviceId: remoteDeviceId,
+              remoteDeviceName: remoteDeviceName,
+              remotePlatform: remoteDevicePlatform,
+              totalFiles: totalFiles,
+              totalBytes: totalBytes,
+              bytesTransferred: receivedBytes,
+              speedBytesPerSec: 0.0,
+              etaSeconds: 0,
+              currentFile: currentFileName ?? 'Interrupted',
+              state: TransferState.interrupted,
+              failureReason: 'Connection closed unexpectedly',
+              createdAt: startTime,
+              completedAt: DateTime.now(),
+            );
+            onTransferProgress(interrupted);
             _activeSockets.remove(activeTransferId);
+            _activeTransfers.remove(activeTransferId);
           }
           await AndroidForegroundService.stopService();
         }
-      },
-      onError: (_) async {
-        if (!isCompleted && receivedBytes >= totalBytes && totalBytes > 0) {
+      } catch (e) {
+        if (isCompleted) return;
+        if (receivedBytes >= totalBytes &&
+            totalBytes > 0 &&
+            (activeTransferId == null ||
+                !_cancelledTransferIds.contains(activeTransferId))) {
           await completeTransferSession();
         } else {
-          await safeCloseFile();
-          if (activeTransferId != null) {
+          await safeCloseFile(deleteIncomplete: true);
+          if (activeTransferId != null &&
+              !_cancelledTransferIds.contains(activeTransferId) &&
+              !isCompleted) {
+            final failed = NexoraTransfer(
+              transferId: activeTransferId!,
+              direction: TransferDirection.receive,
+              remoteDeviceId: remoteDeviceId,
+              remoteDeviceName: remoteDeviceName,
+              remotePlatform: remoteDevicePlatform,
+              totalFiles: totalFiles,
+              totalBytes: totalBytes,
+              bytesTransferred: receivedBytes,
+              speedBytesPerSec: 0.0,
+              etaSeconds: 0,
+              currentFile: currentFileName ?? 'Failed',
+              state: TransferState.failed,
+              failureReason: 'Stream error: $e',
+              createdAt: startTime,
+              completedAt: DateTime.now(),
+            );
+            onTransferProgress(failed);
             _activeSockets.remove(activeTransferId);
+            _activeTransfers.remove(activeTransferId);
           }
           await AndroidForegroundService.stopService();
         }
-      },
-    );
+        try {
+          socket.destroy();
+        } catch (_) {}
+      }
+    }());
   }
 
   void stop() {
@@ -731,5 +943,6 @@ class TransferServer {
       } catch (_) {}
     }
     _activeSockets.clear();
+    _activeTransfers.clear();
   }
 }

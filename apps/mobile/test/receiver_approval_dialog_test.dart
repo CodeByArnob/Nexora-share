@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nexora_app/network/transfer_server.dart';
 import 'package:nexora_app/widgets/receiver_approval_dialog.dart';
@@ -20,19 +21,21 @@ void main() {
       bool? result;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Builder(
-            builder: (context) => Scaffold(
-              body: Center(
-                child: ElevatedButton(
-                  onPressed: () async {
-                    result = await showDialog<bool>(
-                      context: context,
-                      builder: (context) =>
-                          ReceiverApprovalDialog(offer: offer),
-                    );
-                  },
-                  child: const Text('Show Dialog'),
+        ProviderScope(
+          child: MaterialApp(
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: Center(
+                  child: ElevatedButton(
+                    onPressed: () async {
+                      result = await showDialog<bool>(
+                        context: context,
+                        builder: (context) =>
+                            ReceiverApprovalDialog(offer: offer),
+                      );
+                    },
+                    child: const Text('Show Dialog'),
+                  ),
                 ),
               ),
             ),
@@ -76,18 +79,20 @@ void main() {
     bool? result;
 
     await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: Center(
-              child: ElevatedButton(
-                onPressed: () async {
-                  result = await showDialog<bool>(
-                    context: context,
-                    builder: (context) => ReceiverApprovalDialog(offer: offer),
-                  );
-                },
-                child: const Text('Show Dialog'),
+      ProviderScope(
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: Center(
+                child: ElevatedButton(
+                  onPressed: () async {
+                    result = await showDialog<bool>(
+                      context: context,
+                      builder: (context) => ReceiverApprovalDialog(offer: offer),
+                    );
+                  },
+                  child: const Text('Show Dialog'),
+                ),
               ),
             ),
           ),

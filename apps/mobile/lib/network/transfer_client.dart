@@ -27,6 +27,7 @@ class TransferClient {
   final Map<String, Socket> _activeSockets = {};
   final Set<String> _cancelledTransferIds = {};
   final Set<String> _pausedTransferIds = {};
+  final Map<String, Completer<void>> _cancelAckCompleters = {};
 
   TransferClient({
     required this.onProgress,
@@ -36,26 +37,49 @@ class TransferClient {
   });
 
   /// Cancels an in-flight transfer immediately from the sender side.
-  void cancel(String transferId) {
+  Future<void> cancel(
+    String transferId, {
+    String reason = 'Cancelled by user',
+  }) async {
     _cancelledTransferIds.add(transferId);
     _pausedTransferIds.remove(transferId);
 
+    if (_cancelAckCompleters.containsKey(transferId)) {
+      return;
+    }
+
     final socket = _activeSockets[transferId];
     if (socket != null) {
+      final ackCompleter = Completer<void>();
+      _cancelAckCompleters[transferId] = ackCompleter;
       try {
         socket.add(
           encodeFrame({
             'type': 'TransferCancel',
             'payload': {
               'transfer_id': transferId,
-              'reason': 'Cancelled by user',
+              'reason': reason,
             },
           }),
         );
+        await socket.flush().timeout(const Duration(milliseconds: 600));
       } catch (_) {}
+
       try {
+        await ackCompleter.future.timeout(
+          const Duration(seconds: 3),
+          onTimeout: () {},
+        );
+      } catch (_) {} finally {
+        _cancelAckCompleters.remove(transferId);
+      }
+
+      try {
+        await socket.close();
+      } catch (_) {
         socket.destroy();
-      } catch (_) {}
+      }
+      _activeSockets.remove(transferId);
     }
   }
 
@@ -155,6 +179,29 @@ class TransferClient {
     _cancelledTransferIds.remove(transferId);
     _pausedTransferIds.remove(transferId);
 
+    final startTime = DateTime.now();
+    final firstFileName = manifest.files.isNotEmpty
+        ? manifest.files.first.name
+        : 'Files';
+
+    // 0. Register initial state immediately so activeTransfersProvider is non-empty at 0%
+    final initialTransfer = NexoraTransfer(
+      transferId: transferId,
+      direction: TransferDirection.send,
+      remoteDeviceId: peer.deviceId,
+      remoteDeviceName: peer.displayName,
+      remotePlatform: peer.platform,
+      totalFiles: manifest.totalFiles,
+      totalBytes: manifest.totalBytes,
+      bytesTransferred: 0,
+      speedBytesPerSec: 0.0,
+      etaSeconds: 0,
+      currentFile: firstFileName,
+      state: TransferState.connecting,
+      createdAt: startTime,
+    );
+    onProgress(initialTransfer);
+
     final retryPolicy = const RetryPolicy(maxAttempts: 3);
     final Socket socket;
     try {
@@ -167,6 +214,12 @@ class TransferClient {
       });
     } catch (e) {
       await AndroidForegroundService.stopService();
+      final failedTransfer = initialTransfer.copyWith(
+        state: TransferState.failed,
+        failureReason: 'Transfer connection failed: $e',
+        completedAt: DateTime.now(),
+      );
+      onProgress(failedTransfer);
       onError('Transfer connection failed: $e');
       return;
     }
@@ -179,13 +232,9 @@ class TransferClient {
     _activeSockets[transferId] = socket;
 
     RandomAccessFile? activeRaf;
+    int cumulativeBytesSent = 0;
 
     try {
-      final startTime = DateTime.now();
-
-      final firstFileName = manifest.files.isNotEmpty
-          ? manifest.files.first.name
-          : 'Files';
       await AndroidForegroundService.startService(
         fileName: firstFileName,
         isSending: true,
@@ -248,12 +297,55 @@ class TransferClient {
       final peerCancelSub = frameStream.listen((msg) {
         final type = msg['type'] as String?;
         if (type == 'TransferCancel') {
+          final payload = msg['payload'] as Map<String, dynamic>? ?? {};
+          final reason = (payload['reason'] as String?) ?? 'Cancelled by remote peer';
           _cancelledTransferIds.add(transferId);
-          onError('Transfer cancelled by remote peer');
+
+          // Reply with TransferCancelAck
+          try {
+            socket.add(
+              encodeFrame({
+                'type': 'TransferCancelAck',
+                'payload': {
+                  'transfer_id': transferId,
+                  'status': 'acknowledged',
+                },
+              }),
+            );
+          } catch (_) {}
+
+          final cancelledTransfer = initialTransfer.copyWith(
+            state: TransferState.cancelled,
+            failureReason: reason,
+            bytesTransferred: cumulativeBytesSent,
+            speedBytesPerSec: 0.0,
+            etaSeconds: 0,
+            completedAt: DateTime.now(),
+          );
+          onProgress(cancelledTransfer);
+          onError('Transfer cancelled by remote peer: $reason');
+        } else if (type == 'TransferCancelAck') {
+          final payload = msg['payload'] as Map<String, dynamic>? ?? {};
+          final ackTransferId = payload['transfer_id'] as String? ?? transferId;
+          final completer = _cancelAckCompleters[ackTransferId];
+          if (completer != null && !completer.isCompleted) {
+            completer.complete();
+          }
         } else if (type == 'TransferPause') {
           _pausedTransferIds.add(transferId);
+          final pausedTransfer = initialTransfer.copyWith(
+            state: TransferState.paused,
+            bytesTransferred: cumulativeBytesSent,
+            speedBytesPerSec: 0.0,
+          );
+          onProgress(pausedTransfer);
         } else if (type == 'TransferResume') {
           _pausedTransferIds.remove(transferId);
+          final resumedTransfer = initialTransfer.copyWith(
+            state: TransferState.inProgress,
+            bytesTransferred: cumulativeBytesSent,
+          );
+          onProgress(resumedTransfer);
         }
       });
 
@@ -276,24 +368,8 @@ class TransferClient {
       );
       tracker.markCreationEnd();
 
-      // Log in SQLite
-      try {
-        await DatabaseService.instance.logTransfer(
-          NexoraTransfer(
-            transferId: transferId,
-            direction: TransferDirection.send,
-            remoteDeviceId: peer.deviceId,
-            remoteDeviceName: peer.displayName,
-            totalFiles: manifest.totalFiles,
-            totalBytes: manifest.totalBytes,
-            currentFile: manifest.files.isNotEmpty
-                ? manifest.files.first.name
-                : '',
-            state: TransferState.inProgress,
-            createdAt: startTime,
-          ),
-        );
-      } catch (_) {}
+      // Transition state to awaiting acceptance before sending offer
+      onProgress(initialTransfer.copyWith(state: TransferState.awaitingAcceptance));
 
       // 2. Send Lightweight TransferOffer IMMEDIATELY without waiting for whole-file hashing
       tracker.markOfferSent();
@@ -323,17 +399,30 @@ class TransferClient {
       tracker.markAcceptReceived();
       if (responseMsg['type'] == 'TransferReject') {
         final reason =
-            (responseMsg['payload'] as Map<String, dynamic>)['reason']
+            (responseMsg['payload'] as Map<String, dynamic>?)?['reason']
                 as String? ??
-            'Declined';
+            'Declined by peer';
+        final rejectedTransfer = initialTransfer.copyWith(
+          state: TransferState.rejected,
+          failureReason: reason,
+          completedAt: DateTime.now(),
+        );
+        onProgress(rejectedTransfer);
         onError('Transfer declined by ${peer.displayName}: $reason');
         await peerCancelSub.cancel();
         await subscription.cancel();
         _activeSockets.remove(transferId);
-        socket.destroy();
+        try {
+          await socket.close();
+        } catch (_) {
+          socket.destroy();
+        }
         await AndroidForegroundService.stopService();
         return;
       }
+
+      // Acceptance confirmed: transition to active in-progress transfer
+      onProgress(initialTransfer.copyWith(state: TransferState.inProgress));
 
       // If resuming, send TransferResume query and negotiate starting offset
       int currentFileResumeOffset = resumeOffset;
@@ -357,7 +446,7 @@ class TransferClient {
       }
 
       // 3. Stream all manifest files with zero-copy binary chunk framing and sliding window pipelining
-      int cumulativeBytesSent = 0;
+      // cumulativeBytesSent initialized above
       int lastDbCheckpoint = 0;
       DateTime lastUpdate = DateTime.now();
 
@@ -485,7 +574,9 @@ class TransferClient {
           }
 
           final now = DateTime.now();
-          if (now.difference(lastUpdate).inMilliseconds >= 200 ||
+          if (i == startChunk ||
+              i == 0 ||
+              now.difference(lastUpdate).inMilliseconds >= 200 ||
               cumulativeBytesSent >= manifest.totalBytes) {
             lastUpdate = now;
             final elapsedSeconds =
@@ -535,6 +626,10 @@ class TransferClient {
         activeRaf = null;
       }
 
+      if (_cancelledTransferIds.contains(transferId)) {
+        throw TransferCancelledException('Transfer cancelled by user');
+      }
+
       // Drain any remaining unacknowledged chunks in window
       if (pendingAcks.isNotEmpty) {
         await Future.wait(
@@ -542,11 +637,15 @@ class TransferClient {
         ).timeout(const Duration(seconds: 15));
       }
 
+      if (_cancelledTransferIds.contains(transferId)) {
+        throw TransferCancelledException('Transfer cancelled by user');
+      }
+
       await ackSubscription.cancel();
 
       // Setup TransferCompleteAck future before dispatching TransferComplete
       final completeAckFuture = frameStream
-          .firstWhere((m) => m['type'] == 'TransferCompleteAck')
+          .firstWhere((m) => m['type'] == 'TransferCompleteAck', orElse: () => {})
           .timeout(const Duration(seconds: 10), onTimeout: () => {});
 
       // 4. Send TransferComplete with on-the-fly computed full-file SHA-256 hashes
@@ -618,41 +717,43 @@ class TransferClient {
           await activeRaf.close();
         } catch (_) {}
       }
-      _activeSockets.remove(transferId);
       await AndroidForegroundService.stopService();
 
       if (e is TransferCancelledException ||
           _cancelledTransferIds.contains(transferId)) {
-        try {
-          await DatabaseService.instance.updateTransferProgress(
-            transferId,
-            0,
-            TransferState.cancelled,
-          );
-        } catch (_) {}
-        final cancelledTransfer = NexoraTransfer(
-          transferId: transferId,
-          direction: TransferDirection.send,
-          remoteDeviceId: peer.deviceId,
-          remoteDeviceName: peer.displayName,
-          totalFiles: manifest.totalFiles,
-          totalBytes: manifest.totalBytes,
-          bytesTransferred: 0,
+        final cancelledTransfer = initialTransfer.copyWith(
+          state: TransferState.cancelled,
+          failureReason: 'Cancelled by user',
+          bytesTransferred: cumulativeBytesSent,
           speedBytesPerSec: 0.0,
           etaSeconds: 0,
-          currentFile: manifest.files.isNotEmpty
-              ? manifest.files.first.name
-              : '',
-          state: TransferState.cancelled,
-          createdAt: DateTime.now(),
+          completedAt: DateTime.now(),
         );
         onProgress(cancelledTransfer);
       } else {
+        final failedTransfer = initialTransfer.copyWith(
+          state: TransferState.failed,
+          failureReason: e.toString(),
+          bytesTransferred: cumulativeBytesSent,
+          speedBytesPerSec: 0.0,
+          etaSeconds: 0,
+          completedAt: DateTime.now(),
+        );
+        onProgress(failedTransfer);
         onError('Transfer failed: $e');
       }
-      try {
-        socket.destroy();
-      } catch (_) {}
+
+      // Socket Teardown Guard: do not close or destroy socket if cancel()
+      // is currently awaiting TransferCancelAck from receiver
+      if (!_cancelAckCompleters.containsKey(transferId)) {
+        _activeSockets.remove(transferId);
+        try {
+          await socket.flush().timeout(const Duration(milliseconds: 250));
+          await socket.close();
+        } catch (_) {
+          socket.destroy();
+        }
+      }
     }
   }
 }
