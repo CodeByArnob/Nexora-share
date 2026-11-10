@@ -52,11 +52,11 @@
       <img src="https://img.shields.io/badge/🌐%20OFFICIAL%20WEBSITE-39C6B0?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Official Website" height="36" />
     </a>
     &nbsp;
-    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-arm64-v8a.apk">
+    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.2.0-arm64-v8a.apk">
       <img src="https://img.shields.io/badge/📱%20DOWNLOAD%20ARM64%20APK%20(25%20MB)-3978F6?style=for-the-badge&logo=android&logoColor=white" alt="Download ARM64 APK" height="36" />
     </a>
     &nbsp;
-    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-universal.apk">
+    <a href="https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.2.0-universal.apk">
       <img src="https://img.shields.io/badge/📦%20UNIVERSAL%20APK%20(67%20MB)-14243B?style=for-the-badge&logo=android&logoColor=white" alt="Download Universal APK" height="36" />
     </a>
     &nbsp;
@@ -489,11 +489,11 @@ Official release APKs are cryptographically hashed and published under [GitHub R
 
 | Architecture | Recommended Devices | Direct Package Download | File Size |
 | :--- | :--- | :--- | :---: |
-| **`arm64-v8a`** | **Modern Android Phones (Recommended)** | [**Download APK (ARM64)**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-arm64-v8a.apk) | **25.0 MB** |
-| **Universal** | Fat binary (All architectures included) | [Download Universal APK](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-universal.apk) | **67.0 MB** |
-| **`armeabi-v7a`** | Older 32-bit Android phones | [Download APK (ARMv7)](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-armeabi-v7a.apk) | **21.0 MB** |
-| **`x86_64`** | Android emulators & Chromebooks | [Download APK (x86_64)](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-x86_64.apk) | **27.4 MB** |
-| **Google Play** | Android App Bundle | [Download AAB Bundle](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.1.0-release.aab) | **59.4 MB** |
+| **`arm64-v8a`** | **Modern Android Phones (Recommended)** | [**Download APK (ARM64)**](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.2.0-arm64-v8a.apk) | **25.0 MB** |
+| **Universal** | Fat binary (All architectures included) | [Download Universal APK](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.2.0-universal.apk) | **67.0 MB** |
+| **`armeabi-v7a`** | Older 32-bit Android phones | [Download APK (ARMv7)](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.2.0-armeabi-v7a.apk) | **21.0 MB** |
+| **`x86_64`** | Android emulators & Chromebooks | [Download APK (x86_64)](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.2.0-x86_64.apk) | **27.4 MB** |
+| **Google Play** | Android App Bundle | [Download AAB Bundle](https://github.com/CodeByArnob/Nexora-share/releases/latest/download/nexora-v1.2.0-release.aab) | **59.4 MB** |
 
 ---
 
@@ -502,7 +502,7 @@ Official release APKs are cryptographically hashed and published under [GitHub R
 <!-- ============================================================================== -->
 ## 🚀 APK Installation Guide
 
-1. Download **`nexora-v1.1.0-arm64-v8a.apk`** (or the Universal APK) on your Android device.
+1. Download **`nexora-v1.2.0-arm64-v8a.apk`** (or the Universal APK) on your Android device.
 2. Tap the downloaded APK in your browser notification or file manager.
 3. If prompted by Android, toggle **"Allow from this source"** for your browser in device Settings.
 4. Tap **Install** and launch NEXORA.
@@ -755,7 +755,8 @@ Contributions are warmly welcomed! To get started:
 <!-- ============================================================================== -->
 ## 📜 Changelog
 
-- **[v1.1.0] (Current Production Release)**: Exclusive Android focus, optimized split APKs (21–25 MB), sub-second large file initiation latency (< 20 ms), native CameraX QR scanner, streaming SHA-256 integrity.
+- **[v1.2.0] (Current Production Release)**: Next-gen Wi-Fi Direct router-free peer-to-peer transport engine, Wi-Fi Aware (NAN), BLE out-of-band discovery (< 500 ms), real-time `StatFs` storage validation, and dynamic transport badges.
+- **[v1.1.0]**: Exclusive Android focus, optimized split APKs (21–25 MB), sub-second large file initiation latency (< 20 ms), native CameraX QR scanner, streaming SHA-256 integrity.
 - **[v1.0.3]**: Transfer completion two-way handshake, live transfer state demotion, and bounded memory streaming.
 - **[v1.0.1]**: Background execution foreground service and pause/cancel controls.
 - **[v1.0.0]**: Initial production architecture release.
