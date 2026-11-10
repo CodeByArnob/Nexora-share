@@ -149,3 +149,111 @@ Map<String, dynamic> decodeBinaryChunkPayload(Uint8List payloadBytes) {
     },
   };
 }
+
+/// Standardized Protocol Message Types for Bidirectional Transfer Synchronization
+abstract class TransferControlMessage {
+  static const String hello = 'Hello';
+  static const String transferOffer = 'TransferOffer';
+  static const String transferAccept = 'TransferAccept';
+  static const String transferReject = 'TransferReject';
+  static const String transferStarted = 'TransferStarted';
+  static const String transferProgress = 'TransferProgress';
+  static const String transferPause = 'TransferPause';
+  static const String transferResume = 'TransferResume';
+  static const String transferResumeAck = 'TransferResumeAck';
+  static const String transferCancel = 'TransferCancel';
+  static const String transferCancelAck = 'TransferCancelAck';
+  static const String chunkData = 'ChunkData';
+  static const String chunkAck = 'ChunkAck';
+  static const String transferComplete = 'TransferComplete';
+  static const String transferCompleteAck = 'TransferCompleteAck';
+  static const String transferFailed = 'TransferFailed';
+}
+
+/// Helper builders for bidirectional control frames
+Uint8List buildTransferOfferFrame({
+  required String transferId,
+  required Map<String, dynamic> sender,
+  required Map<String, dynamic> manifest,
+}) {
+  return encodeFrame({
+    'type': TransferControlMessage.transferOffer,
+    'payload': {
+      'transfer_id': transferId,
+      'protocol_version': currentProtocolVersion,
+      'sender': sender,
+      'manifest': manifest,
+      'timestamp': DateTime.now().toIso8601String(),
+    },
+  });
+}
+
+Uint8List buildTransferAcceptFrame({
+  required String transferId,
+  required List<String> acceptedFileIds,
+}) {
+  return encodeFrame({
+    'type': TransferControlMessage.transferAccept,
+    'payload': {
+      'transfer_id': transferId,
+      'accepted_file_ids': acceptedFileIds,
+      'timestamp': DateTime.now().toIso8601String(),
+    },
+  });
+}
+
+Uint8List buildTransferRejectFrame({
+  required String transferId,
+  required String reason,
+}) {
+  return encodeFrame({
+    'type': TransferControlMessage.transferReject,
+    'payload': {
+      'transfer_id': transferId,
+      'reason': reason,
+      'timestamp': DateTime.now().toIso8601String(),
+    },
+  });
+}
+
+Uint8List buildTransferCancelFrame({
+  required String transferId,
+  required String reason,
+}) {
+  return encodeFrame({
+    'type': TransferControlMessage.transferCancel,
+    'payload': {
+      'transfer_id': transferId,
+      'reason': reason,
+      'timestamp': DateTime.now().toIso8601String(),
+    },
+  });
+}
+
+Uint8List buildTransferCancelAckFrame({
+  required String transferId,
+  String status = 'acknowledged',
+}) {
+  return encodeFrame({
+    'type': TransferControlMessage.transferCancelAck,
+    'payload': {
+      'transfer_id': transferId,
+      'status': status,
+      'timestamp': DateTime.now().toIso8601String(),
+    },
+  });
+}
+
+Uint8List buildTransferFailedFrame({
+  required String transferId,
+  required String error,
+}) {
+  return encodeFrame({
+    'type': TransferControlMessage.transferFailed,
+    'payload': {
+      'transfer_id': transferId,
+      'error': error,
+      'timestamp': DateTime.now().toIso8601String(),
+    },
+  });
+}

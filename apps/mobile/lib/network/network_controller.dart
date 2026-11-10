@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../database/database_service.dart';
 import '../models/device_model.dart';
 import '../models/transfer_model.dart';
 import '../providers/app_state.dart';
@@ -12,6 +11,7 @@ import '../transport/transport_type.dart';
 import 'discovery_service.dart';
 import 'transfer_client.dart';
 import 'transfer_server.dart';
+import 'transfer_coordinator.dart';
 
 final networkControllerProvider = Provider<NetworkController>((ref) {
   return NetworkController(ref);
@@ -25,6 +25,8 @@ class NetworkController {
   int _tcpPort = 48842;
 
   int get tcpPort => _tcpPort;
+
+  TransferCoordinator get coordinator => _ref.read(transferCoordinatorProvider);
 
   DirectConnectionManager get directManager =>
       _ref.read(directConnectionManagerProvider);
@@ -172,113 +174,46 @@ class NetworkController {
   }
 
   void _updateActiveTransfer(NexoraTransfer transfer) {
-    if (transfer.state == TransferState.cancelled ||
-        transfer.state == TransferState.completed) {
-      _completeTransfer(transfer);
-      return;
-    }
-    final list = List<NexoraTransfer>.from(_ref.read(activeTransfersProvider));
-    final idx = list.indexWhere((t) => t.transferId == transfer.transferId);
-    if (idx >= 0) {
-      list[idx] = transfer;
-    } else {
-      list.insert(0, transfer);
-    }
-    _ref.read(activeTransfersProvider.notifier).state = list;
+    coordinator.updateProgress(transfer);
   }
 
   void _completeTransfer(NexoraTransfer transfer) {
-    // 1. Remove from active
-    final active = List<NexoraTransfer>.from(_ref.read(activeTransfersProvider))
-      ..removeWhere((t) => t.transferId == transfer.transferId);
-    _ref.read(activeTransfersProvider.notifier).state = active;
-
-    // 2. Add to history without duplicates
-    final history = _ref.read(transferHistoryProvider);
-    final alreadyCompleted = history.any(
-      (t) => t.transferId == transfer.transferId && t.state == transfer.state,
+    coordinator.terminateTransfer(
+      transfer.transferId,
+      transfer.state.isTerminal ? transfer.state : TransferState.completed,
+      failureReason: transfer.failureReason,
+      transferredBytes: transfer.bytesTransferred,
+      completedAt: transfer.completedAt,
     );
-    if (!alreadyCompleted) {
-      final finalized = transfer.copyWith(
-        speedBytesPerSec: 0,
-        etaSeconds: 0,
-        completedAt: transfer.completedAt ?? DateTime.now(),
-      );
-      _ref.read(transferHistoryProvider.notifier).state = [
-        finalized,
-        ...history.where((t) => t.transferId != transfer.transferId),
-      ];
-    }
   }
 
   /// Cancels an active in-flight transfer (sending or receiving).
-  Future<void> cancelTransfer(String transferId) async {
-    _client?.cancel(transferId);
-    _server?.cancel(transferId);
-
-    final active = List<NexoraTransfer>.from(
-      _ref.read(activeTransfersProvider),
+  Future<void> cancelTransfer(
+    String transferId, {
+    String reason = 'Cancelled by user',
+  }) async {
+    await _client?.cancel(transferId, reason: reason);
+    await _server?.cancel(transferId, reason: reason);
+    coordinator.terminateTransfer(
+      transferId,
+      TransferState.cancelled,
+      failureReason: reason,
     );
-    final idx = active.indexWhere((t) => t.transferId == transferId);
-    if (idx >= 0) {
-      final cancelled = active[idx].copyWith(
-        state: TransferState.cancelled,
-        speedBytesPerSec: 0,
-        etaSeconds: 0,
-        completedAt: DateTime.now(),
-      );
-      active.removeAt(idx);
-      _ref.read(activeTransfersProvider.notifier).state = active;
-
-      final history = <NexoraTransfer>[
-        cancelled,
-        ..._ref.read(transferHistoryProvider),
-      ];
-      _ref.read(transferHistoryProvider.notifier).state = history;
-
-      try {
-        await DatabaseService.instance.updateTransferProgress(
-          transferId,
-          cancelled.bytesTransferred,
-          TransferState.cancelled,
-        );
-      } catch (_) {}
-    }
   }
 
   /// Pauses an active in-flight transfer.
   void pauseTransfer(String transferId) {
     _client?.pause(transferId);
     _server?.pause(transferId);
-
-    final active = List<NexoraTransfer>.from(
-      _ref.read(activeTransfersProvider),
-    );
-    final idx = active.indexWhere((t) => t.transferId == transferId);
-    if (idx >= 0) {
-      active[idx] = active[idx].copyWith(
-        state: TransferState.paused,
-        speedBytesPerSec: 0,
-      );
-      _ref.read(activeTransfersProvider.notifier).state = active;
-    }
+    coordinator.transitionState(transferId, TransferState.paused);
   }
 
   /// Resumes a paused transfer.
   void resumeTransfer(String transferId) {
     _client?.resume(transferId);
     _server?.resume(transferId);
-
-    final active = List<NexoraTransfer>.from(
-      _ref.read(activeTransfersProvider),
-    );
-    final idx = active.indexWhere((t) => t.transferId == transferId);
-    if (idx >= 0) {
-      active[idx] = active[idx].copyWith(state: TransferState.inProgress);
-      _ref.read(activeTransfersProvider.notifier).state = active;
-    }
+    coordinator.transitionState(transferId, TransferState.inProgress);
   }
-
   /// Resolves the peer connection transport and address, establishing Wi-Fi Direct if needed
   Future<NexoraDevice> _resolvePeerTransport(NexoraDevice peer) async {
     if (peer.address != null &&

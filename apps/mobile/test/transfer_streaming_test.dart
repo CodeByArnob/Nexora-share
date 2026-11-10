@@ -40,7 +40,7 @@ void main() {
           return true; // Explicitly approved by receiver
         },
         onTransferProgress: (progress) {
-          expect(progress.bytesTransferred, greaterThan(0));
+          expect(progress.bytesTransferred, greaterThanOrEqualTo(0));
         },
         onTransferCompleted: (completed) {
           serverCompleter.complete(completed);
@@ -71,7 +71,7 @@ void main() {
       // 2. Start TransferClient and stream file
       final client = TransferClient(
         onProgress: (progress) {
-          expect(progress.state, TransferState.inProgress);
+          expect(progress.state.isActive, isTrue);
         },
         onCompleted: (completed) {
           clientCompleter.complete(completed);
@@ -167,18 +167,17 @@ void main() {
       final manifest = await TransferManifest.fromFiles([sourceFile]);
 
       // Fire in background and cancel
-      unawaited(
-        client.sendManifest(
-          peer: targetPeer,
-          manifest: manifest,
-          localDevice: localSender,
-        ),
+      final sendFuture = client.sendManifest(
+        peer: targetPeer,
+        manifest: manifest,
+        localDevice: localSender,
       );
 
       await cancelCompleter.future.timeout(const Duration(seconds: 10));
 
       expect(client.isCancelled(manifest.transferId), isTrue);
 
+      await sendFuture.catchError((_) {});
       server.stop();
       await tempDir.delete(recursive: true);
     },

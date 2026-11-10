@@ -15,6 +15,8 @@ class LiveTransferScreen extends ConsumerStatefulWidget {
   final int totalFiles;
   final int totalBytes;
   final String primaryFileName;
+  final TransferDirection direction;
+  final String? transferId;
 
   const LiveTransferScreen({
     super.key,
@@ -22,6 +24,8 @@ class LiveTransferScreen extends ConsumerStatefulWidget {
     required this.totalFiles,
     required this.totalBytes,
     required this.primaryFileName,
+    this.direction = TransferDirection.send,
+    this.transferId,
   });
 
   @override
@@ -50,23 +54,50 @@ class _LiveTransferScreenState extends ConsumerState<LiveTransferScreen> {
     final history = ref.read(transferHistoryProvider);
     final active = ref.read(activeTransfersProvider);
 
-    // Look for matching completed transfer in history
-    final completed = history
+    // Look for terminal transfer record in history
+    final terminal = history
         .where(
           (t) =>
-              t.remoteDeviceId == widget.targetPeer.deviceId &&
-              t.state == TransferState.completed,
+              (widget.transferId != null && t.transferId == widget.transferId) ||
+              t.remoteDeviceId == widget.targetPeer.deviceId,
         )
         .firstOrNull;
 
-    if (completed != null && active.isEmpty) {
+    final hasActiveSession = active.any(
+      (t) =>
+          (widget.transferId != null && t.transferId == widget.transferId) ||
+          t.remoteDeviceId == widget.targetPeer.deviceId,
+    );
+
+    if (terminal != null && !hasActiveSession) {
       _watchdogTimer?.cancel();
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => TransferCompletionScreen(transfer: completed),
-          ),
-        );
+        if (terminal.state == TransferState.completed) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => TransferCompletionScreen(transfer: terminal),
+            ),
+          );
+        } else if (terminal.state == TransferState.cancelled ||
+            terminal.state == TransferState.rejected ||
+            terminal.state == TransferState.failed ||
+            terminal.state == TransferState.interrupted) {
+          Navigator.of(context).pop();
+          final message = terminal.failureReason ??
+              (terminal.state == TransferState.cancelled
+                  ? 'Transfer cancelled'
+                  : terminal.state == TransferState.rejected
+                      ? 'Transfer declined by peer'
+                      : 'Transfer interrupted');
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              backgroundColor: terminal.state == TransferState.cancelled
+                  ? NexoraColors.warningAmber
+                  : NexoraColors.errorRed,
+            ),
+          );
+        }
       }
     }
   }
@@ -98,12 +129,16 @@ class _LiveTransferScreenState extends ConsumerState<LiveTransferScreen> {
     // Find active transfer matching this session or use top active
     final transfer =
         activeTransfers
-            .where((t) => t.remoteDeviceId == widget.targetPeer.deviceId)
+            .where((t) =>
+                (widget.transferId != null && t.transferId == widget.transferId) ||
+                t.remoteDeviceId == widget.targetPeer.deviceId)
             .firstOrNull ??
         (activeTransfers.isNotEmpty ? activeTransfers.first : null);
 
-    final progress = transfer?.progressPercentage ?? 0.05;
+    // Strictly 0.0% progress when 0 bytes transferred (NO FAKE 5%!)
+    final progress = transfer?.progressPercentage ?? 0.0;
     final isPaused = transfer?.state == TransferState.paused;
+    final isReceiving = (transfer?.direction ?? widget.direction) == TransferDirection.receive;
     final speed = transfer?.formattedSpeed ?? '0.0 MB/s';
     final bytesTransferred = transfer?.bytesTransferred ?? 0;
     final totalBytes = (transfer != null && transfer.totalBytes > 0)
@@ -111,7 +146,9 @@ class _LiveTransferScreenState extends ConsumerState<LiveTransferScreen> {
         : widget.totalBytes;
     final remainingBytes = (totalBytes - bytesTransferred).clamp(0, totalBytes);
     final eta = _formatEta(transfer?.etaSeconds ?? 0);
-    final currentFileName = transfer?.currentFile ?? widget.primaryFileName;
+    final currentFileName = (transfer?.currentFile.isNotEmpty == true)
+        ? transfer!.currentFile
+        : widget.primaryFileName;
     final totalFiles = transfer?.totalFiles ?? widget.totalFiles;
     final completedFiles = transfer?.completedFiles ?? 0;
 
@@ -139,7 +176,9 @@ class _LiveTransferScreenState extends ConsumerState<LiveTransferScreen> {
               ),
               const SizedBox(width: 8),
               Text(
-                isPaused ? 'Transfer Paused' : 'Live Data Stream',
+                isPaused
+                    ? 'Transfer Paused'
+                    : (isReceiving ? 'Receiving Files' : 'Sending Files'),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
@@ -188,7 +227,9 @@ class _LiveTransferScreenState extends ConsumerState<LiveTransferScreen> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: Text(
-                            'Sending to ${widget.targetPeer.displayName} (${widget.targetPeer.address ?? 'Direct P2P'})',
+                            isReceiving
+                                ? 'Receiving from ${widget.targetPeer.displayName}'
+                                : 'Sending to ${widget.targetPeer.displayName} (${widget.targetPeer.address ?? 'Direct P2P'})',
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
@@ -211,14 +252,14 @@ class _LiveTransferScreenState extends ConsumerState<LiveTransferScreen> {
                               color: NexoraColors.electricBlue.withValues(alpha: 0.4),
                             ),
                           ),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.bolt, size: 12, color: NexoraColors.electricBlue),
-                              SizedBox(width: 4),
+                              const Icon(Icons.bolt, size: 12, color: NexoraColors.electricBlue),
+                              const SizedBox(width: 4),
                               Text(
-                                'Wi-Fi Direct High-Speed P2P',
-                                style: TextStyle(
+                                isReceiving ? 'Direct High-Speed Receiver' : 'Wi-Fi Direct High-Speed P2P',
+                                style: const TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
                                   color: NexoraColors.electricBlue,

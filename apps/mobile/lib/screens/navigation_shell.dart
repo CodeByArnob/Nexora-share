@@ -5,7 +5,10 @@ import '../network/network_controller.dart';
 import '../providers/app_state.dart';
 import '../services/device_identity_service.dart';
 import '../theme/nexora_theme.dart';
+import '../models/device_model.dart';
+import '../models/transfer_model.dart';
 import '../widgets/receiver_approval_dialog.dart';
+import 'live_transfer_screen.dart';
 import 'devices_screen.dart';
 import 'history_screen.dart';
 import 'home_screen.dart';
@@ -62,6 +65,28 @@ class _NavigationShellState extends ConsumerState<NavigationShell> {
       approvalCallback: (offer) async {
         if (!mounted) return false;
 
+        void openLiveTransfer() {
+          if (!mounted) return;
+          final senderPeer = NexoraDevice(
+            deviceId: offer.transferId,
+            displayName: offer.senderName,
+            platform: offer.senderPlatform.isNotEmpty ? offer.senderPlatform : 'Android',
+            lastSeen: DateTime.now(),
+          );
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => LiveTransferScreen(
+                targetPeer: senderPeer,
+                totalFiles: offer.totalFiles > 0 ? offer.totalFiles : 1,
+                totalBytes: offer.totalBytes,
+                primaryFileName: offer.fileName,
+                direction: TransferDirection.receive,
+                transferId: offer.transferId,
+              ),
+            ),
+          );
+        }
+
         // Auto-approve if trusted
         final trusted = ref.read(trustedDevicesProvider);
         final isTrusted = trusted.any((d) => d.displayName == offer.senderName);
@@ -69,6 +94,7 @@ class _NavigationShellState extends ConsumerState<NavigationShell> {
           'auto_accept_trusted',
         );
         if (isTrusted && autoAccept != 'false') {
+          openLiveTransfer();
           return true;
         }
 
@@ -78,7 +104,11 @@ class _NavigationShellState extends ConsumerState<NavigationShell> {
           barrierDismissible: false,
           builder: (context) => ReceiverApprovalDialog(offer: offer),
         );
-        return result ?? false;
+        if (result == true) {
+          openLiveTransfer();
+          return true;
+        }
+        return false;
       },
     );
   }

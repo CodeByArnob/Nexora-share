@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../models/transfer_model.dart';
 import '../network/transfer_server.dart';
+import '../providers/app_state.dart';
 import '../services/pairing_security_service.dart';
 import '../theme/nexora_theme.dart';
 
-class ReceiverApprovalDialog extends StatefulWidget {
+class ReceiverApprovalDialog extends ConsumerStatefulWidget {
   final IncomingTransferOffer offer;
 
   const ReceiverApprovalDialog({super.key, required this.offer});
 
   @override
-  State<ReceiverApprovalDialog> createState() => _ReceiverApprovalDialogState();
+  ConsumerState<ReceiverApprovalDialog> createState() =>
+      _ReceiverApprovalDialogState();
 }
 
-class _ReceiverApprovalDialogState extends State<ReceiverApprovalDialog> {
+class _ReceiverApprovalDialogState
+    extends ConsumerState<ReceiverApprovalDialog> {
   bool _alwaysTrust = false;
 
   String _formatBytes(int bytes) {
@@ -39,6 +44,41 @@ class _ReceiverApprovalDialogState extends State<ReceiverApprovalDialog> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Listen to transfer state: if cancelled by sender, automatically close modal!
+    ref.listen<List<NexoraTransfer>>(activeTransfersProvider, (prev, next) {
+      final current = next
+          .where((t) => t.transferId == widget.offer.transferId)
+          .firstOrNull;
+      if (current != null && current.state == TransferState.cancelled) {
+        if (mounted) {
+          Navigator.of(context).pop(false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Transfer was cancelled by ${widget.offer.senderName}'),
+              backgroundColor: NexoraColors.errorRed,
+            ),
+          );
+        }
+      }
+    });
+
+    ref.listen<List<NexoraTransfer>>(transferHistoryProvider, (prev, next) {
+      final current = next
+          .where((t) => t.transferId == widget.offer.transferId)
+          .firstOrNull;
+      if (current != null && current.state == TransferState.cancelled) {
+        if (mounted) {
+          Navigator.of(context).pop(false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Transfer was cancelled by ${widget.offer.senderName}'),
+              backgroundColor: NexoraColors.errorRed,
+            ),
+          );
+        }
+      }
+    });
     final offer = widget.offer;
     final formattedFingerprint = offer.declaredSha256 != null
         ? PairingSecurityService.formatFingerprint(offer.declaredSha256!)

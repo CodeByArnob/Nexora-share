@@ -1,6 +1,70 @@
 enum TransferDirection { send, receive }
 
-enum TransferState { pending, inProgress, paused, completed, failed, cancelled }
+enum TransferState {
+  pending,
+  connecting,
+  offered,
+  awaitingAcceptance,
+  accepted,
+  inProgress,
+  verifying,
+  paused,
+  resuming,
+  completed,
+  cancelled,
+  cancelRequested,
+  rejected,
+  interrupted,
+  failed;
+
+  bool get isActive =>
+      this == TransferState.pending ||
+      this == TransferState.connecting ||
+      this == TransferState.offered ||
+      this == TransferState.awaitingAcceptance ||
+      this == TransferState.accepted ||
+      this == TransferState.inProgress ||
+      this == TransferState.verifying ||
+      this == TransferState.paused ||
+      this == TransferState.resuming ||
+      this == TransferState.cancelRequested;
+
+  bool get isTerminal => !isActive;
+
+  String get displayName {
+    switch (this) {
+      case TransferState.pending:
+        return 'Pending';
+      case TransferState.connecting:
+        return 'Connecting';
+      case TransferState.offered:
+      case TransferState.awaitingAcceptance:
+        return 'Awaiting Acceptance';
+      case TransferState.accepted:
+        return 'Accepted';
+      case TransferState.inProgress:
+        return 'Transferring';
+      case TransferState.verifying:
+        return 'Verifying';
+      case TransferState.paused:
+        return 'Paused';
+      case TransferState.resuming:
+        return 'Resuming';
+      case TransferState.completed:
+        return 'Completed';
+      case TransferState.cancelled:
+        return 'Cancelled';
+      case TransferState.cancelRequested:
+        return 'Cancelling';
+      case TransferState.rejected:
+        return 'Rejected';
+      case TransferState.interrupted:
+        return 'Interrupted';
+      case TransferState.failed:
+        return 'Failed';
+    }
+  }
+}
 
 class NexoraTransfer {
   final String transferId;
@@ -16,6 +80,7 @@ class NexoraTransfer {
   final int etaSeconds;
   final String currentFile;
   final TransferState state;
+  final String? failureReason;
   final DateTime createdAt;
   final DateTime? completedAt;
 
@@ -33,14 +98,24 @@ class NexoraTransfer {
     this.etaSeconds = 0,
     this.currentFile = '',
     this.state = TransferState.pending,
+    this.failureReason,
     required this.createdAt,
     this.completedAt,
   });
 
+  /// Real mathematical progress calculation: 0 B transferred returns strictly 0.0
   double get progressPercentage {
-    if (totalBytes <= 0) return 1.0;
+    if (totalBytes <= 0 || bytesTransferred <= 0) return 0.0;
     return (bytesTransferred / totalBytes).clamp(0.0, 1.0);
   }
+
+  bool get isCompleted => state == TransferState.completed;
+  bool get isCancelled => state == TransferState.cancelled;
+  bool get isFailed =>
+      state == TransferState.failed ||
+      state == TransferState.interrupted ||
+      state == TransferState.rejected;
+  bool get isActive => state.isActive;
 
   String get formattedSpeed {
     if (speedBytesPerSec >= 1024 * 1024) {
@@ -65,6 +140,7 @@ class NexoraTransfer {
     int? etaSeconds,
     String? currentFile,
     TransferState? state,
+    String? failureReason,
     DateTime? createdAt,
     DateTime? completedAt,
   }) {
@@ -82,6 +158,7 @@ class NexoraTransfer {
       etaSeconds: etaSeconds ?? this.etaSeconds,
       currentFile: currentFile ?? this.currentFile,
       state: state ?? this.state,
+      failureReason: failureReason ?? this.failureReason,
       createdAt: createdAt ?? this.createdAt,
       completedAt: completedAt ?? this.completedAt,
     );
