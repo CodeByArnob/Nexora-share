@@ -176,24 +176,58 @@ class _LiveTransferScreenState extends ConsumerState<LiveTransferScreen> {
                         : NexoraColors.lightBorder,
                   ),
                 ),
-                child: Row(
+                child: Column(
                   children: [
-                    const Icon(
-                      Icons.swap_vert_circle,
-                      color: NexoraColors.electricBlue,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Sending to ${widget.targetPeer.displayName} (${widget.targetPeer.address ?? 'LAN'})',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.swap_vert_circle,
+                          color: NexoraColors.electricBlue,
+                          size: 20,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            'Sending to ${widget.targetPeer.displayName} (${widget.targetPeer.address ?? 'Direct P2P'})',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: NexoraColors.electricBlue.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: NexoraColors.electricBlue.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.bolt, size: 12, color: NexoraColors.electricBlue),
+                              SizedBox(width: 4),
+                              Text(
+                                'Wi-Fi Direct High-Speed P2P',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: NexoraColors.electricBlue,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

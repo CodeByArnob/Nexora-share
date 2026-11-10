@@ -278,4 +278,69 @@ void main() {
       await tempDir.delete(recursive: true);
     },
   );
+
+  test(
+    'TransferServer rejects incoming offer when receiver storage space is insufficient',
+    () async {
+      final tempDir = await Directory.systemTemp.createTemp(
+        'nexora_storage_test_',
+      );
+
+      final sourceFile = File('${tempDir.path}/large_asset.bin');
+      await sourceFile.writeAsBytes(Uint8List(128 * 1024));
+
+      final clientErrorCompleter = Completer<String>();
+
+      final server = TransferServer(
+        customDestinationDirectory: tempDir,
+        onRequestApproval: (offer) async => true,
+        onTransferProgress: (_) {},
+        onTransferCompleted: (_) {},
+        checkStorageSpace: (requiredBytes) async => false, // Simulates 0 free disk space
+      );
+
+      final port = await server.start();
+
+      final targetPeer = NexoraDevice(
+        deviceId: 'server-device-full',
+        displayName: 'Full Storage Receiver',
+        platform: 'Android',
+        address: '127.0.0.1',
+        port: port,
+        lastSeen: DateTime.now(),
+      );
+
+      final localSender = NexoraDevice(
+        deviceId: 'sender-device',
+        displayName: 'Sender Device',
+        platform: 'Android',
+        lastSeen: DateTime.now(),
+      );
+
+      final client = TransferClient(
+        onProgress: (_) {},
+        onCompleted: (_) {},
+        onError: (err) {
+          if (!clientErrorCompleter.isCompleted) {
+            clientErrorCompleter.complete(err);
+          }
+        },
+      );
+
+      await client.sendFile(
+        peer: targetPeer,
+        file: sourceFile,
+        localDevice: localSender,
+      );
+
+      final clientErr = await clientErrorCompleter.future.timeout(
+        const Duration(seconds: 5),
+      );
+
+      expect(clientErr, contains('Insufficient storage space'));
+
+      server.stop();
+      await tempDir.delete(recursive: true);
+    },
+  );
 }

@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import '../models/device_model.dart';
 import '../theme/nexora_theme.dart';
+import '../transport/direct_connection_manager.dart';
+import '../transport/transport_type.dart';
 
 class PairingDialog extends StatelessWidget {
   final NexoraDevice localDevice;
   final String sasCode;
   final String qrData;
   final VoidCallback? onManualConnect;
+  final ReceiveDirectSession? directSession;
 
   const PairingDialog({
     super.key,
@@ -15,6 +18,7 @@ class PairingDialog extends StatelessWidget {
     required this.sasCode,
     required this.qrData,
     this.onManualConnect,
+    this.directSession,
   });
 
   @override
@@ -74,8 +78,52 @@ class PairingDialog extends StatelessWidget {
               ),
               const SizedBox(height: 14),
 
+              // Direct Transport Badge
+              if (directSession != null) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: directSession!.transport.color.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: directSession!.transport.color.withValues(alpha: 0.4),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        directSession!.transport.icon,
+                        size: 14,
+                        color: directSession!.transport.color,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        directSession!.transport.label,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: directSession!.transport.color,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (directSession!.ssid != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'P2P Group: ${directSession!.ssid}',
+                    style: const TextStyle(fontSize: 11, color: Colors.grey),
+                  ),
+                ],
+                const SizedBox(height: 10),
+              ],
+
               // Device IP pill
-              if (localDevice.address != null) ...[
+              if (localDevice.address != null || directSession != null) ...[
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -98,7 +146,7 @@ class PairingDialog extends StatelessWidget {
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        'Device IP: ${localDevice.address}',
+                        'Device IP: ${directSession?.ipAddress ?? localDevice.address}',
                         style: const TextStyle(
                           fontFamily: 'monospace',
                           fontSize: 12,

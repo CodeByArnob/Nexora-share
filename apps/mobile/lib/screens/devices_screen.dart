@@ -168,6 +168,7 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen>
             _discoveryStatus = DiscoveryStatus.idle;
           });
           _radarController.stop();
+          ref.read(networkControllerProvider).directManager.stopUnifiedDiscovery();
         }
       });
     } catch (e) {
@@ -177,12 +178,14 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen>
           _errorMessage = 'Failed to initiate network scan: $e';
         });
         _radarController.stop();
+        ref.read(networkControllerProvider).directManager.stopUnifiedDiscovery();
       }
     }
   }
 
   void _cancelScan() {
     _scanTimeoutTimer?.cancel();
+    ref.read(networkControllerProvider).directManager.stopUnifiedDiscovery();
     if (mounted) {
       setState(() {
         _discoveryStatus = DiscoveryStatus.idle;
@@ -816,13 +819,59 @@ class _DevicesScreenState extends ConsumerState<DevicesScreen>
                                 const Text(' • ', style: TextStyle(color: Colors.grey, fontSize: 11)),
                                 Expanded(
                                   child: Text(
-                                    peer.address ?? 'LAN Direct',
+                                    peer.address ?? (peer.deviceId.startsWith('p2p-') ? 'Direct P2P Link' : 'Nearby Peer'),
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                                     ),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 3),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: (peer.deviceId.startsWith('p2p-') || peer.transportHint == 'WIFI-DIRECT')
+                                        ? NexoraColors.electricBlue.withValues(alpha: 0.15)
+                                        : const Color(0xFF3DDC84).withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: (peer.deviceId.startsWith('p2p-') || peer.transportHint == 'WIFI-DIRECT')
+                                          ? NexoraColors.electricBlue.withValues(alpha: 0.4)
+                                          : const Color(0xFF3DDC84).withValues(alpha: 0.4),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        (peer.deviceId.startsWith('p2p-') || peer.transportHint == 'WIFI-DIRECT')
+                                            ? Icons.bolt
+                                            : Icons.wifi,
+                                        size: 10,
+                                        color: (peer.deviceId.startsWith('p2p-') || peer.transportHint == 'WIFI-DIRECT')
+                                            ? NexoraColors.electricBlue
+                                            : const Color(0xFF3DDC84),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        (peer.deviceId.startsWith('p2p-') || peer.transportHint == 'WIFI-DIRECT')
+                                            ? 'Wi-Fi Direct (No Router)'
+                                            : 'Local Wi-Fi',
+                                        style: TextStyle(
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                          color: (peer.deviceId.startsWith('p2p-') || peer.transportHint == 'WIFI-DIRECT')
+                                              ? NexoraColors.electricBlue
+                                              : const Color(0xFF3DDC84),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],

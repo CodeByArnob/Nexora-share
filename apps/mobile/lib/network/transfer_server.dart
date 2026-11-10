@@ -42,6 +42,7 @@ class TransferServer {
   final void Function(NexoraTransfer transfer) onTransferProgress;
   final void Function(NexoraTransfer completedTransfer) onTransferCompleted;
   final void Function(String error)? onError;
+  final Future<bool> Function(int requiredBytes)? checkStorageSpace;
 
   final Map<String, Socket> _activeSockets = {};
   final Set<String> _cancelledTransferIds = {};
@@ -53,6 +54,7 @@ class TransferServer {
     required this.onTransferProgress,
     required this.onTransferCompleted,
     this.onError,
+    this.checkStorageSpace,
   });
 
   /// Cancels an in-flight transfer from the receiver side.
@@ -415,6 +417,25 @@ class TransferServer {
                 declaredSha256: firstFile?.sha256Hash,
                 files: manifest.files,
               );
+
+              // Verify target storage has sufficient free capacity
+              if (checkStorageSpace != null) {
+                final hasSpace = await checkStorageSpace!(totalBytes);
+                if (!hasSpace) {
+                  socket.add(
+                    encodeFrame({
+                      'type': 'TransferReject',
+                      'payload': {
+                        'transfer_id': activeTransferId,
+                        'reason': 'Insufficient storage space on receiver device',
+                      },
+                    }),
+                  );
+                  _activeSockets.remove(activeTransferId);
+                  socket.destroy();
+                  return;
+                }
+              }
 
               final approved = await onRequestApproval(offer);
 

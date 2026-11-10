@@ -86,24 +86,32 @@ class HomeScreen extends ConsumerWidget {
     );
   }
 
-  void _showReceiveDialog(
+  Future<void> _showReceiveDialog(
     BuildContext context,
     NexoraDevice localDevice,
     int tcpPort,
     NetworkController controller,
-  ) {
+  ) async {
+    final directSession = await controller.prepareReceiveMode();
+    final effectiveDevice = localDevice.copyWith(
+      address: directSession.ipAddress,
+      port: directSession.port,
+    );
     final payload = PairingSecurityService.createPayload(
-      localDevice: localDevice,
-      port: tcpPort,
+      localDevice: effectiveDevice,
+      port: directSession.port,
     );
     final qrString = jsonEncode(payload.toJson());
+
+    if (!context.mounted) return;
 
     showDialog(
       context: context,
       builder: (context) => PairingDialog(
-        localDevice: localDevice,
+        localDevice: effectiveDevice,
         sasCode: payload.sasCode,
         qrData: qrString,
+        directSession: directSession,
         onManualConnect: () {
           Navigator.of(context).pop();
           _showManualConnectDialog(context, controller);
