@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,8 @@ import '../database/database_service.dart';
 import '../models/device_model.dart';
 import '../models/transfer_model.dart';
 import '../providers/app_state.dart';
+import '../transport/direct_connection_manager.dart';
+import '../transport/transport_type.dart';
 import 'discovery_service.dart';
 import 'transfer_client.dart';
 import 'transfer_server.dart';
@@ -23,12 +26,21 @@ class NetworkController {
 
   int get tcpPort => _tcpPort;
 
+  DirectConnectionManager get directManager =>
+      _ref.read(directConnectionManagerProvider);
+
   // Active receiver approval prompt hook
   Future<bool> Function(IncomingTransferOffer offer)? onApprovalRequested;
 
+  final Map<String, NexoraDevice> _lanPeers = {};
+  final Map<String, NexoraDevice> _directPeers = {};
+
+  StreamSubscription? _directPeersSub;
+  StreamSubscription? _phaseSub;
+
   NetworkController(this._ref);
 
-  /// Initializes local network services, TCP server, and discovery broadcaster.
+  /// Initializes local network services, TCP server, Wi-Fi Direct, and discovery broadcasters.
   Future<void> initialize({
     required Future<bool> Function(IncomingTransferOffer offer)
     approvalCallback,
@@ -36,7 +48,26 @@ class NetworkController {
     onApprovalRequested = approvalCallback;
     final localDevice = _ref.read(localDeviceProvider);
 
-    // Initialize TCP Server
+    // Initialize Direct Connection Manager (Wi-Fi Direct, Wi-Fi Aware, BLE)
+    await directManager.initialize();
+
+    // Wire up Direct connection phase
+    _phaseSub?.cancel();
+    _phaseSub = directManager.onPhaseChanged.listen((phase) {
+      _ref.read(connectionPhaseProvider.notifier).state = phase;
+    });
+
+    // Wire up Direct peers stream
+    _directPeersSub?.cancel();
+    _directPeersSub = directManager.onPeersUpdated.listen((directList) {
+      _directPeers.clear();
+      for (final p in directList) {
+        _directPeers[p.deviceId] = p;
+      }
+      _publishUnifiedPeers();
+    });
+
+    // Initialize TCP Server with native StatFs storage verification
     _server = TransferServer(
       onRequestApproval: (offer) async {
         if (onApprovalRequested != null) {
@@ -50,14 +81,29 @@ class NetworkController {
       onTransferCompleted: (transfer) {
         _completeTransfer(transfer);
       },
+      checkStorageSpace: (requiredBytes) async {
+        try {
+          final free = await directManager.checkFreeStorageSpace();
+          // Require at least file size + 50 MB safety margin
+          return free >= (requiredBytes + 50 * 1024 * 1024);
+        } catch (_) {
+          return true; // Fallback to allowing if check fails
+        }
+      },
     );
 
     _tcpPort = await _server!.start();
 
-    // Initialize Discovery Service
+    // Initialize Local Network UDP Multicast/Broadcast Discovery Service
     _discovery = DiscoveryService(
       onPeersUpdated: (peers) {
-        _ref.read(discoveredPeersProvider.notifier).state = peers;
+        _lanPeers.clear();
+        for (final p in peers) {
+          _lanPeers[p.deviceId] = p.copyWith(
+            transportHint: TransportType.localNetwork.shortTag,
+          );
+        }
+        _publishUnifiedPeers();
       },
     );
 
@@ -77,14 +123,46 @@ class NetworkController {
     );
   }
 
+  void _publishUnifiedPeers() {
+    final combined = <String, NexoraDevice>{};
+
+    // Add Direct P2P peers (Priority 1)
+    for (final entry in _directPeers.entries) {
+      combined[entry.key] = entry.value;
+    }
+
+    // Add LAN peers
+    for (final entry in _lanPeers.entries) {
+      if (!combined.containsKey(entry.key)) {
+        combined[entry.key] = entry.value;
+      }
+    }
+
+    _ref.read(discoveredPeersProvider.notifier).state =
+        combined.values.toList();
+  }
+
   /// Updates the local device announcement broadcast
   void updateLocalDevice(NexoraDevice updatedDevice) {
     _discovery?.updateLocalDevice(updatedDevice);
   }
 
-  /// Manually triggers a network discovery rescan beacon
+  /// Manually triggers a network discovery rescan beacon across all transports
   Future<void> rescan() async {
+    final localDevice = _ref.read(localDeviceProvider);
     await _discovery?.rescan();
+    await directManager.startUnifiedDiscovery(localDevice: localDevice);
+  }
+
+  /// Prepares device for router-free direct file reception via autonomous Wi-Fi Direct
+  Future<ReceiveDirectSession> prepareReceiveMode() async {
+    final localDevice = _ref.read(localDeviceProvider);
+    final session = await directManager.prepareReceiveMode(
+      localDevice: localDevice,
+      tcpPort: _tcpPort,
+    );
+    _ref.read(activeTransportProvider.notifier).state = session.transport;
+    return session;
   }
 
   /// Manually pings and discovers a peer by IP address
@@ -201,14 +279,27 @@ class NetworkController {
     }
   }
 
+  /// Resolves the peer connection transport and address, establishing Wi-Fi Direct if needed
+  Future<NexoraDevice> _resolvePeerTransport(NexoraDevice peer) async {
+    if (peer.address != null &&
+        peer.address!.isNotEmpty &&
+        peer.address != '127.0.0.1') {
+      return peer;
+    }
+
+    final targetIp = await directManager.connectDirect(targetPeer: peer);
+    return peer.copyWith(address: targetIp, port: _tcpPort);
+  }
+
   /// Sends a specific file to a peer (e.g. from file picker, Share Intent, or tests).
   Future<void> sendFile({
     required NexoraDevice peer,
     required File file,
   }) async {
     if (_client == null) return;
+    final resolved = await _resolvePeerTransport(peer);
     final localDevice = _ref.read(localDeviceProvider);
-    await _client!.sendFile(peer: peer, file: file, localDevice: localDevice);
+    await _client!.sendFile(peer: resolved, file: file, localDevice: localDevice);
   }
 
   /// Sends multiple files in a batch to a peer.
@@ -217,9 +308,10 @@ class NetworkController {
     required List<File> files,
   }) async {
     if (_client == null) return;
+    final resolved = await _resolvePeerTransport(peer);
     final localDevice = _ref.read(localDeviceProvider);
     await _client!.sendFiles(
-      peer: peer,
+      peer: resolved,
       files: files,
       localDevice: localDevice,
     );
@@ -231,9 +323,10 @@ class NetworkController {
     required Directory directory,
   }) async {
     if (_client == null) return;
+    final resolved = await _resolvePeerTransport(peer);
     final localDevice = _ref.read(localDeviceProvider);
     await _client!.sendDirectory(
-      peer: peer,
+      peer: resolved,
       directory: directory,
       localDevice: localDevice,
     );
@@ -254,7 +347,10 @@ class NetworkController {
   }
 
   void dispose() {
+    _phaseSub?.cancel();
+    _directPeersSub?.cancel();
     _discovery?.stop();
     _server?.stop();
+    directManager.teardownSession();
   }
 }

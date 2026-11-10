@@ -10,6 +10,7 @@ import android.os.Environment
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import io.github.codebyarnob.nexora_app.direct.DirectTransportPlugin
 import java.io.File
 
 class MainActivity : FlutterActivity() {
@@ -22,6 +23,7 @@ class MainActivity : FlutterActivity() {
     private var shareMethodChannel: MethodChannel? = null
     private var multicastLock: WifiManager.MulticastLock? = null
     private var wifiLock: WifiManager.WifiLock? = null
+    private var directTransportPlugin: DirectTransportPlugin? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,6 +51,9 @@ class MainActivity : FlutterActivity() {
     }
 
     override fun onDestroy() {
+        directTransportPlugin?.destroy()
+        directTransportPlugin = null
+
         try {
             multicastLock?.let {
                 if (it.isHeld) {
@@ -92,6 +97,9 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        // Native Direct Transport Engine (Wi-Fi Direct, Wi-Fi Aware, BLE, StatFs)
+        directTransportPlugin = DirectTransportPlugin(applicationContext, flutterEngine.dartExecutor.binaryMessenger)
 
         // Native Foreground Service Channel
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, SERVICE_CHANNEL).setMethodCallHandler { call, result ->

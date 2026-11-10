@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/device_model.dart';
 import '../models/transfer_model.dart';
+import '../transport/direct_connection_manager.dart';
+import '../transport/transport_type.dart';
 
 /// Provider for local device identity
 final localDeviceProvider = StateProvider<NexoraDevice>((ref) {
@@ -38,4 +41,21 @@ final trustedDevicesProvider = StateProvider<List<NexoraDevice>>((ref) {
 /// Provider for app theme mode
 final themeModeProvider = StateProvider<ThemeMode>((ref) {
   return ThemeMode.system;
+});
+
+/// Provider for DirectConnectionManager singleton
+final directConnectionManagerProvider = Provider<DirectConnectionManager>((ref) {
+  final manager = DirectConnectionManager();
+  ref.onDispose(() => manager.dispose());
+  return manager;
+});
+
+/// Provider for current direct transport type (Wi-Fi Direct, Wi-Fi Aware, Local LAN, Direct IP)
+final activeTransportProvider = StateProvider<TransportType>((ref) {
+  return TransportType.wifiDirect;
+});
+
+/// Provider for current connection phase
+final connectionPhaseProvider = StateProvider<ConnectionPhase>((ref) {
+  return ConnectionPhase.idle;
 });
