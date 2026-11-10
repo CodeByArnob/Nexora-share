@@ -167,18 +167,17 @@ void main() {
       final manifest = await TransferManifest.fromFiles([sourceFile]);
 
       // Fire in background and cancel
-      unawaited(
-        client.sendManifest(
-          peer: targetPeer,
-          manifest: manifest,
-          localDevice: localSender,
-        ),
+      final sendFuture = client.sendManifest(
+        peer: targetPeer,
+        manifest: manifest,
+        localDevice: localSender,
       );
 
       await cancelCompleter.future.timeout(const Duration(seconds: 10));
 
       expect(client.isCancelled(manifest.transferId), isTrue);
 
+      await sendFuture.catchError((_) {});
       server.stop();
       await tempDir.delete(recursive: true);
     },

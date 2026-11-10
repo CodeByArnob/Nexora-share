@@ -287,7 +287,11 @@ class TransferClient {
             } catch (_) {}
           }
         },
-        onError: (e) => frameController.addError(e),
+        onError: (e) {
+          if (!frameController.isClosed) {
+            frameController.close();
+          }
+        },
         onDone: () => frameController.close(),
       );
 
