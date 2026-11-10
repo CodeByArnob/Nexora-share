@@ -506,7 +506,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: Column(
               children: [
                 Text(
-                  'NEXORA v1.1.0 (Production Release)',
+                  'NEXORA v1.2.0 (Production Release)',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,

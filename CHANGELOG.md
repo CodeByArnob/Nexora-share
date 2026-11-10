@@ -4,6 +4,30 @@ All notable changes to NEXORA will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-11-10
+
+### Major Production Upgrade — Next-Gen Android Wi-Fi Direct, Wi-Fi Aware & BLE P2P Engine
+
+#### ⚡ Router-Free & Mobile Hotspot-Free Direct Sharing
+- **Wi-Fi Direct (`WifiP2pManager`) Integration**:
+  - Direct device-to-device wireless link with autonomous Group Owner configuration at `192.168.49.1`.
+  - Enables gigabit-capable direct P2P transfers between Android devices with zero router or active internet requirement.
+- **Wi-Fi Aware (NAN) Support**:
+  - Added support for Neighbor Awareness Networking on compatible Android 8.0+ devices.
+- **Sub-Second BLE Assisted Discovery**:
+  - Bluetooth Low Energy (BLE) advertisement and scanning (< 500 ms) for rapid out-of-band credential exchange and P2P handoff.
+- **Automatic Connection Orchestrator (`DirectConnectionManager`)**:
+  - Dynamic capability detection, OS-specific permission management (`NEARBY_WIFI_DEVICES` with `neverForLocation` on Android 13+), and seamless fallback to local Wi-Fi.
+
+#### 🛡️ Native Android Real-Time Storage Validation
+- **StatFs Pre-Flight Check**:
+  - Queries available filesystem bytes on the target storage partition via Android OS `StatFs` before accepting any file transfer offer.
+  - Automatically rejects offers if destination device has insufficient storage space, preventing mid-transfer disk exhaustion.
+
+#### 🎨 Visual Transport Indicators
+- **Interactive UI Badges**:
+  - Added visual badges on Home, Transfers, and Devices screens indicating active transport (`⚡ Wi-Fi Direct (No Router)`, `🌐 Wi-Fi Aware`, `📡 Local Wi-Fi`).
+
 ## [1.1.0] - 2026-11-08
 
 ### Major Production Release — Exclusive Android Production & High-Speed Protocol
